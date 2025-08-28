@@ -14,6 +14,7 @@ import { LogBox, useColorScheme } from "react-native";
 import { DarkTheme, DefaultTheme } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ThemeProvider } from "@react-navigation/core";
+import { ConvexProvider, ConvexReactClient } from "convex/react";
 
 SplashScreen.setOptions({
   duration: 1000,
@@ -21,6 +22,11 @@ SplashScreen.setOptions({
 });
 
 SplashScreen.preventAutoHideAsync();
+
+const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!, {
+  unsavedChangesWarning: false,
+});
+
 const InitialLayout = function () {
   const [fontsLoaded] = useFonts({
     HindSiliguri_300Light,
@@ -45,10 +51,14 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <InitialLayout />
-      </ThemeProvider>
-    </GestureHandlerRootView>
+    <ConvexProvider client={convex}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <ThemeProvider
+          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+        >
+          <InitialLayout />
+        </ThemeProvider>
+      </GestureHandlerRootView>
+    </ConvexProvider>
   );
 }
