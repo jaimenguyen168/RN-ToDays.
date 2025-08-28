@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+    /* Semantic background colors */
+    .bg-background { @apply bg-white dark:bg-slate-900; }
+    .bg-foreground { @apply bg-gray-900 dark:bg-white; }
+    .bg-card { @apply bg-white dark:bg-slate-800; }
+    .bg-app-primary { @apply bg-primary-500 dark:bg-primary-400; }
+    .bg-app-secondary { @apply bg-primary-50 dark:bg-slate-700; }
+    .bg-muted { @apply bg-slate-50 dark:bg-slate-700; }
+    .bg-accent { @apply bg-primary-50 dark:bg-blue-800; }
+    .bg-destructive { @apply bg-error-500 dark:bg-error-400; }
+    .bg-input { @apply bg-slate-50 dark:bg-slate-800; }
+    .bg-muted-foreground { @apply bg-slate-500 dark:bg-slate-400; }
+    .bg-border { @apply bg-slate-200 dark:bg-slate-700; }
+
+    /* Semantic text colors */
+    .text-foreground { @apply text-gray-900 dark:text-white; }
+    .text-card-foreground { @apply text-gray-900 dark:text-slate-50; }
+    .text-app-primary { @apply text-primary-500 dark:text-primary-400; }
+    .text-app-primary-foreground { @apply text-white dark:text-white; }
+    .text-app-secondary-foreground { @apply text-primary-500 dark:text-primary-100; }
+    .text-muted-foreground { @apply text-slate-500 dark:text-slate-400; }
+    .text-accent-foreground { @apply text-primary-500 dark:text-primary-100; }
+    .text-destructive { @apply text-error-500 dark:text-error-400; }
+    .text-destructive-foreground { @apply text-white dark:text-white; }
+
+    /* Semantic border colors */
+    .border-border { @apply border-slate-200 dark:border-slate-700; }
+    .border-input { @apply border-slate-200 dark:border-slate-700; }
+    .border-app-primary { @apply border-primary-500 dark:border-primary-400; }
+    .border-destructive { @apply border-error-500 dark:border-error-400; }
+
+    /* Additional semantic colors */
+    .text-success { @apply text-success-500 dark:text-success-400; }
+    .text-warning { @apply text-warning-500 dark:text-warning-400; }
+    .text-error { @apply text-error-500 dark:text-error-400; }
+
+    .bg-success { @apply bg-success-500 dark:bg-success-400; }
+    .bg-warning { @apply bg-warning-500 dark:bg-warning-400; }
+    .bg-error { @apply bg-error-500 dark:bg-error-400; }
+}
