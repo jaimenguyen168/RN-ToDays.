@@ -8,8 +8,9 @@ module.exports = {
       colors: {
         primary: {
           500: "#5B67CA",
-          300: "#858FE9",
-          200: "#8F99EB",
+          400: "#8F81FE",
+          300: "#8F99EB",
+          200: "#ECEAFF",
           100: "#F9FAFD",
         },
         success: {
