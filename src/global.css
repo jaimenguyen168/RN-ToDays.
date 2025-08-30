@@ -10,11 +10,12 @@
     .bg-app-primary { @apply bg-primary-500 dark:bg-primary-400; }
     .bg-app-secondary { @apply bg-primary-50 dark:bg-slate-700; }
     .bg-muted { @apply bg-slate-50 dark:bg-slate-700; }
-    .bg-accent { @apply bg-primary-50 dark:bg-blue-800; }
+    .bg-accent { @apply bg-primary-100 dark:bg-primary-200; }
     .bg-destructive { @apply bg-error-500 dark:bg-error-400; }
-    .bg-input { @apply bg-slate-50 dark:bg-slate-800; }
+    .bg-input { @apply bg-slate-200 dark:bg-slate-800; }
     .bg-muted-foreground { @apply bg-slate-500 dark:bg-slate-400; }
     .bg-border { @apply bg-slate-200 dark:bg-slate-700; }
+    .bg-muted-accent { @apply bg-primary-100 dark:bg-slate-700; }
 
     /* Semantic text colors */
     .text-foreground { @apply text-gray-900 dark:text-white; }
@@ -26,6 +27,7 @@
     .text-accent-foreground { @apply text-primary-500 dark:text-primary-100; }
     .text-destructive { @apply text-error-500 dark:text-error-400; }
     .text-destructive-foreground { @apply text-white dark:text-white; }
+    .text-muted-accent { @apply text-primary-400 dark:text-slate-400; }
 
     /* Semantic border colors */
     .border-border { @apply border-slate-200 dark:border-slate-700; }
