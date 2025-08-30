@@ -13,7 +13,9 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as private_tasks from "../private/tasks.js";
 import type * as private_users from "../private/users.js";
+import type * as schemas_tasks from "../schemas/tasks.js";
 import type * as schemas_users from "../schemas/users.js";
 
 /**
@@ -25,7 +27,9 @@ import type * as schemas_users from "../schemas/users.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  "private/tasks": typeof private_tasks;
   "private/users": typeof private_users;
+  "schemas/tasks": typeof schemas_tasks;
   "schemas/users": typeof schemas_users;
 }>;
 export declare const api: FilterApi<

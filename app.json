@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "rn-to-days.",
-    "slug": "rn-to-days.",
+    "name": "rn-to-days",
+    "slug": "rn-to-days",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./src/assets/images/icon.png",
@@ -40,6 +40,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "1e0a9346-2b5b-40d0-ba50-467520bf825b"
+      }
     }
   }
 }
