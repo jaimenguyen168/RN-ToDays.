@@ -10,7 +10,7 @@ const TabsLayout = () => {
   const router = useRouter();
 
   const handleAddPress = () => {
-    router.push("/add-modal");
+    router.push("/add-task");
   };
 
   return (
