@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation } from "../_generated/server";
+import { mutation, query } from "../_generated/server";
 import { TaskTypes } from "../schemas/tasks";
 
 export const create = mutation({
@@ -55,5 +55,84 @@ export const create = mutation({
     };
 
     await ctx.db.insert("tasks", taskData);
+  },
+});
+
+export const getAllTasks = query({
+  args: {
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("tasks")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .order("desc")
+      .collect();
+  },
+});
+
+export const getTasksWithFilters = query({
+  args: {
+    userId: v.string(),
+    type: v.optional(
+      v.union(
+        v.literal(TaskTypes.PERSONAL),
+        v.literal(TaskTypes.JOB),
+        v.literal(TaskTypes.EMERGENCY),
+      ),
+    ),
+    isCompleted: v.optional(v.boolean()),
+    tags: v.optional(v.array(v.string())),
+  },
+  handler: async (ctx, args) => {
+    let query = ctx.db
+      .query("tasks")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId));
+
+    let filteredTasks = await query.collect();
+
+    if (args.type) {
+      filteredTasks = filteredTasks.filter((task) => task.type === args.type);
+    }
+
+    if (args.isCompleted !== undefined) {
+      filteredTasks = filteredTasks.filter(
+        (task) => task.isCompleted === args.isCompleted,
+      );
+    }
+
+    if (args.tags && args.tags.length > 0) {
+      filteredTasks = filteredTasks.filter((task) =>
+        args.tags!.some((tag) => task.tags.includes(tag)),
+      );
+    }
+
+    filteredTasks.sort((a, b) => b.startDate - a.startDate);
+
+    return filteredTasks;
+  },
+});
+
+export const getTasksForDate = query({
+  args: {
+    userId: v.string(),
+    date: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const startOfDay = new Date(args.date);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(args.date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    return await ctx.db
+      .query("tasks")
+      .withIndex("by_user_and_date", (q) =>
+        q
+          .eq("userId", args.userId)
+          .gte("startDate", startOfDay.getTime())
+          .lte("startDate", endOfDay.getTime()),
+      )
+      .collect();
   },
 });

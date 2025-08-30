@@ -46,7 +46,7 @@ interface FeatherProps extends BaseIconProps {
   name: FeatherName;
 }
 
-type ThemedIconProps =
+export type ThemedIconProps =
   | IoniconsProps
   | FontAwesome6Props
   | MaterialIconsProps
