@@ -5,21 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="848daa69-0b20-4967-b608-52402236c448" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/assets/images/complete.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/assets/images/emergency.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/TaskCard.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/constants/images.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/types/images.d.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/ScrollHeader.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/TodayTaskItem.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/hooks/useScrollHeader.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/utils/time-passed.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/convex/private/tasks.ts" beforeDir="false" afterPath="$PROJECT_DIR$/convex/private/tasks.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ios/Podfile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Podfile.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(app)/(tabs)/_layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(app)/(tabs)/_layout.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(app)/(tabs)/home.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(app)/(tabs)/home.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/ThemedIcon.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ThemedIcon.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/global.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/global.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tailwind.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/tailwind.config.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
