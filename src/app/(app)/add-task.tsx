@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Switch,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -13,88 +14,104 @@ import { format, addDays, startOfWeek } from "date-fns";
 import { ThemedIcon } from "@/components/ThemedIcon";
 import DatePicker from "react-native-date-picker";
 import { z } from "zod";
+import { useMutation } from "convex/react";
+import { api } from "~/convex/_generated/api";
+import {
+  calculateRecurringDates,
+  getSelectedDayNames,
+} from "@/utils/create-task";
+import { TaskTypes } from "~/convex/schemas/tasks";
 
-const taskSchema = z.object({
+const taskSchemaForm = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
   startDate: z.date(),
   endDate: z.date().optional(),
   startTime: z.date(),
   endTime: z.date(),
-  taskType: z.enum(["Personal", "Private", "Secret"]),
-  tags: z.array(z.string()).nonempty("Select at least one tag"),
+  type: z.nativeEnum(TaskTypes),
+  tags: z.array(z.string()),
+  hasEndDate: z.boolean(),
+  selectedWeekDays: z.array(z.date()),
 });
 
-type TaskType = "Personal" | "Private" | "Secret";
-type TagType = "Office" | "Home" | "Urgent" | "Work";
+type TaskFormData = z.infer<typeof taskSchemaForm>;
 
 const AddTask = () => {
   const router = useRouter();
 
-  // Form state
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
-  const [startTime, setStartTime] = useState(new Date());
-  const [endTime, setEndTime] = useState(new Date());
-  const [taskType, setTaskType] = useState<TaskType>("Personal");
-  const [selectedTags, setSelectedTags] = useState<TagType[]>([
-    "Office",
-    "Work",
-  ]);
-  const [hasEndDate, setHasEndDate] = useState(false);
+  const [formData, setFormData] = useState<TaskFormData>({
+    title: "",
+    description: "",
+    startDate: new Date(),
+    endDate: new Date(),
+    startTime: new Date(),
+    endTime: new Date(),
+    type: TaskTypes.PERSONAL,
+    tags: [],
+    hasEndDate: false,
+    selectedWeekDays: [],
+  });
 
-  // Date picker states
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
   const [showStartTimePicker, setShowStartTimePicker] = useState(false);
   const [showEndTimePicker, setShowEndTimePicker] = useState(false);
-
   const [newTag, setNewTag] = useState("");
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
+
+  const updateFormData = (field: keyof TaskFormData, value: any) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
   const handleAddTag = () => {
-    if (newTag.trim() !== "" && !availableTags.includes(newTag as TagType)) {
-      setAvailableTags((prev) => [...prev, newTag as TagType]);
-      setSelectedTags((prev) => [...prev, newTag as TagType]);
+    if (newTag.trim() !== "" && !availableTags.includes(newTag.trim())) {
+      const trimmedTag = newTag.trim();
+      setAvailableTags((prev) => [...prev, trimmedTag]);
+      updateFormData("tags", [...formData.tags, trimmedTag]);
     }
     setNewTag("");
   };
 
-  const taskTypes: TaskType[] = ["Personal", "Private", "Secret"];
-  const [availableTags, setAvailableTags] = useState<TagType[]>([]);
+  const handleRemoveTag = (tagToRemove: string) => {
+    setAvailableTags((prev) => prev.filter((tag) => tag !== tagToRemove));
+    updateFormData(
+      "tags",
+      formData.tags.filter((tag) => tag !== tagToRemove),
+    );
+  };
 
   // Generate week dates starting from the selected start date
   const getWeekDates = () => {
-    const weekStart = startOfWeek(startDate, { weekStartsOn: 1 }); // Start on Monday
+    const weekStart = startOfWeek(formData.startDate, { weekStartsOn: 1 });
     return Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   };
 
   const weekDates = getWeekDates();
-  const [selectedWeekDays, setSelectedWeekDays] = useState<Date[]>([]);
-
-  const toggleTag = (tag: TagType) => {
-    setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
-    );
-  };
 
   const toggleWeekDay = (date: Date) => {
-    setSelectedWeekDays((prev) => {
-      const dateString = format(date, "yyyy-MM-dd");
-      const exists = prev.some((d) => format(d, "yyyy-MM-dd") === dateString);
+    const dateString = format(date, "yyyy-MM-dd");
+    const exists = formData.selectedWeekDays.some(
+      (d) => format(d, "yyyy-MM-dd") === dateString,
+    );
 
-      if (exists) {
-        return prev.filter((d) => format(d, "yyyy-MM-dd") !== dateString);
-      } else {
-        return [...prev, date];
-      }
-    });
+    if (exists) {
+      updateFormData(
+        "selectedWeekDays",
+        formData.selectedWeekDays.filter(
+          (d) => format(d, "yyyy-MM-dd") !== dateString,
+        ),
+      );
+    } else {
+      updateFormData("selectedWeekDays", [...formData.selectedWeekDays, date]);
+    }
   };
 
   const isWeekDaySelected = (date: Date) => {
     const dateString = format(date, "yyyy-MM-dd");
-    return selectedWeekDays.some((d) => format(d, "yyyy-MM-dd") === dateString);
+    return formData.selectedWeekDays.some(
+      (d) => format(d, "yyyy-MM-dd") === dateString,
+    );
   };
 
   const formatDate = (date: Date) => {
@@ -102,27 +119,56 @@ const AddTask = () => {
   };
 
   const formatTime = (date: Date) => {
-    return format(date, "HH:mm a");
+    return format(date, "h:mm a");
   };
 
-  const handleCreate = () => {
-    const result = taskSchema.safeParse({
-      title,
-      description,
-      startDate,
-      endDate: hasEndDate ? endDate : undefined,
-      startTime,
-      endTime,
-      taskType,
-      tags: selectedTags,
-    });
+  const createTask = useMutation(api.private.tasks.create);
 
-    if (!result.success) {
-      console.log(result.error.format());
-      return;
+  const handleCreate = async () => {
+    try {
+      const validatedData = taskSchemaForm.parse(formData);
+
+      const userId = "j57fgqzy3wkwx3381xw5ezvjcs7pga7v";
+
+      const recurringTimestamps = calculateRecurringDates(
+        validatedData.startDate,
+        validatedData.endDate,
+        validatedData.selectedWeekDays,
+        validatedData.hasEndDate,
+      );
+
+      const selectedDayNames = validatedData.hasEndDate
+        ? getSelectedDayNames(validatedData.selectedWeekDays)
+        : [];
+
+      const taskData = {
+        title: validatedData.title,
+        description: validatedData.description,
+        startDate: validatedData.startDate.getTime(),
+        endDate: validatedData?.endDate?.getTime(),
+        startTime: validatedData.startTime.toTimeString().slice(0, 5),
+        endTime: validatedData.endTime.toTimeString().slice(0, 5),
+        type: validatedData.type,
+        tags: validatedData.tags,
+        hasEndDate: validatedData.hasEndDate,
+        selectedWeekDays: selectedDayNames,
+        recurringDates: recurringTimestamps,
+        userId,
+      };
+
+      await createTask(taskData);
+
+      Alert.alert("Success", "Task created successfully");
+      router.back();
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        console.error("Validation errors:", error.errors);
+        Alert.alert("Error", "Validation errors");
+      } else {
+        console.error("Error creating task:", error);
+        Alert.alert("Error", "Failed to create task");
+      }
     }
-
-    console.log("Valid form:", result.data);
   };
 
   return (
@@ -131,11 +177,11 @@ const AddTask = () => {
       <DatePicker
         modal
         open={showStartDatePicker}
-        date={startDate}
+        date={formData.startDate}
         mode="date"
         onConfirm={(date) => {
           setShowStartDatePicker(false);
-          setStartDate(date);
+          updateFormData("startDate", date);
         }}
         onCancel={() => {
           setShowStartDatePicker(false);
@@ -145,12 +191,12 @@ const AddTask = () => {
       <DatePicker
         modal
         open={showEndDatePicker}
-        date={endDate}
+        date={formData.endDate || new Date()}
         mode="date"
-        minimumDate={startDate}
+        minimumDate={formData.startDate}
         onConfirm={(date) => {
           setShowEndDatePicker(false);
-          setEndDate(date);
+          updateFormData("endDate", date);
         }}
         onCancel={() => {
           setShowEndDatePicker(false);
@@ -160,11 +206,11 @@ const AddTask = () => {
       <DatePicker
         modal
         open={showStartTimePicker}
-        date={startTime}
+        date={formData.startTime}
         mode="time"
         onConfirm={(time) => {
           setShowStartTimePicker(false);
-          setStartTime(time);
+          updateFormData("startTime", time);
         }}
         onCancel={() => {
           setShowStartTimePicker(false);
@@ -174,11 +220,12 @@ const AddTask = () => {
       <DatePicker
         modal
         open={showEndTimePicker}
-        date={endTime}
+        date={formData.endTime}
         mode="time"
+        minimumDate={formData.startTime}
         onConfirm={(time) => {
           setShowEndTimePicker(false);
-          setEndTime(time);
+          updateFormData("endTime", time);
         }}
         onCancel={() => {
           setShowEndTimePicker(false);
@@ -213,13 +260,13 @@ const AddTask = () => {
         </View>
 
         <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-          <View className="px-8 py-4 gap-6">
+          <View className="px-8 pt-4 pb-8 gap-6">
             {/* Title */}
             <View className="gap-3">
               <Text className="text-sm text-muted-foreground">Title</Text>
               <TextInput
-                value={title}
-                onChangeText={setTitle}
+                value={formData.title}
+                onChangeText={(value) => updateFormData("title", value)}
                 className="text-foreground border-b border-border pb-3"
                 placeholder="Enter task title"
               />
@@ -232,7 +279,9 @@ const AddTask = () => {
                 onPress={() => setShowStartDatePicker(true)}
                 className="flex-row items-center justify-between border-b border-border pb-3"
               >
-                <Text className="text-foreground">{formatDate(startDate)}</Text>
+                <Text className="text-foreground">
+                  {formatDate(formData.startDate)}
+                </Text>
                 <ThemedIcon
                   name="calendar-outline"
                   size={20}
@@ -249,21 +298,21 @@ const AddTask = () => {
                   Has End Date
                 </Text>
                 <Switch
-                  value={hasEndDate}
-                  onValueChange={setHasEndDate}
+                  value={formData.hasEndDate}
+                  onValueChange={(value) => updateFormData("hasEndDate", value)}
                   trackColor={{ false: "#e5e7eb", true: "#6366f1" }}
-                  thumbColor={hasEndDate ? "#f9fafb" : "#f9fafb"}
+                  thumbColor={formData.hasEndDate ? "#f9fafb" : "#f9fafb"}
                 />
               </View>
 
-              {hasEndDate && (
+              {formData.hasEndDate && (
                 <>
                   <TouchableOpacity
                     onPress={() => setShowEndDatePicker(true)}
                     className="flex-row items-center justify-between border-b border-border pb-3 mt-6"
                   >
                     <Text className="text-foreground">
-                      {formatDate(startDate)}
+                      {formatDate(formData.endDate || new Date())}
                     </Text>
                     <ThemedIcon
                       name="calendar-outline"
@@ -324,7 +373,7 @@ const AddTask = () => {
                   className="flex-1 border-b border-border pb-3 items-center justify-center"
                 >
                   <Text className="text-foreground font-medium">
-                    {formatTime(startTime)}
+                    {formatTime(formData.startTime)}
                   </Text>
                 </TouchableOpacity>
 
@@ -333,7 +382,7 @@ const AddTask = () => {
                   className="flex-1 border-b border-border pb-3 items-center justify-center"
                 >
                   <Text className="text-foreground font-medium">
-                    {formatTime(endTime)}
+                    {formatTime(formData.endTime)}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -343,8 +392,8 @@ const AddTask = () => {
             <View className="gap-3">
               <Text className="text-sm text-muted-foreground">Description</Text>
               <TextInput
-                value={description}
-                onChangeText={setDescription}
+                value={formData.description}
+                onChangeText={(value) => updateFormData("description", value)}
                 className="text-foreground border-b border-border pb-3"
                 placeholder="Enter task description"
                 multiline
@@ -355,20 +404,20 @@ const AddTask = () => {
             <View className="gap-3">
               <Text className="text-sm text-muted-foreground">Type</Text>
               <View className="flex-row items-center justify-between mr-8">
-                {taskTypes.map((type) => (
+                {Object.values(TaskTypes).map((type) => (
                   <TouchableOpacity
                     key={type}
-                    onPress={() => setTaskType(type)}
+                    onPress={() => updateFormData("type", type)}
                     className="flex-row items-center"
                   >
                     <View
                       className={`w-5 h-5 rounded-full border mr-2 ${
-                        taskType === type
+                        formData.type === type
                           ? "bg-primary-500 border-primary-500"
                           : "border-border"
                       }`}
                     >
-                      {taskType === type && (
+                      {formData.type === type && (
                         <Ionicons
                           name="checkmark"
                           size={12}
@@ -388,36 +437,33 @@ const AddTask = () => {
               <Text className="text-sm text-muted-foreground">Tags</Text>
               <View className="flex-row flex-wrap gap-2 items-center">
                 {availableTags.map((tag) => (
-                  <TouchableOpacity
+                  <View
                     key={tag}
-                    onPress={() => toggleTag(tag)}
-                    className={`px-3.5 py-1 rounded-2xl border items-center justify-center ${
-                      selectedTags.includes(tag)
-                        ? "bg-primary-200 border-primary-200 dark:bg-primary-300/70 dark:border-primary-400/60"
-                        : "bg-muted border-border"
-                    }`}
+                    className="px-3.5 py-1 rounded-2xl border bg-primary-200 border-primary-200 dark:bg-primary-300/70 dark:border-primary-400/60 flex-row items-center gap-1"
                   >
-                    <Text
-                      className={`text-sm font-semibold ${
-                        selectedTags.includes(tag)
-                          ? "text-accent-foreground"
-                          : "text-muted-foreground"
-                      }`}
-                    >
+                    <Text className="text-sm font-semibold text-accent-foreground mt-0.5">
                       {tag}
                     </Text>
-                  </TouchableOpacity>
+                    <TouchableOpacity onPress={() => handleRemoveTag(tag)}>
+                      <ThemedIcon
+                        name="close"
+                        size={14}
+                        lightColor="#8F99EB"
+                        darkColor="#F9FAFD"
+                      />
+                    </TouchableOpacity>
+                  </View>
                 ))}
-
-                <TextInput
-                  value={newTag}
-                  onChangeText={setNewTag}
-                  placeholder="Add new tag"
-                  className="text-foreground border-b border-border pb-3 flex-1"
-                  onSubmitEditing={handleAddTag} // press enter
-                  returnKeyType="done"
-                />
               </View>
+
+              <TextInput
+                value={newTag}
+                onChangeText={setNewTag}
+                placeholder="Add new tag"
+                className="text-foreground border-b border-border pb-3 shrink-0 flex-1"
+                onSubmitEditing={handleAddTag}
+                returnKeyType="done"
+              />
             </View>
           </View>
         </ScrollView>
