@@ -1,12 +1,15 @@
-import { View, Text, TouchableOpacity, Image, FlatList } from "react-native";
+import { View, Text, TouchableOpacity, Image, Animated } from "react-native";
 import React from "react";
 import { useQuery } from "convex/react";
 import { api } from "~/convex/_generated/api";
 import { Id } from "~/convex/_generated/dataModel";
 import { TaskTypes } from "~/convex/schemas/tasks";
-import { ThemedIcon, ThemedIconProps } from "@/components/ThemedIcon";
+import { ThemedIcon } from "@/components/ThemedIcon";
 import TaskCard from "@/components/TaskCard";
 import { images } from "@/constants/images";
+import { useScrollHeader } from "@/hooks/useScrollHeader";
+import { ScrollHeader } from "@/components/ScrollHeader";
+import TodayTaskItem from "@/components/TodayTaskItem";
 
 interface TaskCounts {
   completed: number;
@@ -23,10 +26,18 @@ interface TodayTask {
   tags: string[];
   type: string;
   isRecurring?: boolean;
+  // For one-time tasks
+  isCompleted?: boolean;
+  // For recurring tasks
+  weeklyCompletions?: Record<
+    string,
+    { isCompleted: boolean; completedAt?: number }
+  >;
 }
 
 const HomeScreen = () => {
   const userId = "j57fgqzy3wkwx3381xw5ezvjcs7pga7v";
+  const { headerOpacity, handleScroll } = useScrollHeader(30);
 
   const user = useQuery(api.private.users.getUser, {
     userId: userId as Id<"users">,
@@ -50,7 +61,6 @@ const HomeScreen = () => {
     );
   };
 
-  // Calculate task counts
   const calculateTaskCounts = (): TaskCounts => {
     if (!allTasks)
       return { completed: 0, pending: 0, onGoing: 0, emergency: 0 };
@@ -113,10 +123,11 @@ const HomeScreen = () => {
             tags: task.tags,
             type: task.type,
             isRecurring: true,
+            isCompleted: task.isCompleted,
+            weeklyCompletions: task.weeklyCompletions,
           });
         }
       } else {
-        // One-time task - check if start date is today
         if (isToday(task.startDate)) {
           todayTasks.push({
             _id: task._id,
@@ -126,6 +137,8 @@ const HomeScreen = () => {
             tags: task.tags,
             type: task.type,
             isRecurring: false,
+            isCompleted: task.isCompleted,
+            weeklyCompletions: task.weeklyCompletions,
           });
         }
       }
@@ -137,61 +150,8 @@ const HomeScreen = () => {
   const taskCounts = calculateTaskCounts();
   const todayTasks = getTodayTasks();
 
-  const TodayTaskItem = ({ task }: { task: TodayTask }) => {
-    const getTaskTypeColor = (type: string) => {
-      switch (type) {
-        case TaskTypes.EMERGENCY:
-          return "border-l-red-500";
-        case TaskTypes.PERSONAL:
-          return "border-l-primary-500";
-        case TaskTypes.JOB:
-          return "border-l-purple-500";
-        default:
-          return "border-l-gray-500";
-      }
-    };
-
-    const getTaskTypeBg = (type: string) => {
-      switch (type) {
-        case TaskTypes.EMERGENCY:
-          return "bg-[#f87171]/20 dark:bg-[#f87171]/50";
-        case TaskTypes.PERSONAL:
-          return "bg-[#8F99EB]/10 dark:bg-[#8F99EB]/50";
-        case TaskTypes.JOB:
-          return "bg-[#16a34a]/20 dark:bg-[#16a34a]/50";
-        default:
-          return "bg-[#8F99EB]/10 dark:bg-[#8F99EB]/50";
-      }
-    };
-
-    return (
-      <View className={`p-4 rounded-2xl gap-4 ${getTaskTypeBg(task.type)}`}>
-        <View className={`pl-4 border-l-[3px] ${getTaskTypeColor(task.type)}`}>
-          <View className="flex-row items-center justify-between">
-            <Text className="text-lg font-semibold text-accent-foreground flex-1">
-              {task.title}
-            </Text>
-            <TouchableOpacity>
-              <ThemedIcon name="ellipsis-vertical" size={16} />
-            </TouchableOpacity>
-          </View>
-
-          <Text className="text-accent-foreground font-light">
-            {task.startTime} - {task.endTime}
-          </Text>
-        </View>
-
-        <View className="flex-row items-center flex-wrap pl-4">
-          {task.tags.map((tag, index) => (
-            <View key={index} className="bg-input px-3 py-1 rounded-full mr-2">
-              <Text className="text-xs font-semibold text-accent-foreground">
-                {tag}
-              </Text>
-            </View>
-          ))}
-        </View>
-      </View>
-    );
+  const handleTaskPress = (taskId: string) => {
+    console.log("Task pressed:", taskId);
   };
 
   const renderHeader = () => (
@@ -227,7 +187,7 @@ const HomeScreen = () => {
             <TaskCard
               title="Completed"
               count={taskCounts.completed}
-              colors={["#84fab0", "#4ade80", "#22c55e"]} // Very bright mint to green
+              colors={["#84fab0", "#4ade80", "#22c55e"]}
               image={images.complete}
             />
             <TaskCard
@@ -291,21 +251,28 @@ const HomeScreen = () => {
   const renderFooter = () => <View className="h-36" />;
 
   return (
-    <FlatList
-      data={todayTasks}
-      className="flex-1 bg-background"
-      renderItem={({ item }) => (
-        <View className="px-6 mb-3">
-          <TodayTaskItem task={item} />
-        </View>
-      )}
-      keyExtractor={(item) => item._id}
-      ListHeaderComponent={renderHeader}
-      ListEmptyComponent={renderEmptyState}
-      ListFooterComponent={renderFooter}
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ flexGrow: 1 }}
-    />
+    <View className="flex-1 bg-background">
+      {/* Animated Top Bar */}
+      <ScrollHeader title="Home" opacity={headerOpacity} />
+
+      <Animated.FlatList
+        data={todayTasks}
+        className="flex-1"
+        renderItem={({ item }) => (
+          <View className="px-6 mb-3">
+            <TodayTaskItem task={item} />
+          </View>
+        )}
+        keyExtractor={(item) => item._id}
+        ListHeaderComponent={renderHeader}
+        ListEmptyComponent={renderEmptyState}
+        ListFooterComponent={renderFooter}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ flexGrow: 1 }}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+      />
+    </View>
   );
 };
 
