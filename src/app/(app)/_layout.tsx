@@ -6,7 +6,7 @@ const AppLayout = () => {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" />
       <Stack.Screen
-        name="add-modal"
+        name="add-task"
         options={{
           presentation: "modal",
         }}
