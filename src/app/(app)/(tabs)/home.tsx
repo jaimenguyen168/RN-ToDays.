@@ -9,24 +9,14 @@ import TaskCard from "@/components/TaskCard";
 import { images } from "@/constants/images";
 import { useScrollHeader } from "@/hooks/useScrollHeader";
 import { ScrollHeader } from "@/components/ScrollHeader";
-import TodayTaskItem from "@/components/TodayTaskItem";
+import TaskItem from "@/components/TaskItem";
+import { Task } from "@/types";
 
 interface TaskCounts {
   completed: number;
   pending: number;
   onGoing: number;
   emergency: number;
-}
-
-interface TodayTask {
-  _id: string;
-  title: string;
-  startTime: string;
-  endTime: string;
-  tags: string[];
-  type: string;
-  isCompleted: boolean;
-  note?: string;
 }
 
 const HomeScreen = () => {
@@ -90,7 +80,7 @@ const HomeScreen = () => {
     return { completed, pending, onGoing, emergency };
   };
 
-  const getTodayTasks = (): TodayTask[] => {
+  const getTodayTasks = (): Task[] => {
     if (!allTasks) return [];
 
     return allTasks
@@ -104,6 +94,7 @@ const HomeScreen = () => {
         type: task.type,
         isCompleted: task.isCompleted,
         note: task.note,
+        date: task.date,
       }))
       .sort((a, b) => a.startTime.localeCompare(b.startTime));
   };
@@ -214,14 +205,18 @@ const HomeScreen = () => {
   return (
     <View className="flex-1 bg-background">
       {/* Animated Top Bar */}
-      <ScrollHeader title="Home" opacity={headerOpacity} />
+      <ScrollHeader opacity={headerOpacity}>
+        <Text className="text-foreground text-lg font-semibold text-center">
+          Home
+        </Text>
+      </ScrollHeader>
 
       <Animated.FlatList
         data={todayTasks}
         className="flex-1"
         renderItem={({ item }) => (
           <View className="px-6 mb-3">
-            <TodayTaskItem task={item} />
+            <TaskItem task={item} />
           </View>
         )}
         keyExtractor={(item) => item._id}
