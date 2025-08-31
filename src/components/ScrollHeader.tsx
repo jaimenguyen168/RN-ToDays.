@@ -2,13 +2,13 @@ import React from "react";
 import { Animated, Text, useColorScheme } from "react-native";
 
 interface ScrollHeaderProps {
-  title: string;
+  children: React.ReactNode;
   opacity: Animated.AnimatedInterpolation<number>;
   className?: string;
 }
 
 export const ScrollHeader = ({
-  title,
+  children,
   opacity,
   className = "",
 }: ScrollHeaderProps) => {
@@ -31,9 +31,7 @@ export const ScrollHeader = ({
         shadowRadius: 8,
       }}
     >
-      <Text className="text-foreground text-lg font-semibold text-center">
-        {title}
-      </Text>
+      {children}
     </Animated.View>
   );
 };
