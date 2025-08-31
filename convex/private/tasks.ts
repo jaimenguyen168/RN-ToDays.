@@ -17,57 +17,83 @@ export const create = mutation({
     ),
     tags: v.array(v.string()),
     hasEndDate: v.boolean(),
-    selectedWeekDays: v.array(v.string()),
-    recurringDates: v.array(v.number()),
+    selectedWeekDays: v.optional(v.array(v.string())),
     userId: v.string(),
   },
   handler: async (ctx, args) => {
     const now = Date.now();
 
-    if (
-      args.hasEndDate &&
-      (!args.selectedWeekDays || args.selectedWeekDays.length === 0)
-    ) {
-      throw new Error(
-        "Must select at least one day of the week for recurring tasks",
-      );
+    if (!args.hasEndDate || !args.endDate) {
+      return await ctx.db.insert("tasks", {
+        title: args.title,
+        description: args.description,
+        date: args.startDate,
+        startTime: args.startTime,
+        endTime: args.endTime,
+        type: args.type,
+        tags: args.tags,
+        isCompleted: false,
+        updatedAt: now,
+        userId: args.userId,
+      });
     }
 
-    const taskData = {
-      title: args.title.trim(),
-      description: args.description?.trim() || undefined,
-      startDate: args.startDate,
-      endDate: args.endDate,
+    // Recurring task
+    const recurringId = await ctx.db.insert("recurrings", {
+      title: args.title,
       startTime: args.startTime,
       endTime: args.endTime,
       type: args.type,
       tags: args.tags,
-      hasEndDate: args.hasEndDate,
       selectedWeekDays: args.selectedWeekDays,
-      recurringDates: args.recurringDates,
-
-      weeklyCompletions: args.hasEndDate ? {} : undefined,
-      isCompleted: false,
-      completedAt: undefined,
-
-      updatedAt: now,
+      startDate: args.startDate,
+      endDate: args.endDate,
+      isActive: true,
       userId: args.userId,
-    };
+    });
 
-    await ctx.db.insert("tasks", taskData);
-  },
-});
+    const current = new Date(args.startDate);
+    const end = new Date(args.endDate!);
+    const isDaily =
+      !args.selectedWeekDays || args.selectedWeekDays.length === 0;
 
-export const getAllTasks = query({
-  args: {
-    userId: v.string(),
-  },
-  handler: async (ctx, args) => {
-    return await ctx.db
-      .query("tasks")
-      .withIndex("by_user", (q) => q.eq("userId", args.userId))
-      .order("desc")
-      .collect();
+    while (current <= end) {
+      let shouldCreate = isDaily;
+
+      if (!isDaily) {
+        const weekdays = [
+          "sunday",
+          "monday",
+          "tuesday",
+          "wednesday",
+          "thursday",
+          "friday",
+          "saturday",
+        ];
+        const todayName = weekdays[current.getDay()];
+        shouldCreate = args.selectedWeekDays!.includes(todayName);
+      }
+
+      if (shouldCreate) {
+        await ctx.db.insert("tasks", {
+          title: args.title,
+          description: args.description,
+          date: current.getTime(),
+          startTime: args.startTime,
+          endTime: args.endTime,
+          type: args.type,
+          tags: args.tags,
+          isCompleted: false,
+          recurringId,
+          updatedAt: now,
+          userId: args.userId,
+        });
+      }
+
+      current.setDate(current.getDate() + 1);
+    }
+
+    return recurringId;
   },
 });
 
@@ -107,7 +133,7 @@ export const getTasksWithFilters = query({
       );
     }
 
-    filteredTasks.sort((a, b) => b.startDate - a.startDate);
+    filteredTasks.sort((a, b) => b.date - a.date);
 
     return filteredTasks;
   },
@@ -130,9 +156,42 @@ export const getTasksForDate = query({
       .withIndex("by_user_and_date", (q) =>
         q
           .eq("userId", args.userId)
-          .gte("startDate", startOfDay.getTime())
-          .lte("startDate", endOfDay.getTime()),
+          .gte("date", startOfDay.getTime())
+          .lte("date", endOfDay.getTime()),
       )
+      .collect();
+  },
+});
+
+export const toggleCompleted = mutation({
+  args: {
+    taskId: v.id("tasks"),
+  },
+  handler: async (ctx, args) => {
+    const task = await ctx.db.get(args.taskId);
+
+    if (!task) {
+      throw new Error("Task not found");
+    }
+
+    const now = Date.now();
+
+    await ctx.db.patch(args.taskId, {
+      isCompleted: !task.isCompleted,
+      completedAt: !task.isCompleted ? now : undefined,
+      updatedAt: now,
+    });
+  },
+});
+
+export const getRecurringTasks = query({
+  args: {
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("recurrings")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .collect();
   },
 });

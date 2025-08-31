@@ -22,35 +22,28 @@ interface TodayTask {
   _id: string;
   title: string;
   startTime: string;
-  endTime?: string;
+  endTime: string;
   tags: string[];
   type: string;
-  isRecurring?: boolean;
-  // For one-time tasks
-  isCompleted?: boolean;
-  // For recurring tasks
-  weeklyCompletions?: Record<
-    string,
-    { isCompleted: boolean; completedAt?: number }
-  >;
+  isCompleted: boolean;
+  note?: string;
 }
 
 const HomeScreen = () => {
   const userId = "j57fgqzy3wkwx3381xw5ezvjcs7pga7v";
-  const { headerOpacity, handleScroll } = useScrollHeader(30);
+  const { headerOpacity, handleScroll } = useScrollHeader(15);
 
   const user = useQuery(api.private.users.getUser, {
     userId: userId as Id<"users">,
   });
-  const allTasks = useQuery(api.private.tasks.getAllTasks, { userId });
 
-  const getTodayTimestamp = () => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return today.getTime();
-  };
+  const allTasks = useQuery(api.private.tasks.getTasksWithFilters, {
+    userId,
+  });
+  const allRecurringTasks = useQuery(api.private.tasks.getRecurringTasks, {
+    userId,
+  });
 
-  // Helper function to check if a timestamp is today
   const isToday = (timestamp: number) => {
     const today = new Date();
     const date = new Date(timestamp);
@@ -66,11 +59,9 @@ const HomeScreen = () => {
       return { completed: 0, pending: 0, onGoing: 0, emergency: 0 };
 
     const now = Date.now();
-    const today = getTodayTimestamp();
-
     let completed = 0;
     let pending = 0;
-    let onGoing = 0;
+    let onGoing = allRecurringTasks?.length || 0;
     let emergency = 0;
 
     allTasks.forEach((task) => {
@@ -79,26 +70,14 @@ const HomeScreen = () => {
         emergency++;
       }
 
-      if (task.hasEndDate) {
-        // Recurring task
-        const weeklyCompletions = task.weeklyCompletions || {};
-        completed += Object.keys(weeklyCompletions).length;
+      // Task status
+      if (task.isCompleted) {
+        completed++;
+      }
 
-        // Check if task is ongoing (has future end date)
-        if (task.endDate && task.endDate > now) {
-          onGoing++;
-        }
-      } else {
-        // One-time task
-        if (task.isCompleted) {
-          completed++;
-        } else if (task.startDate > now) {
-          // Future start date = pending
-          pending++;
-        } else {
-          // Past or current start date but not completed = ongoing
-          onGoing++;
-        }
+      // Pending count
+      if (task.date < now && !task.isCompleted) {
+        pending++;
       }
     });
 
@@ -108,43 +87,19 @@ const HomeScreen = () => {
   const getTodayTasks = (): TodayTask[] => {
     if (!allTasks) return [];
 
-    const today = getTodayTimestamp();
-    const todayTasks: TodayTask[] = [];
-
-    allTasks.forEach((task) => {
-      if (task.hasEndDate) {
-        // Recurring task - check if any recurring date is today
-        if (task.recurringDates?.some((date) => isToday(date))) {
-          todayTasks.push({
-            _id: task._id,
-            title: task.title,
-            startTime: task.startTime,
-            endTime: task.endTime,
-            tags: task.tags,
-            type: task.type,
-            isRecurring: true,
-            isCompleted: task.isCompleted,
-            weeklyCompletions: task.weeklyCompletions,
-          });
-        }
-      } else {
-        if (isToday(task.startDate)) {
-          todayTasks.push({
-            _id: task._id,
-            title: task.title,
-            startTime: task.startTime,
-            endTime: task.endTime,
-            tags: task.tags,
-            type: task.type,
-            isRecurring: false,
-            isCompleted: task.isCompleted,
-            weeklyCompletions: task.weeklyCompletions,
-          });
-        }
-      }
-    });
-
-    return todayTasks.sort((a, b) => a.startTime.localeCompare(b.startTime));
+    return allTasks
+      .filter((task) => isToday(task.date))
+      .map((task) => ({
+        _id: task._id,
+        title: task.title,
+        startTime: task.startTime,
+        endTime: task.endTime,
+        tags: task.tags,
+        type: task.type,
+        isCompleted: task.isCompleted,
+        note: task.note,
+      }))
+      .sort((a, b) => a.startTime.localeCompare(b.startTime));
   };
 
   const taskCounts = calculateTaskCounts();

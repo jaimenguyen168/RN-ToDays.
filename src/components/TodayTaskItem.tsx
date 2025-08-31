@@ -3,22 +3,19 @@ import { View, Text, TouchableOpacity } from "react-native";
 import { ThemedIcon } from "@/components/ThemedIcon";
 import { TaskTypes } from "~/convex/schemas/tasks";
 import { hasTimePassed } from "@/utils/time-passed";
+import { useMutation } from "convex/react";
+import { api } from "~/convex/_generated/api";
+import { Id } from "~/convex/_generated/dataModel";
 
 interface TodayTask {
   _id: string;
   title: string;
   startTime: string;
-  endTime?: string;
+  endTime: string;
   tags: string[];
   type: string;
-  isRecurring?: boolean;
-  // For one-time tasks
-  isCompleted?: boolean;
-  // For recurring tasks
-  weeklyCompletions?: Record<
-    string,
-    { isCompleted: boolean; completedAt?: number }
-  >;
+  isCompleted: boolean;
+  note?: string;
 }
 
 interface TodayTaskItemProps {
@@ -27,15 +24,21 @@ interface TodayTaskItemProps {
 }
 
 const TodayTaskItem = ({ task, onPress }: TodayTaskItemProps) => {
-  console.log("Task", task);
+  const toggleCompleted = useMutation(api.private.tasks.toggleCompleted);
+
+  const handleToggleCompleted = async () => {
+    await toggleCompleted({
+      taskId: task._id as Id<"tasks">,
+    });
+  };
 
   const getTaskColors = (type: string) => {
     switch (type) {
       case TaskTypes.EMERGENCY:
         return {
           borderColor: "border-l-red-500",
-          backgroundColor: "bg-red-100/60 dark:bg-red-800/30",
-          tagBackground: "bg-red-200 dark:bg-red-800/60",
+          backgroundColor: "bg-red-100/40 dark:bg-red-800/30",
+          tagBackground: "bg-red-200/60 dark:bg-red-800/60",
           tagText: "text-red-600 dark:text-red-200",
           iconColor: "#ef4444",
         };
@@ -66,25 +69,8 @@ const TodayTaskItem = ({ task, onPress }: TodayTaskItemProps) => {
     }
   };
 
-  // Check if task is completed
-  const isTaskCompleted = () => {
-    if (task.isRecurring && task.weeklyCompletions) {
-      // For recurring tasks, check today's completion
-      const today = new Date().toDateString();
-      console.log("This block 1");
-      return task.weeklyCompletions[today]?.isCompleted || false;
-    }
-
-    console.log("This block 2");
-    // For one-time tasks
-    return task.isCompleted || false;
-  };
-
   const colors = getTaskColors(task.type);
-  const completed = isTaskCompleted();
   const timeHasPassed = hasTimePassed(task.endTime);
-
-  console.log("Task completed", task.title, completed);
 
   return (
     <TouchableOpacity
@@ -97,13 +83,13 @@ const TodayTaskItem = ({ task, onPress }: TodayTaskItemProps) => {
           <View className="flex-row items-center flex-1 gap-2">
             <Text
               className={`text-lg font-semibold ${colors.tagText} ${
-                completed ? "line-through opacity-60" : ""
+                task.isCompleted ? "line-through opacity-60" : ""
               }`}
             >
               {task.title}
             </Text>
 
-            {completed && (
+            {task.isCompleted && (
               <ThemedIcon
                 name="checkmark-done"
                 size={20}
@@ -112,7 +98,7 @@ const TodayTaskItem = ({ task, onPress }: TodayTaskItemProps) => {
               />
             )}
           </View>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={handleToggleCompleted}>
             <ThemedIcon name="ellipsis-vertical" size={16} />
           </TouchableOpacity>
         </View>
@@ -120,15 +106,19 @@ const TodayTaskItem = ({ task, onPress }: TodayTaskItemProps) => {
         <View className="flex-row items-center gap-2">
           <Text
             className={`${colors.tagText} font-light gap-3 ${
-              timeHasPassed || completed ? "line-through opacity-60" : ""
+              timeHasPassed || task.isCompleted ? "line-through opacity-60" : ""
             }`}
           >
             {task.startTime} - {task.endTime}
           </Text>
-          <Text className={` font-medium ${colors.tagText} opacity-70`}>
-            {task.isRecurring && "(Recurring)"}
-          </Text>
         </View>
+
+        {/* Note */}
+        {task.note && (
+          <Text className={`${colors.tagText} text-sm opacity-70 mt-1`}>
+            {task.note}
+          </Text>
+        )}
       </View>
 
       {/* Tags */}
