@@ -32,7 +32,7 @@ const taskSchemaForm = z.object({
   type: z.nativeEnum(TaskTypes),
   tags: z.array(z.string()),
   hasEndDate: z.boolean(),
-  selectedWeekDays: z.array(z.date()),
+  selectedWeekDays: z.array(z.string()),
 });
 
 type TaskFormData = z.infer<typeof taskSchemaForm>;
@@ -44,7 +44,7 @@ const AddTask = () => {
     title: "",
     description: "",
     startDate: new Date(),
-    endDate: new Date(),
+    endDate: undefined,
     startTime: new Date(),
     endTime: new Date(),
     type: TaskTypes.PERSONAL,
@@ -90,28 +90,24 @@ const AddTask = () => {
   const weekDates = getWeekDates();
 
   const toggleWeekDay = (date: Date) => {
-    const dateString = format(date, "yyyy-MM-dd");
-    const exists = formData.selectedWeekDays.some(
-      (d) => format(d, "yyyy-MM-dd") === dateString,
-    );
+    const dayName = format(date, "EEEE").toLowerCase();
 
-    if (exists) {
+    if (formData.selectedWeekDays.includes(dayName)) {
       updateFormData(
         "selectedWeekDays",
-        formData.selectedWeekDays.filter(
-          (d) => format(d, "yyyy-MM-dd") !== dateString,
-        ),
+        formData.selectedWeekDays.filter((day) => day !== dayName),
       );
     } else {
-      updateFormData("selectedWeekDays", [...formData.selectedWeekDays, date]);
+      updateFormData("selectedWeekDays", [
+        ...formData.selectedWeekDays,
+        dayName,
+      ]);
     }
   };
 
   const isWeekDaySelected = (date: Date) => {
-    const dateString = format(date, "yyyy-MM-dd");
-    return formData.selectedWeekDays.some(
-      (d) => format(d, "yyyy-MM-dd") === dateString,
-    );
+    const dayName = format(date, "EEEE").toLowerCase();
+    return formData.selectedWeekDays.includes(dayName);
   };
 
   const formatDate = (date: Date) => {
@@ -130,15 +126,9 @@ const AddTask = () => {
 
       const userId = "j57fgqzy3wkwx3381xw5ezvjcs7pga7v";
 
-      const recurringTimestamps = calculateRecurringDates(
-        validatedData.startDate,
-        validatedData.endDate,
-        validatedData.selectedWeekDays,
-        validatedData.hasEndDate,
-      );
-
+      // Simplified data preparation - remove the utility function calls
       const selectedDayNames = validatedData.hasEndDate
-        ? getSelectedDayNames(validatedData.selectedWeekDays)
+        ? validatedData.selectedWeekDays
         : [];
 
       const taskData = {
@@ -151,8 +141,7 @@ const AddTask = () => {
         type: validatedData.type,
         tags: validatedData.tags,
         hasEndDate: validatedData.hasEndDate,
-        selectedWeekDays: selectedDayNames,
-        recurringDates: recurringTimestamps,
+        selectedWeekDays: selectedDayNames, // Remove recurringDates since mutation handles this
         userId,
       };
 
