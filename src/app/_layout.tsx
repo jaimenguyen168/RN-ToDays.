@@ -15,6 +15,7 @@ import { DarkTheme, DefaultTheme } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ThemeProvider } from "@react-navigation/core";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
+import { MenuProvider } from "react-native-popup-menu";
 
 SplashScreen.setOptions({
   duration: 1000,
@@ -56,7 +57,9 @@ export default function RootLayout() {
         <ThemeProvider
           value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
         >
-          <InitialLayout />
+          <MenuProvider>
+            <InitialLayout />
+          </MenuProvider>
         </ThemeProvider>
       </GestureHandlerRootView>
     </ConvexProvider>
