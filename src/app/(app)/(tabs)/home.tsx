@@ -76,8 +76,14 @@ const HomeScreen = () => {
       }
 
       // Pending count
-      if (task.date < now && !task.isCompleted) {
-        pending++;
+      if (!task.isCompleted) {
+        const [hours, minutes] = task.endTime.split(":").map(Number);
+        const taskEndDateTime = new Date(task.date);
+        taskEndDateTime.setHours(hours, minutes, 0, 0);
+
+        if (taskEndDateTime.getTime() < now) {
+          pending++;
+        }
       }
     });
 

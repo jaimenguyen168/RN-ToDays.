@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { mutation, query } from "../_generated/server";
 import { TaskTypes } from "../schemas/tasks";
 
@@ -94,6 +94,15 @@ export const create = mutation({
     }
 
     return recurringId;
+  },
+});
+
+export const getTaskById = query({
+  args: {
+    taskId: v.id("tasks"),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.taskId);
   },
 });
 
@@ -193,5 +202,82 @@ export const getRecurringTasks = query({
       .query("recurrings")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .collect();
+  },
+});
+
+export const editTask = mutation({
+  args: {
+    taskId: v.id("tasks"),
+    updates: v.object({
+      title: v.optional(v.string()),
+      description: v.optional(v.string()),
+      startTime: v.optional(v.string()),
+      endTime: v.optional(v.string()),
+      type: v.union(
+        v.literal(TaskTypes.PERSONAL),
+        v.literal(TaskTypes.JOB),
+        v.literal(TaskTypes.EMERGENCY),
+      ),
+      tags: v.optional(v.array(v.string())),
+      note: v.optional(v.string()),
+    }),
+    editScope: v.union(
+      v.literal("this_only"),
+      v.literal("all"),
+      v.literal("this_and_future"),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const task = await ctx.db.get(args.taskId);
+
+    if (!task) {
+      throw new ConvexError({
+        code: "NOT_FOUND",
+        message: "Task not found",
+      });
+    }
+
+    if (!task?.recurringId) {
+      return await ctx.db.patch(args.taskId, args.updates);
+    }
+
+    const now = Date.now();
+
+    switch (args.editScope) {
+      case "this_only":
+        await ctx.db.patch(args.taskId, {
+          ...args.updates,
+          recurringId: undefined,
+          updatedAt: now,
+        });
+        break;
+
+      case "all":
+        const allTasks = await ctx.db
+          .query("tasks")
+          .withIndex("by_recurring", (q) =>
+            q.eq("recurringId", task.recurringId),
+          )
+          .collect();
+
+        for (const t of allTasks) {
+          await ctx.db.patch(t._id, { ...args.updates, updatedAt: now });
+        }
+        break;
+
+      case "this_and_future":
+        const futureTasks = await ctx.db
+          .query("tasks")
+          .withIndex("by_recurring", (q) =>
+            q.eq("recurringId", task.recurringId),
+          )
+          .filter((q) => q.gte(q.field("date"), task.date))
+          .collect();
+
+        for (const t of futureTasks) {
+          await ctx.db.patch(t._id, { ...args.updates, updatedAt: now });
+        }
+        break;
+    }
   },
 });
