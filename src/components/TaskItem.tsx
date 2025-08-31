@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, Text, TouchableOpacity, useColorScheme } from "react-native";
 import {
   Menu,
@@ -8,29 +8,19 @@ import {
 } from "react-native-popup-menu";
 import { ThemedIcon } from "@/components/ThemedIcon";
 import { TaskTypes } from "~/convex/schemas/tasks";
-import { hasTimePassed } from "@/utils/time-passed";
 import { useMutation } from "convex/react";
 import { api } from "~/convex/_generated/api";
 import { Id } from "~/convex/_generated/dataModel";
 import { useRouter } from "expo-router";
+import { Task } from "@/types";
+import { hasTimePassed } from "@/utils/time";
 
-interface TodayTask {
-  _id: string;
-  title: string;
-  startTime: string;
-  endTime: string;
-  tags: string[];
-  type: string;
-  isCompleted: boolean;
-  note?: string;
-}
-
-interface TodayTaskItemProps {
-  task: TodayTask;
+interface TaskItemProps {
+  task: Task;
   onPress?: () => void;
 }
 
-const TodayTaskItem = ({ task, onPress }: TodayTaskItemProps) => {
+const TaskItem = ({ task, onPress }: TaskItemProps) => {
   const router = useRouter();
   const colorScheme = useColorScheme();
 
@@ -57,37 +47,41 @@ const TodayTaskItem = ({ task, onPress }: TodayTaskItemProps) => {
           backgroundColor: "bg-red-100/40 dark:bg-red-800/30",
           tagBackground: "bg-red-200/60 dark:bg-red-800/60",
           tagText: "text-red-600 dark:text-red-200",
-          iconColor: "#ef4444",
+          iconColor: "#dc2626",
+          iconColorDark: "#fca5a5",
         };
       case TaskTypes.PERSONAL:
         return {
           borderColor: "border-l-primary-500",
           backgroundColor: "bg-primary-200/60 dark:bg-primary-500/30",
-          tagBackground: "bg-primary-300/30 dark:bg-primary-500",
+          tagBackground: "bg-primary-300/30 dark:bg-primary-400/30",
           tagText: "text-primary-500 dark:text-primary-200",
-          iconColor: "#3b82f6",
+          iconColor: "#5B67CA",
+          iconColorDark: "#ECEAFF",
         };
       case TaskTypes.JOB:
         return {
           borderColor: "border-l-green-500",
-          backgroundColor: "bg-green-50/80 dark:bg-green-700/30",
-          tagBackground: "bg-green-100 dark:bg-green-500/40",
+          backgroundColor: "bg-green-50/80 dark:bg-green-800/30",
+          tagBackground: "bg-green-400/30 dark:bg-green-700/40",
           tagText: "text-green-700 dark:text-green-200",
-          iconColor: "#22c55e",
+          iconColor: "#15803d",
+          iconColorDark: "#bbf7d0",
         };
       default:
         return {
           borderColor: "border-l-gray-500",
-          backgroundColor: "bg-gray-50/80 dark:bg-gray-950/30",
-          tagBackground: "bg-gray-100 dark:bg-gray-900/40",
+          backgroundColor: "bg-gray-50/80 dark:bg-gray-900/30",
+          tagBackground: "bg-gray-100/60 dark:bg-gray-800/40",
           tagText: "text-gray-700 dark:text-gray-300",
-          iconColor: "#6b7280",
+          iconColor: "#374151",
+          iconColorDark: "#d1d5db",
         };
     }
   };
 
   const colors = getTaskColors(task.type);
-  const timeHasPassed = hasTimePassed(task.endTime);
+  const timeHasPassed = hasTimePassed(task.endTime, task.date);
 
   return (
     <TouchableOpacity
@@ -200,4 +194,4 @@ const TodayTaskItem = ({ task, onPress }: TodayTaskItemProps) => {
   );
 };
 
-export default TodayTaskItem;
+export default TaskItem;
