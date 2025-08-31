@@ -7,11 +7,11 @@ interface ScrollHeaderProps {
   className?: string;
 }
 
-export const ScrollHeader: React.FC<ScrollHeaderProps> = ({
+export const ScrollHeader = ({
   title,
   opacity,
   className = "",
-}) => {
+}: ScrollHeaderProps) => {
   const colorScheme = useColorScheme();
   const shadowColor = colorScheme === "dark" ? "#334155" : "#ECEAFF";
 

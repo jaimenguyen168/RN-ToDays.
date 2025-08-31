@@ -5,12 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="848daa69-0b20-4967-b608-52402236c448" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/app/(app)/(modals)/_layout.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/(app)/(modals)/edit-task.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/convex/private/tasks.ts" beforeDir="false" afterPath="$PROJECT_DIR$/convex/private/tasks.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/convex/schema.ts" beforeDir="false" afterPath="$PROJECT_DIR$/convex/schema.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/convex/schemas/tasks.ts" beforeDir="false" afterPath="$PROJECT_DIR$/convex/schemas/tasks.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(app)/(tabs)/home.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(app)/(tabs)/home.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(app)/add-task.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(app)/add-task.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(app)/_layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(app)/_layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(app)/add-task.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(app)/(modals)/add-task.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/_layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/_layout.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/TodayTaskItem.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/TodayTaskItem.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -61,7 +64,7 @@
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "prettierjs.PrettierConfiguration.Package": "/Users/jaime168/Local/rn-to-days./node_modules/prettier",
-    "settings.editor.selected.configurable": "preferences.keymap",
+    "settings.editor.selected.configurable": "settings.javascript.prettier",
     "ts.external.directory.path": "/Users/jaime168/Local/rn-to-days./node_modules/typescript/lib",
     "vue.rearranger.settings.migration": "true"
   }
@@ -77,6 +80,7 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/app/(app)/(modals)" />
       <recent name="$PROJECT_DIR$/src/assets/images" />
       <recent name="$PROJECT_DIR$/convex" />
       <recent name="$PROJECT_DIR$/src" />

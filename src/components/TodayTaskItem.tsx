@@ -1,11 +1,18 @@
-import React from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity, useColorScheme } from "react-native";
+import {
+  Menu,
+  MenuOptions,
+  MenuOption,
+  MenuTrigger,
+} from "react-native-popup-menu";
 import { ThemedIcon } from "@/components/ThemedIcon";
 import { TaskTypes } from "~/convex/schemas/tasks";
 import { hasTimePassed } from "@/utils/time-passed";
 import { useMutation } from "convex/react";
 import { api } from "~/convex/_generated/api";
 import { Id } from "~/convex/_generated/dataModel";
+import { useRouter } from "expo-router";
 
 interface TodayTask {
   _id: string;
@@ -24,11 +31,21 @@ interface TodayTaskItemProps {
 }
 
 const TodayTaskItem = ({ task, onPress }: TodayTaskItemProps) => {
+  const router = useRouter();
+  const colorScheme = useColorScheme();
+
   const toggleCompleted = useMutation(api.private.tasks.toggleCompleted);
 
   const handleToggleCompleted = async () => {
     await toggleCompleted({
       taskId: task._id as Id<"tasks">,
+    });
+  };
+
+  const handleEditTask = () => {
+    router.push({
+      pathname: "/edit-task",
+      params: { taskId: task._id },
     });
   };
 
@@ -98,9 +115,59 @@ const TodayTaskItem = ({ task, onPress }: TodayTaskItemProps) => {
               />
             )}
           </View>
-          <TouchableOpacity onPress={handleToggleCompleted}>
-            <ThemedIcon name="ellipsis-vertical" size={16} />
-          </TouchableOpacity>
+
+          {/* Dropdown Menu */}
+          <Menu>
+            <MenuTrigger>
+              <ThemedIcon name="ellipsis-vertical" size={16} />
+            </MenuTrigger>
+            <MenuOptions
+              customStyles={{
+                optionsContainer: {
+                  backgroundColor: colorScheme === "dark" ? "#1e1e1e" : "white",
+                  borderRadius: 12,
+                  padding: 4,
+                  shadowColor: "#000",
+                  shadowOffset: {
+                    width: 0,
+                    height: 2,
+                  },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 3.84,
+                  elevation: 5,
+                },
+              }}
+            >
+              <MenuOption onSelect={handleToggleCompleted}>
+                <View className="flex-row items-center px-3 py-2 gap-3">
+                  <ThemedIcon
+                    name={task.isCompleted ? "close" : "checkmark"}
+                    size={16}
+                    lightColor={task.isCompleted ? "#ef4444" : "#22c55e"}
+                    darkColor={task.isCompleted ? "#ef4444" : "#22c55e"}
+                  />
+                  <Text className="text-foreground font-medium">
+                    {task.isCompleted
+                      ? "Mark as Incomplete"
+                      : "Mark as Complete"}
+                  </Text>
+                </View>
+              </MenuOption>
+
+              <MenuOption onSelect={handleEditTask}>
+                <View className="flex-row items-center px-3 py-2 gap-3">
+                  <ThemedIcon
+                    name="edit"
+                    size={16}
+                    lightColor="#6366f1"
+                    darkColor="#818cf8"
+                    library="antdesign"
+                  />
+                  <Text className="text-foreground font-medium">Edit Task</Text>
+                </View>
+              </MenuOption>
+            </MenuOptions>
+          </Menu>
         </View>
 
         <View className="flex-row items-center gap-2">
@@ -112,13 +179,6 @@ const TodayTaskItem = ({ task, onPress }: TodayTaskItemProps) => {
             {task.startTime} - {task.endTime}
           </Text>
         </View>
-
-        {/* Note */}
-        {task.note && (
-          <Text className={`${colors.tagText} text-sm opacity-70 mt-1`}>
-            {task.note}
-          </Text>
-        )}
       </View>
 
       {/* Tags */}
