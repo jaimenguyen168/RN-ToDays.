@@ -8,7 +8,7 @@ import {
   Switch,
   Alert,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { format, addDays, startOfWeek } from "date-fns";
 import { ThemedIcon } from "@/components/ThemedIcon";
@@ -36,10 +36,20 @@ type TaskFormData = z.infer<typeof taskSchemaForm>;
 const AddTask = () => {
   const router = useRouter();
 
+  const { selectedDate } = useLocalSearchParams<{ selectedDate?: string }>();
+
+  const getInitialDate = () => {
+    if (selectedDate) {
+      const parsedDate = new Date(selectedDate);
+      return isNaN(parsedDate.getTime()) ? new Date() : parsedDate;
+    }
+    return new Date();
+  };
+
   const [formData, setFormData] = useState<TaskFormData>({
     title: "",
     description: "",
-    startDate: new Date(),
+    startDate: getInitialDate(),
     endDate: undefined,
     startTime: new Date(),
     endTime: new Date(),

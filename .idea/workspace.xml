@@ -5,16 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="848daa69-0b20-4967-b608-52402236c448" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/app/(app)/(modals)/_layout.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/(app)/(modals)/edit-task.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/WeekNavigation.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/hooks/useTimeSlots.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/types/index.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/utils/time.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/convex/private/tasks.ts" beforeDir="false" afterPath="$PROJECT_DIR$/convex/private/tasks.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(app)/_layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(app)/_layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(app)/add-task.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(app)/(modals)/add-task.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/_layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/_layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/TodayTaskItem.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/TodayTaskItem.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(app)/(modals)/add-task.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(app)/(modals)/add-task.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(app)/(tabs)/home.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(app)/(tabs)/home.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(app)/(tabs)/tasks.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(app)/(tabs)/tasks.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/ScrollHeader.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ScrollHeader.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/TodayTaskItem.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/TaskItem.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/time-passed.ts" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,7 +58,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "03-home",
+    "git-widget-placeholder": "04-task-view",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
