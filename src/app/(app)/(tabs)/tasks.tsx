@@ -221,7 +221,10 @@ const TasksScreen = () => {
           <Text className="text-2xl font-semibold text-foreground justify-center -mb-2">
             Task
           </Text>
-          <View className="flex-row items-center gap-2">
+          <TouchableOpacity
+            className="flex-row items-center gap-2"
+            onPress={() => router.push("/activity")}
+          >
             <ThemedIcon
               name="calendar-outline"
               size={16}
@@ -231,7 +234,7 @@ const TasksScreen = () => {
             <Text className="text-muted-foreground text-sm">
               {formatDate(selectedDate)}
             </Text>
-          </View>
+          </TouchableOpacity>
         </View>
 
         {/* Week Navigation - Now using the component */}

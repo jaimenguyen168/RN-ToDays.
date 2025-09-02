@@ -11,6 +11,8 @@ import { useScrollHeader } from "@/hooks/useScrollHeader";
 import { ScrollHeader } from "@/components/ScrollHeader";
 import TaskItem from "@/components/TaskItem";
 import { Task } from "@/types";
+import { useRouter } from "expo-router";
+import EmptyState from "@/modules/activity/ui/components/EmptyState";
 
 interface TaskCounts {
   completed: number;
@@ -20,6 +22,7 @@ interface TaskCounts {
 }
 
 const HomeScreen = () => {
+  const router = useRouter();
   const userId = "j57fgqzy3wkwx3381xw5ezvjcs7pga7v";
   const { headerOpacity, handleScroll } = useScrollHeader(15);
 
@@ -102,12 +105,8 @@ const HomeScreen = () => {
   const taskCounts = calculateTaskCounts();
   const todayTasks = getTodayTasks();
 
-  const handleTaskPress = (taskId: string) => {
-    console.log("Task pressed:", taskId);
-  };
-
   const renderHeader = () => (
-    <View className="bg-background pt-20 px-6 gap-8">
+    <View className="bg-background pt-20 gap-8">
       {/* Header */}
       <View className="mr-2">
         <View className="flex-row items-center justify-between">
@@ -173,29 +172,10 @@ const HomeScreen = () => {
           <Text className="text-xl font-semibold text-foreground">
             Today Task
           </Text>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push("/tasks")}>
             <Text className="text-accent-foreground font-medium">View all</Text>
           </TouchableOpacity>
         </View>
-      </View>
-    </View>
-  );
-
-  const renderEmptyState = () => (
-    <View className="px-6">
-      <View className="bg-muted-accent rounded-2xl p-8 items-center">
-        <ThemedIcon
-          name="calendar-outline"
-          size={48}
-          lightColor="#5B67CA"
-          darkColor="#F9FAFD"
-        />
-        <Text className="text-accent-foreground text-center mt-4 font-semibold">
-          No tasks scheduled for today
-        </Text>
-        <Text className="text-muted-accent text-center text-sm">
-          Enjoy your free day!
-        </Text>
       </View>
     </View>
   );
@@ -213,15 +193,21 @@ const HomeScreen = () => {
 
       <Animated.FlatList
         data={todayTasks}
-        className="flex-1"
+        className="flex-1 px-6"
         renderItem={({ item }) => (
-          <View className="px-6 mb-3">
+          <View className="mb-3">
             <TaskItem task={item} />
           </View>
         )}
         keyExtractor={(item) => item._id}
         ListHeaderComponent={renderHeader}
-        ListEmptyComponent={renderEmptyState}
+        ListEmptyComponent={
+          <EmptyState
+            icon="calendar"
+            title="No tasks scheduled for today"
+            description="Enjoy your free day!"
+          />
+        }
         ListFooterComponent={renderFooter}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ flexGrow: 1 }}

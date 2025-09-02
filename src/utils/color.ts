@@ -6,7 +6,7 @@ export const getTaskColors = (type: string) => {
       return "#ff6b6b";
     case TaskTypes.PERSONAL:
       return "#a855f7";
-    case TaskTypes.JOB:
+    case TaskTypes.WORK:
       return "#22c55e";
     default:
       return "#94a3b8";

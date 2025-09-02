@@ -10,18 +10,18 @@ interface EmptyStateProps {
 
 const EmptyState = ({ icon, title, description }: EmptyStateProps) => {
   return (
-    <View className="bg-muted rounded-lg p-6 items-center">
+    <View className="bg-muted-accent rounded-2xl p-8 items-center">
       <ThemedIcon
         name={icon}
         size={48}
+        lightColor="#5B67CA"
+        darkColor="#F9FAFD"
         library="fontawesome6"
-        lightColor="#9CA3AF"
-        darkColor="#6B7280"
       />
-      <Text className="text-muted-foreground text-center mt-3 mb-2">
+      <Text className="text-accent-foreground text-center mt-4 font-semibold">
         {title}
       </Text>
-      <Text className="text-muted-foreground text-center text-sm">
+      <Text className="text-muted-accent text-center text-sm">
         {description}
       </Text>
     </View>
