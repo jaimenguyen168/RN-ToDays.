@@ -79,7 +79,7 @@ const AnalyticsView = ({ tasks }: AnalyticsViewProps) => {
         (task) => task.type === TaskTypes.PERSONAL,
       ).length;
       const jobCount = dayTasks.filter(
-        (task) => task.type === TaskTypes.JOB,
+        (task) => task.type === TaskTypes.WORK,
       ).length;
       const emergencyCount = dayTasks.filter(
         (task) => task.type === TaskTypes.EMERGENCY,
@@ -99,7 +99,7 @@ const AnalyticsView = ({ tasks }: AnalyticsViewProps) => {
           },
           {
             value: jobCount,
-            color: getTaskColors(TaskTypes.JOB),
+            color: getTaskColors(TaskTypes.WORK),
           },
           {
             value: emergencyCount,
@@ -117,7 +117,7 @@ const AnalyticsView = ({ tasks }: AnalyticsViewProps) => {
     // 2. Task distribution by type (Pie Chart)
     const tasksByType: Record<string, number> = {
       [TaskTypes.PERSONAL]: 0,
-      [TaskTypes.JOB]: 0,
+      [TaskTypes.WORK]: 0,
       [TaskTypes.EMERGENCY]: 0,
     };
 

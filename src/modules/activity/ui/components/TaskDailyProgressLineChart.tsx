@@ -13,6 +13,15 @@ const TaskDailyProgressLineChart = ({
 }: TaskDailyProgressLineChartProps) => {
   if (!completedData || !totalData) return null;
 
+  const maxValue = Math.max(
+    3,
+    ...completedData.map(
+      (d) =>
+        d.stacks?.reduce((sum: number, stack: any) => sum + stack.value, 0) ||
+        d.value,
+    ),
+  );
+
   return (
     <View className="bg-card rounded-lg p-4 overflow-hidden">
       <Text className="text-lg font-semibold text-foreground mb-4">
@@ -44,12 +53,7 @@ const TaskDailyProgressLineChart = ({
         yAxisThickness={0}
         xAxisColor="#94a3b8"
         yAxisColor="#94a3b8"
-        maxValue={
-          Math.max(
-            ...totalData.map((d) => d.value),
-            ...completedData.map((d) => d.value),
-          ) + 1
-        }
+        maxValue={maxValue}
       />
       <View className="flex-row justify-center gap-6 mt-4">
         <View className="flex-row items-center gap-2">

@@ -33,17 +33,9 @@ const TaskDistributionPieChart = ({
           innerRadius={60}
           innerCircleColor="transparent"
           centerLabelComponent={() => (
-            <View style={{ justifyContent: "center", alignItems: "center" }}>
-              <Text
-                style={{
-                  fontSize: 18,
-                  color: "#1F2937",
-                  fontWeight: "bold",
-                }}
-              >
-                {totalTasks}
-              </Text>
-              <Text style={{ fontSize: 12, color: "#6B7280" }}>Total</Text>
+            <View className="items-center justify-center">
+              <Text className="font-semibold text-2xl">{totalTasks}</Text>
+              <Text className="text-sm font-light">Total</Text>
             </View>
           )}
         />

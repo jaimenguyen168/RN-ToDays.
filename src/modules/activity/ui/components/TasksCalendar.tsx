@@ -156,7 +156,7 @@ const TaskLegend = ({ getTaskColors }: TaskLegendProps) => {
         <View
           className="size-2 rounded-full"
           style={{
-            backgroundColor: getTaskColors(TaskTypes.JOB),
+            backgroundColor: getTaskColors(TaskTypes.WORK),
           }}
         />
         <Text className="text-foreground">Job</Text>

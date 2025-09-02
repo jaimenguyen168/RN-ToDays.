@@ -1,6 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "../_generated/server";
-import { TaskTypes } from "../schemas/tasks";
+import { NotificationTypes, TaskTypes } from "../schemas/tasks";
 
 export const create = mutation({
   args: {
@@ -12,12 +12,26 @@ export const create = mutation({
     endTime: v.string(),
     type: v.union(
       v.literal(TaskTypes.PERSONAL),
-      v.literal(TaskTypes.JOB),
+      v.literal(TaskTypes.WORK),
       v.literal(TaskTypes.EMERGENCY),
     ),
     tags: v.array(v.string()),
     hasEndDate: v.boolean(),
     selectedWeekDays: v.optional(v.array(v.string())),
+    note: v.optional(v.string()),
+    notifications: v.optional(
+      v.array(
+        v.object({
+          type: v.union(
+            v.literal(NotificationTypes.FIFTEEN_MINUTES),
+            v.literal(NotificationTypes.FIVE_MINUTES),
+            v.literal(NotificationTypes.AT_START),
+          ),
+          scheduledTime: v.number(),
+          notificationId: v.optional(v.string()),
+        }),
+      ),
+    ),
     userId: v.string(),
   },
   handler: async (ctx, args) => {
@@ -85,6 +99,8 @@ export const create = mutation({
           tags: args.tags,
           isCompleted: false,
           recurringId,
+          notifications: args.notifications,
+          note: args.note,
           updatedAt: now,
           userId: args.userId,
         });
@@ -112,7 +128,7 @@ export const getTasksWithFilters = query({
     type: v.optional(
       v.union(
         v.literal(TaskTypes.PERSONAL),
-        v.literal(TaskTypes.JOB),
+        v.literal(TaskTypes.WORK),
         v.literal(TaskTypes.EMERGENCY),
       ),
     ),
@@ -215,7 +231,7 @@ export const editTask = mutation({
       endTime: v.optional(v.string()),
       type: v.union(
         v.literal(TaskTypes.PERSONAL),
-        v.literal(TaskTypes.JOB),
+        v.literal(TaskTypes.WORK),
         v.literal(TaskTypes.EMERGENCY),
       ),
       tags: v.optional(v.array(v.string())),

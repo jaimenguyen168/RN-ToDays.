@@ -3,11 +3,16 @@ import { v } from "convex/values";
 
 export const TaskTypes = {
   PERSONAL: "Personal",
-  JOB: "Job",
+  WORK: "Work",
   EMERGENCY: "Emergency",
 } as const;
 
-// Table for individual task instances
+export const NotificationTypes = {
+  FIFTEEN_MINUTES: "15_minutes",
+  FIVE_MINUTES: "5_minutes",
+  AT_START: "at_start",
+} as const;
+
 export const tasks = defineTable({
   title: v.string(),
   description: v.optional(v.string()),
@@ -16,7 +21,7 @@ export const tasks = defineTable({
   endTime: v.string(),
   type: v.union(
     v.literal(TaskTypes.PERSONAL),
-    v.literal(TaskTypes.JOB),
+    v.literal(TaskTypes.WORK),
     v.literal(TaskTypes.EMERGENCY),
   ),
   tags: v.array(v.string()),
@@ -28,6 +33,21 @@ export const tasks = defineTable({
 
   // Reference to recurring template (if this task is part of a recurring series)
   recurringId: v.optional(v.id("recurrings")),
+
+  // Notification settings - array to support multiple notifications
+  notifications: v.optional(
+    v.array(
+      v.object({
+        type: v.union(
+          v.literal(NotificationTypes.FIFTEEN_MINUTES),
+          v.literal(NotificationTypes.FIVE_MINUTES),
+          v.literal(NotificationTypes.AT_START),
+        ),
+        scheduledTime: v.number(),
+        notificationId: v.optional(v.string()),
+      }),
+    ),
+  ),
 
   // Metadata
   updatedAt: v.number(),
@@ -41,7 +61,9 @@ export const tasks = defineTable({
   .index("by_task_type", ["type"])
   .index("by_user_and_type", ["userId", "type"])
   .index("by_recurring", ["recurringId"])
-  .index("by_user_and_recurring", ["userId", "recurringId"]);
+  .index("by_user_and_recurring", ["userId", "recurringId"])
+  .index("by_notifications", ["notifications"])
+  .index("by_user_and_notifications", ["userId", "notifications"]);
 
 // Table for recurring task templates
 export const recurrings = defineTable({
@@ -50,7 +72,7 @@ export const recurrings = defineTable({
   endTime: v.string(),
   type: v.union(
     v.literal(TaskTypes.PERSONAL),
-    v.literal(TaskTypes.JOB),
+    v.literal(TaskTypes.WORK),
     v.literal(TaskTypes.EMERGENCY),
   ),
   tags: v.array(v.string()),
@@ -59,8 +81,8 @@ export const recurrings = defineTable({
   selectedWeekDays: v.optional(v.array(v.string())), // ["monday", "wednesday", "friday"]
 
   // Date range for the recurring pattern
-  startDate: v.number(), // When the recurring pattern starts
-  endDate: v.number(), // When the recurring pattern ends (null for indefinite)
+  startDate: v.number(),
+  endDate: v.number(),
 
   // Status
   isActive: v.boolean(),

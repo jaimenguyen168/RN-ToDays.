@@ -59,7 +59,7 @@ const TaskItem = ({ task, onPress }: TaskItemProps) => {
           iconColor: "#5B67CA",
           iconColorDark: "#ECEAFF",
         };
-      case TaskTypes.JOB:
+      case TaskTypes.WORK:
         return {
           borderColor: "border-l-green-500",
           backgroundColor: "bg-green-50/80 dark:bg-green-800/30",

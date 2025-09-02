@@ -34,7 +34,7 @@ const TaskStats = ({ selectedDate, tasks }: TaskStatsProps) => {
     total > 0 ? Math.round((completed / total) * 100) : 0;
 
   return (
-    <View className="bg-muted rounded-lg p-4 gap-1">
+    <View className="bg-muted rounded-lg px-6 py-4 gap-1">
       <Text className="text-lg font-semibold text-foreground">
         {formattedDate}
       </Text>
