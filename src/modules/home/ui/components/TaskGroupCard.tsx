@@ -2,21 +2,23 @@ import { Text, TouchableOpacity, View, Image } from "react-native";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 
-const TaskCard = ({
-  title,
-  count,
-  colors,
-  icon,
-  image,
-  height,
-}: {
+interface TaskGroupCardProps {
   title: string;
   count: number;
   colors: any;
   icon?: string;
   image?: any;
   height?: number;
-}) => (
+}
+
+const TaskGroupCard = ({
+  title,
+  count,
+  colors,
+  icon,
+  image,
+  height,
+}: TaskGroupCardProps) => (
   <TouchableOpacity
     className={`${height && `h-${height}`} rounded-3xl px-6 pt-6 pb-4 justify-between flex-1 overflow-hidden`}
     style={{
@@ -62,4 +64,4 @@ const TaskCard = ({
   </TouchableOpacity>
 );
 
-export default TaskCard;
+export default TaskGroupCard;
