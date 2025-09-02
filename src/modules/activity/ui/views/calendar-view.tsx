@@ -4,7 +4,7 @@ import TasksCalendar from "@/modules/activity/ui/components/TasksCalendar";
 import { Task } from "@/types";
 import TaskStats from "@/modules/activity/ui/components/TaskStats";
 import { isToday } from "date-fns";
-import TaskItem from "@/components/TaskItem";
+import TaskItem from "@/modules/tasks/ui/components/TaskItem";
 import EmptyState from "@/modules/activity/ui/components/EmptyState";
 
 interface CalendarViewProps {

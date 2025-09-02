@@ -5,29 +5,30 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  Switch,
   Alert,
   Modal,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { format, addDays, startOfWeek } from "date-fns";
+import { format } from "date-fns";
 import { ThemedIcon } from "@/components/ThemedIcon";
 import DatePicker from "react-native-date-picker";
 import { z } from "zod";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "~/convex/_generated/api";
-import { TaskTypes } from "~/convex/schemas/tasks";
+import { NotificationTypes, TaskTypes } from "~/convex/schemas/tasks";
 import { Id } from "~/convex/_generated/dataModel";
+import { createNotificationSettings } from "@/utils/noti";
 
 const taskSchemaForm = z.object({
   title: z.string().min(1, "Title is required"),
-  description: z.string().optional(),
+  description: z.optional(z.string()),
   startTime: z.date(),
   endTime: z.date(),
   type: z.nativeEnum(TaskTypes),
   tags: z.array(z.string()),
-  note: z.string().optional(),
+  note: z.optional(z.string()),
+  notifications: z.array(z.string()),
 });
 
 type TaskFormData = z.infer<typeof taskSchemaForm>;
@@ -48,6 +49,7 @@ const EditTask = () => {
     type: TaskTypes.PERSONAL,
     tags: [],
     note: "",
+    notifications: [],
   });
 
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -81,6 +83,7 @@ const EditTask = () => {
         type: task.type,
         tags: task.tags,
         note: task.note || "",
+        notifications: task.notifications?.map((n) => n.type) || [],
       });
       setAvailableTags(task.tags);
     }
@@ -152,6 +155,14 @@ const EditTask = () => {
         type: validatedData.type,
         tags: validatedData.tags,
         note: validatedData.note,
+        notifications:
+          validatedData.notifications.length > 0
+            ? createNotificationSettings(
+                validatedData.notifications,
+                task?.date || 0,
+                validatedData.startTime.toTimeString().slice(0, 5),
+              )
+            : undefined,
       };
 
       await editTask({
@@ -308,6 +319,23 @@ const EditTask = () => {
 
         <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
           <View className="px-8 pt-4 pb-8 gap-6">
+            {/* Recurring Info Display */}
+            {task?.recurringId && (
+              <View className="flex-row justify-end">
+                <View className="px-3.5 py-1 rounded-2xl border bg-primary-200 border-primary-200 dark:bg-primary-300/70 dark:border-primary-400/60 flex-row items-center gap-1">
+                  <ThemedIcon
+                    name="refresh"
+                    size={16}
+                    lightColor="#8F99EB"
+                    darkColor="#F9FAFD"
+                  />
+                  <Text className="font-medium text-accent-foreground">
+                    This is a recurring task
+                  </Text>
+                </View>
+              </View>
+            )}
+
             {/* Title */}
             <View className="gap-3">
               <Text className="text-sm text-muted-foreground">Title</Text>
@@ -359,6 +387,63 @@ const EditTask = () => {
                     {formatTime(formData.endTime)}
                   </Text>
                 </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Notifications */}
+            <View className="gap-4 mt-1">
+              <Text className="text-sm text-muted-foreground">
+                Notifications (optional)
+              </Text>
+              <View className="gap-3">
+                {Object.values(NotificationTypes).map((notificationType) => (
+                  <TouchableOpacity
+                    key={notificationType}
+                    onPress={() => {
+                      const isSelected =
+                        formData.notifications.includes(notificationType);
+                      if (isSelected) {
+                        updateFormData(
+                          "notifications",
+                          formData.notifications.filter(
+                            (n) => n !== notificationType,
+                          ),
+                        );
+                      } else {
+                        updateFormData("notifications", [
+                          ...formData.notifications,
+                          notificationType,
+                        ]);
+                      }
+                    }}
+                    className="flex-row items-center"
+                  >
+                    <View
+                      className={`w-5 h-5 rounded border mr-3 ${
+                        formData.notifications.includes(notificationType)
+                          ? "bg-primary-500 border-primary-500"
+                          : "border-border"
+                      }`}
+                    >
+                      {formData.notifications.includes(notificationType) && (
+                        <Ionicons
+                          name="checkmark"
+                          size={12}
+                          color="white"
+                          style={{ alignSelf: "center", marginTop: 1 }}
+                        />
+                      )}
+                    </View>
+                    <Text className="text-foreground">
+                      {notificationType === NotificationTypes.FIFTEEN_MINUTES &&
+                        "15 minutes before task"}
+                      {notificationType === NotificationTypes.FIVE_MINUTES &&
+                        "5 minutes before task"}
+                      {notificationType === NotificationTypes.AT_START &&
+                        "At start of task"}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
               </View>
             </View>
 
@@ -451,26 +536,6 @@ const EditTask = () => {
                 returnKeyType="done"
               />
             </View>
-
-            {/* Recurring Info Display */}
-            {task?.recurringId && (
-              <View className="p-4 bg-primary-50 dark:bg-primary-900/20 rounded-xl">
-                <View className="flex-row items-center gap-2">
-                  <ThemedIcon
-                    name="refresh"
-                    size={16}
-                    lightColor="#6366f1"
-                    darkColor="#818cf8"
-                  />
-                  <Text className="text-primary-600 dark:text-primary-400 font-medium">
-                    This is a recurring task
-                  </Text>
-                </View>
-                <Text className="text-primary-500 dark:text-primary-300 text-sm mt-1">
-                  You'll be asked how you want to apply changes when you update
-                </Text>
-              </View>
-            )}
           </View>
         </ScrollView>
 

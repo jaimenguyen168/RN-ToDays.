@@ -236,6 +236,19 @@ export const editTask = mutation({
       ),
       tags: v.optional(v.array(v.string())),
       note: v.optional(v.string()),
+      notifications: v.optional(
+        v.array(
+          v.object({
+            type: v.union(
+              v.literal(NotificationTypes.FIFTEEN_MINUTES),
+              v.literal(NotificationTypes.FIVE_MINUTES),
+              v.literal(NotificationTypes.AT_START),
+            ),
+            scheduledTime: v.number(),
+            notificationId: v.optional(v.string()),
+          }),
+        ),
+      ),
     }),
     editScope: v.union(
       v.literal("this_only"),

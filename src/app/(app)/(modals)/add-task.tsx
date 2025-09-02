@@ -470,6 +470,18 @@ const AddTask = () => {
               />
             </View>
 
+            {/* Note */}
+            <View className="gap-3">
+              <Text className="text-sm text-muted-foreground">Note</Text>
+              <TextInput
+                value={formData.note}
+                onChangeText={(value) => updateFormData("note", value)}
+                className="text-foreground border-b border-border pb-3"
+                placeholder="Add a personal note"
+                multiline
+              />
+            </View>
+
             {/* Type */}
             <View className="gap-3">
               <Text className="text-sm text-muted-foreground">Type</Text>
