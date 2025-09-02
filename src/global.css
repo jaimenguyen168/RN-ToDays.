@@ -6,7 +6,7 @@
     /* Semantic background colors */
     .bg-background { @apply bg-white dark:bg-slate-900; }
     .bg-foreground { @apply bg-gray-900 dark:bg-white; }
-    .bg-card { @apply bg-white dark:bg-slate-800; }
+    .bg-card { @apply bg-slate-100 dark:bg-slate-800; }
     .bg-app-primary { @apply bg-primary-500 dark:bg-primary-400; }
     .bg-app-secondary { @apply bg-primary-50 dark:bg-slate-700; }
     .bg-muted { @apply bg-slate-50 dark:bg-slate-700; }

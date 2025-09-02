@@ -1,11 +1,7 @@
-import { View, Text } from "react-native";
 import React from "react";
+import { Redirect } from "expo-router";
 
-const AddScreen = () => {
-  return (
-    <View className="flex-1 items-center justify-center bg-yellow-200">
-      <Text>AddScreen</Text>
-    </View>
-  );
+const Add = () => {
+  return <Redirect href="/add-task" />;
 };
-export default AddScreen;
+export default Add;

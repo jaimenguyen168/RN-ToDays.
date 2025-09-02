@@ -1,11 +1,8 @@
-import { View, Text } from "react-native";
 import React from "react";
+import ActivityView from "@/modules/activity/ui/views/activity-view";
 
 const ActivityScreen = () => {
-  return (
-    <View className="flex-1 items-center justify-center bg-blue-200">
-      <Text>ActivityScreen</Text>
-    </View>
-  );
+  return <ActivityView />;
 };
+
 export default ActivityScreen;
