@@ -16,19 +16,22 @@ import DatePicker from "react-native-date-picker";
 import { z } from "zod";
 import { useMutation } from "convex/react";
 import { api } from "~/convex/_generated/api";
-import { TaskTypes } from "~/convex/schemas/tasks";
+import { NotificationTypes, TaskTypes } from "~/convex/schemas/tasks";
+import { createNotificationSettings } from "@/utils/noti";
 
 const taskSchemaForm = z.object({
   title: z.string().min(1, "Title is required"),
-  description: z.string().optional(),
+  description: z.optional(z.string()),
   startDate: z.date(),
-  endDate: z.date().optional(),
+  endDate: z.optional(z.date()),
   startTime: z.date(),
   endTime: z.date(),
   type: z.nativeEnum(TaskTypes),
   tags: z.array(z.string()),
   hasEndDate: z.boolean(),
   selectedWeekDays: z.array(z.string()),
+  note: z.optional(z.string()),
+  notifications: z.array(z.string()),
 });
 
 type TaskFormData = z.infer<typeof taskSchemaForm>;
@@ -57,6 +60,8 @@ const AddTask = () => {
     tags: [],
     hasEndDate: false,
     selectedWeekDays: [],
+    note: "",
+    notifications: [],
   });
 
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
@@ -137,6 +142,15 @@ const AddTask = () => {
         ? validatedData.selectedWeekDays
         : [];
 
+      const notificationSettings =
+        validatedData.notifications.length > 0
+          ? createNotificationSettings(
+              validatedData.notifications,
+              validatedData.startDate.getTime(),
+              validatedData.startTime.toTimeString().slice(0, 5),
+            )
+          : undefined;
+
       const taskData = {
         title: validatedData.title,
         description: validatedData.description,
@@ -147,7 +161,9 @@ const AddTask = () => {
         type: validatedData.type,
         tags: validatedData.tags,
         hasEndDate: validatedData.hasEndDate,
-        selectedWeekDays: selectedDayNames, // Remove recurringDates since mutation handles this
+        selectedWeekDays: selectedDayNames,
+        notifications: notificationSettings,
+        note: validatedData.note,
         userId,
       };
 
@@ -255,7 +271,7 @@ const AddTask = () => {
         </View>
 
         <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-          <View className="px-8 pt-4 pb-8 gap-6">
+          <View className="px-8 pt-4 pb-10 gap-6">
             {/* Title */}
             <View className="gap-3">
               <Text className="text-sm text-muted-foreground">Title</Text>
@@ -383,14 +399,85 @@ const AddTask = () => {
               </View>
             </View>
 
+            {/* Notifications */}
+            <View className="gap-4 mt-1">
+              <Text className="text-sm text-muted-foreground">
+                Notifications (optional)
+              </Text>
+              <View className="gap-3">
+                {Object.values(NotificationTypes).map((notificationType) => (
+                  <TouchableOpacity
+                    key={notificationType}
+                    onPress={() => {
+                      const isSelected =
+                        formData.notifications.includes(notificationType);
+                      if (isSelected) {
+                        updateFormData(
+                          "notifications",
+                          formData.notifications.filter(
+                            (n) => n !== notificationType,
+                          ),
+                        );
+                      } else {
+                        updateFormData("notifications", [
+                          ...formData.notifications,
+                          notificationType,
+                        ]);
+                      }
+                    }}
+                    className="flex-row items-center"
+                  >
+                    <View
+                      className={`w-5 h-5 rounded border mr-3 ${
+                        formData.notifications.includes(notificationType)
+                          ? "bg-primary-500 border-primary-500"
+                          : "border-border"
+                      }`}
+                    >
+                      {formData.notifications.includes(notificationType) && (
+                        <Ionicons
+                          name="checkmark"
+                          size={12}
+                          color="white"
+                          style={{ alignSelf: "center", marginTop: 1 }}
+                        />
+                      )}
+                    </View>
+                    <Text className="text-foreground">
+                      {notificationType === NotificationTypes.FIFTEEN_MINUTES &&
+                        "15 minutes before task"}
+                      {notificationType === NotificationTypes.FIVE_MINUTES &&
+                        "5 minutes before task"}
+                      {notificationType === NotificationTypes.AT_START &&
+                        "At start of task"}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
             {/* Description */}
             <View className="gap-3">
-              <Text className="text-sm text-muted-foreground">Description</Text>
+              <Text className="text-sm text-muted-foreground">
+                Description (optional)
+              </Text>
               <TextInput
                 value={formData.description}
                 onChangeText={(value) => updateFormData("description", value)}
                 className="text-foreground border-b border-border pb-3"
                 placeholder="Enter task description"
+                multiline
+              />
+            </View>
+
+            {/* Note */}
+            <View className="gap-3">
+              <Text className="text-sm text-muted-foreground">Note</Text>
+              <TextInput
+                value={formData.note}
+                onChangeText={(value) => updateFormData("note", value)}
+                className="text-foreground border-b border-border pb-3"
+                placeholder="Add a personal note"
                 multiline
               />
             </View>
@@ -458,6 +545,20 @@ const AddTask = () => {
                 className="text-foreground border-b border-border pb-3 shrink-0 flex-1"
                 onSubmitEditing={handleAddTag}
                 returnKeyType="done"
+              />
+            </View>
+
+            {/* Note */}
+            <View className="gap-3">
+              <Text className="text-sm text-muted-foreground">
+                Note (optional)
+              </Text>
+              <TextInput
+                value={formData.note}
+                onChangeText={(value) => updateFormData("note", value)}
+                className="text-foreground border-b border-border pb-3"
+                placeholder="Enter note"
+                multiline
               />
             </View>
           </View>

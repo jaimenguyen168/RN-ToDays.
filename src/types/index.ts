@@ -8,4 +8,5 @@ export interface Task {
   date: number;
   isCompleted: boolean;
   note?: string;
+  recurringId?: string;
 }
