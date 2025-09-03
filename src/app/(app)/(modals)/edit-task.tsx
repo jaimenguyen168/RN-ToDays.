@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-  Modal,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -19,6 +18,7 @@ import { api } from "~/convex/_generated/api";
 import { NotificationTypes, TaskTypes } from "~/convex/schemas/tasks";
 import { Id } from "~/convex/_generated/dataModel";
 import { createNotificationSettings } from "@/utils/noti";
+import ScopeSelectionModal from "@/components/ScopeSelectionModal";
 
 const taskSchemaForm = z.object({
   title: z.string().min(1, "Title is required"),
@@ -180,75 +180,6 @@ const EditTask = () => {
     }
   };
 
-  const EditScopeModal = () => (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={showEditScopeModal}
-      onRequestClose={() => setShowEditScopeModal(false)}
-    >
-      <View className="flex-1 justify-end bg-black/50">
-        <View className="bg-background rounded-t-3xl p-6">
-          <View className="items-center mb-6">
-            <View className="w-12 h-1 bg-muted rounded-full mb-4" />
-            <Text className="text-xl font-semibold text-foreground">
-              Edit Recurring Task
-            </Text>
-            <Text className="text-muted-foreground text-center mt-2">
-              This task is part of a recurring series. What would you like to
-              edit?
-            </Text>
-          </View>
-
-          <View className="gap-3">
-            <TouchableOpacity
-              onPress={() => updateTask("this_only")}
-              className="p-4 bg-muted rounded-xl"
-            >
-              <Text className="text-foreground font-semibold">
-                This task only
-              </Text>
-              <Text className="text-muted-foreground text-sm">
-                Edit only this specific instance
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => updateTask("all")}
-              className="p-4 bg-muted rounded-xl"
-            >
-              <Text className="text-foreground font-semibold">All tasks</Text>
-              <Text className="text-muted-foreground text-sm">
-                Edit all tasks in this recurring series
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => updateTask("this_and_future")}
-              className="p-4 bg-muted rounded-xl"
-            >
-              <Text className="text-foreground font-semibold">
-                This and future tasks
-              </Text>
-              <Text className="text-muted-foreground text-sm">
-                Edit this task and all future ones in the series
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <TouchableOpacity
-            onPress={() => setShowEditScopeModal(false)}
-            className="mt-6 p-4 bg-secondary rounded-xl"
-          >
-            <Text className="text-center text-foreground font-semibold">
-              Cancel
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-
   if (!task) {
     return (
       <View className="flex-1 bg-background items-center justify-center">
@@ -288,7 +219,14 @@ const EditTask = () => {
         }}
       />
 
-      <EditScopeModal />
+      <ScopeSelectionModal
+        visible={showEditScopeModal}
+        onClose={() => setShowEditScopeModal(false)}
+        onScopeSelect={updateTask}
+        title="Edit Recurring Task"
+        subtitle="This task is part of a recurring series. What would you like to edit?"
+        actionType="edit"
+      />
 
       <View className="flex-1 bg-background rounded-t-4xl">
         {/* Header */}
@@ -551,74 +489,6 @@ const EditTask = () => {
           </TouchableOpacity>
         </View>
       </View>
-
-      {/* Edit Scope Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={showEditScopeModal}
-        onRequestClose={() => setShowEditScopeModal(false)}
-      >
-        <View className="flex-1 justify-end bg-black/50">
-          <View className="bg-background rounded-t-3xl p-6">
-            <View className="items-center mb-6">
-              <View className="w-12 h-1 bg-muted rounded-full mb-4" />
-              <Text className="text-xl font-semibold text-foreground">
-                Edit Recurring Task
-              </Text>
-              <Text className="text-muted-foreground text-center mt-2">
-                This task is part of a recurring series. What would you like to
-                edit?
-              </Text>
-            </View>
-
-            <View className="gap-3">
-              <TouchableOpacity
-                onPress={() => updateTask("this_only")}
-                className="p-4 bg-muted rounded-xl"
-              >
-                <Text className="text-foreground font-semibold">
-                  This task only
-                </Text>
-                <Text className="text-muted-foreground text-sm">
-                  Edit only this specific instance
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => updateTask("all")}
-                className="p-4 bg-muted rounded-xl"
-              >
-                <Text className="text-foreground font-semibold">All tasks</Text>
-                <Text className="text-muted-foreground text-sm">
-                  Edit all tasks in this recurring series
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => updateTask("this_and_future")}
-                className="p-4 bg-muted rounded-xl"
-              >
-                <Text className="text-foreground font-semibold">
-                  This and future tasks
-                </Text>
-                <Text className="text-muted-foreground text-sm">
-                  Edit this task and all future ones in the series
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            <TouchableOpacity
-              onPress={() => setShowEditScopeModal(false)}
-              className="mt-6 p-4 bg-secondary rounded-xl"
-            >
-              <Text className="text-center text-foreground font-semibold">
-                Cancel
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </>
   );
 };

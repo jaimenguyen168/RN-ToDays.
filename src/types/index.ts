@@ -1,3 +1,5 @@
+import { TaskNotification } from "@/utils/noti";
+
 export interface Task {
   _id: string;
   title: string;
@@ -9,4 +11,5 @@ export interface Task {
   isCompleted: boolean;
   note?: string;
   recurringId?: string;
+  notifications?: TaskNotification[];
 }

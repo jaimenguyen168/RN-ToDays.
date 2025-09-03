@@ -1,13 +1,25 @@
 import { Tabs, useRouter } from "expo-router";
-import React from "react";
+import React, { useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity, useColorScheme, View } from "react-native";
+import { useNotifications } from "@/hooks/useNotifications";
 
 const TabsLayout = () => {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
 
   const router = useRouter();
+
+  const { notification, permissionStatus } = useNotifications();
+
+  useEffect(() => {
+    if (notification) {
+      console.log("Received notification:", notification.request.content.title);
+    }
+    if (permissionStatus === "granted") {
+      console.log("Permission granted");
+    }
+  }, [notification]);
 
   const handleAddPress = () => {
     router.push("/add-task");

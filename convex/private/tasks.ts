@@ -1,14 +1,15 @@
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "../_generated/server";
 import { NotificationTypes, TaskTypes } from "../schemas/tasks";
+import { calculateNotifications } from "../../src/utils/noti";
 
 export const create = mutation({
   args: {
     title: v.string(),
     description: v.optional(v.string()),
-    startDate: v.number(),
-    endDate: v.optional(v.number()),
-    startTime: v.string(),
+    startDate: v.number(), // UTC timestamp for the date (midnight)
+    endDate: v.optional(v.number()), // UTC timestamp for the date (midnight)
+    startTime: v.string(), // e.g. "08:00"
     endTime: v.string(),
     type: v.union(
       v.literal(TaskTypes.PERSONAL),
@@ -19,40 +20,37 @@ export const create = mutation({
     hasEndDate: v.boolean(),
     selectedWeekDays: v.optional(v.array(v.string())),
     note: v.optional(v.string()),
-    notifications: v.optional(
-      v.array(
-        v.object({
-          type: v.union(
-            v.literal(NotificationTypes.FIFTEEN_MINUTES),
-            v.literal(NotificationTypes.FIVE_MINUTES),
-            v.literal(NotificationTypes.AT_START),
-          ),
-          scheduledTime: v.number(),
-          notificationId: v.optional(v.string()),
-        }),
-      ),
-    ),
+    notifications: v.optional(v.array(v.string())),
     userId: v.string(),
   },
   handler: async (ctx, args) => {
     const now = Date.now();
 
+    // ✅ Handle one-time task
     if (!args.hasEndDate || !args.endDate) {
-      return await ctx.db.insert("tasks", {
+      const taskId = await ctx.db.insert("tasks", {
         title: args.title,
         description: args.description,
-        date: args.startDate,
+        date: args.startDate, // keep midnight UTC timestamp
         startTime: args.startTime,
         endTime: args.endTime,
         type: args.type,
         tags: args.tags,
         isCompleted: false,
+        notifications: calculateNotifications(
+          args.startDate,
+          args.startTime,
+          args.notifications || [],
+        ),
+        note: args.note,
         updatedAt: now,
         userId: args.userId,
       });
+
+      return await ctx.db.get(taskId);
     }
 
-    // Recurring task
+    // ✅ Recurring task
     const recurringId = await ctx.db.insert("recurrings", {
       title: args.title,
       startTime: args.startTime,
@@ -66,50 +64,68 @@ export const create = mutation({
       userId: args.userId,
     });
 
-    const current = new Date(args.startDate);
-    const end = new Date(args.endDate!);
+    const tasks = [];
     const isDaily =
       !args.selectedWeekDays || args.selectedWeekDays.length === 0;
 
-    while (current <= end) {
+    const weekdays = [
+      "sunday",
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+    ];
+
+    // Use calendar-based UTC increments (DST-safe)
+    let currentDate = new Date(args.startDate);
+    const endDate = new Date(args.endDate!);
+
+    while (currentDate <= endDate) {
       let shouldCreate = isDaily;
 
-      if (!isDaily) {
-        const weekdays = [
-          "sunday",
-          "monday",
-          "tuesday",
-          "wednesday",
-          "thursday",
-          "friday",
-          "saturday",
-        ];
-        const todayName = weekdays[current.getDay()];
-        shouldCreate = args.selectedWeekDays!.includes(todayName);
+      if (!isDaily && args.selectedWeekDays) {
+        const currentDayName = weekdays[currentDate.getUTCDay()];
+        shouldCreate = args.selectedWeekDays.includes(currentDayName);
       }
 
       if (shouldCreate) {
-        await ctx.db.insert("tasks", {
+        const taskId = await ctx.db.insert("tasks", {
           title: args.title,
           description: args.description,
-          date: current.getTime(),
+          date: currentDate.getTime(), // always midnight UTC
           startTime: args.startTime,
           endTime: args.endTime,
           type: args.type,
           tags: args.tags,
           isCompleted: false,
           recurringId,
-          notifications: args.notifications,
+          notifications: calculateNotifications(
+            currentDate.getTime(),
+            args.startTime,
+            args.notifications || [],
+          ),
           note: args.note,
           updatedAt: now,
           userId: args.userId,
         });
+
+        const task = await ctx.db.get(taskId);
+        if (task) tasks.push(task);
       }
 
-      current.setDate(current.getDate() + 1);
+      // ✅ Increment by 1 calendar day in UTC (DST-safe)
+      currentDate = new Date(
+        Date.UTC(
+          currentDate.getUTCFullYear(),
+          currentDate.getUTCMonth(),
+          currentDate.getUTCDate() + 1,
+        ),
+      );
     }
 
-    return recurringId;
+    return tasks;
   },
 });
 
@@ -170,21 +186,22 @@ export const getTasksForDate = query({
     date: v.number(),
   },
   handler: async (ctx, args) => {
-    const startOfDay = new Date(args.date);
-    startOfDay.setHours(0, 0, 0, 0);
+    const targetDate = new Date(args.date);
+    targetDate.setHours(0, 0, 0, 0);
+    const targetTimestamp = targetDate.getTime();
 
-    const endOfDay = new Date(args.date);
-    endOfDay.setHours(23, 59, 59, 999);
-
-    return await ctx.db
+    // Get all tasks for the user
+    const allTasks = await ctx.db
       .query("tasks")
-      .withIndex("by_user_and_date", (q) =>
-        q
-          .eq("userId", args.userId)
-          .gte("date", startOfDay.getTime())
-          .lte("date", endOfDay.getTime()),
-      )
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .collect();
+
+    // Filter tasks that match the exact date
+    return allTasks.filter((task) => {
+      const taskDate = new Date(task.date);
+      taskDate.setHours(0, 0, 0, 0);
+      return taskDate.getTime() === targetTimestamp;
+    });
   },
 });
 
@@ -218,6 +235,24 @@ export const getRecurringTasks = query({
       .query("recurrings")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .collect();
+  },
+});
+
+export const getRecurringTaskIds = query({
+  args: {
+    recurringId: v.optional(v.id("recurrings")),
+  },
+  handler: async (ctx, args) => {
+    if (!args.recurringId) {
+      return [];
+    }
+
+    const allTasks = await ctx.db
+      .query("tasks")
+      .withIndex("by_recurring", (q) => q.eq("recurringId", args.recurringId))
+      .collect();
+
+    return allTasks.map((task) => task._id);
   },
 });
 
@@ -305,6 +340,68 @@ export const editTask = mutation({
 
         for (const t of futureTasks) {
           await ctx.db.patch(t._id, { ...args.updates, updatedAt: now });
+        }
+        break;
+    }
+  },
+});
+
+export const deleteTask = mutation({
+  args: {
+    taskId: v.id("tasks"),
+    deleteScope: v.optional(
+      v.union(
+        v.literal("this_only"),
+        v.literal("all"),
+        v.literal("this_and_future"),
+      ),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const task = await ctx.db.get(args.taskId);
+
+    if (!task) {
+      throw new ConvexError({
+        code: "NOT_FOUND",
+        message: "Task not found",
+      });
+    }
+
+    if (!task.recurringId || !args.deleteScope) {
+      await ctx.db.delete(args.taskId);
+      return;
+    }
+
+    switch (args.deleteScope) {
+      case "this_only":
+        await ctx.db.delete(args.taskId);
+        break;
+
+      case "all":
+        const allTasks = await ctx.db
+          .query("tasks")
+          .withIndex("by_recurring", (q) =>
+            q.eq("recurringId", task.recurringId),
+          )
+          .collect();
+
+        await ctx.db.delete(task.recurringId);
+        for (const t of allTasks) {
+          await ctx.db.delete(t._id);
+        }
+        break;
+
+      case "this_and_future":
+        const futureTasks = await ctx.db
+          .query("tasks")
+          .withIndex("by_recurring", (q) =>
+            q.eq("recurringId", task.recurringId),
+          )
+          .filter((q) => q.gte(q.field("date"), task.date))
+          .collect();
+
+        for (const t of futureTasks) {
+          await ctx.db.delete(t._id);
         }
         break;
     }
