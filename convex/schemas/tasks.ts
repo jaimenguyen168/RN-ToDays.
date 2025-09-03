@@ -44,7 +44,6 @@ export const tasks = defineTable({
           v.literal(NotificationTypes.AT_START),
         ),
         scheduledTime: v.number(),
-        notificationId: v.optional(v.string()),
       }),
     ),
   ),
