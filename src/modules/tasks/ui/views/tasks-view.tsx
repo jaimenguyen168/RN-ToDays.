@@ -6,19 +6,22 @@ import {
   Animated,
 } from "react-native";
 import React, { useState } from "react";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useScrollHeader } from "@/hooks/useScrollHeader";
 import { useQuery } from "convex/react";
 import { api } from "~/convex/_generated/api";
 import { TimeSlot, useTimeSlots } from "@/modules/tasks/hooks/useTimeSlots";
 import { ThemedIcon } from "@/components/ThemedIcon";
-import { subtractOneMinute } from "@/utils/time";
+import { normalizeDate, subtractOneMinute } from "@/utils/time";
 import TaskItem from "@/modules/tasks/ui/components/TaskItem";
 import WeekNavigation from "@/modules/tasks/ui/components/WeekNavigation";
 import { ScrollHeader } from "@/components/ScrollHeader";
 
 const TasksView = () => {
   const router = useRouter();
+  const { today } = useLocalSearchParams<{
+    today: string;
+  }>();
 
   const userId = "j57fgqzy3wkwx3381xw5ezvjcs7pga7v";
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -26,9 +29,18 @@ const TasksView = () => {
 
   const { headerOpacity, handleScroll } = useScrollHeader(15);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      if (!!today) {
+        setSelectedDate(new Date());
+        router.setParams({ today: undefined });
+      }
+    }, [today, router]),
+  );
+
   const tasksForDate = useQuery(api.private.tasks.getTasksForDate, {
     userId,
-    date: selectedDate.getTime(),
+    date: normalizeDate(selectedDate),
   });
 
   const isPast = selectedDate.getTime() < new Date().setHours(0, 0, 0, 0);
