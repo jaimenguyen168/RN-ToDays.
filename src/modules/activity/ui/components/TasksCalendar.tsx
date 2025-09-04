@@ -1,18 +1,9 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { View, Text, useColorScheme } from "react-native";
 import { Calendar } from "react-native-calendars";
-import { format, parseISO, startOfDay } from "date-fns";
 import { Task } from "@/types";
 import { TaskTypes } from "~/convex/schemas/tasks";
 import { getTaskColors } from "@/utils/color";
-
-const numberToDateString = (timestamp: number): string => {
-  return format(new Date(timestamp), "yyyy-MM-dd");
-};
-
-const dateStringToNumber = (dateString: string): number => {
-  return startOfDay(parseISO(dateString)).getTime();
-};
 
 interface TaskCalendarProps {
   tasks: Task[] | undefined;
@@ -26,69 +17,65 @@ const TasksCalendar = ({
   onDateSelect,
 }: TaskCalendarProps) => {
   const colorScheme = useColorScheme();
+  if (!tasks) return null;
 
-  const selectedDateString = useMemo(() => {
-    return numberToDateString(selectedDate);
-  }, [selectedDate]);
+  // Group tasks by date and create marked dates object
+  const markedDates = React.useMemo(() => {
+    const marked: any = {};
 
-  const taskMarkedDates = useMemo(() => {
-    if (!tasks) return {};
-
-    const marked: { [key: string]: any } = {};
-
+    // Group tasks by date string (YYYY-MM-DD format)
     const tasksByDate = tasks.reduce(
-      (acc: { [key: string]: Task[] }, task: Task) => {
-        // Use date-fns to format the task date
-        const dateString = format(new Date(task.date), "yyyy-MM-dd");
-
-        if (!acc[dateString]) {
-          acc[dateString] = [];
+      (acc, task) => {
+        const dateStr = new Date(task.date).toISOString().split("T")[0]; // Get YYYY-MM-DD
+        if (!acc[dateStr]) {
+          acc[dateStr] = [];
         }
-        acc[dateString].push(task);
+        acc[dateStr].push(task);
         return acc;
       },
-      {},
+      {} as Record<string, Task[]>,
     );
 
-    Object.keys(tasksByDate).forEach((dateString) => {
-      const tasksForDate = tasksByDate[dateString];
+    // Convert to react-native-calendars format
+    Object.entries(tasksByDate).forEach(([dateStr, dateTasks]) => {
+      // Get unique task types for this date
+      const uniqueTypes = [...new Set(dateTasks.map((task) => task.type))];
 
-      const typeCount: { [key: string]: number } = {};
-      tasksForDate.forEach((task) => {
-        typeCount[task.type] = (typeCount[task.type] || 0) + 1;
-      });
+      // Create dots for each unique task type
+      const dots = uniqueTypes.map((type) => ({
+        color: getTaskColors(type),
+        selectedDotColor: "#ffffff",
+      }));
 
-      const dots = Object.entries(typeCount)
-        .sort(([, a], [, b]) => b - a)
-        .slice(0, 3)
-        .map(([type]) => ({
-          key: type,
-          color: getTaskColors(type),
-          selectedDotColor: getTaskColors(type),
-        }));
-
-      marked[dateString] = {
-        dots,
-        selected: dateString === selectedDateString,
-        selectedColor:
-          dateString === selectedDateString ? "#8F99EB" : undefined,
+      marked[dateStr] = {
+        dots: dots,
+        selected: false,
+        selectedColor: "#BEC2F5",
       };
     });
 
-    if (!marked[selectedDateString]) {
-      marked[selectedDateString] = {
+    // Mark the selected date
+    const selectedDateStr = new Date(selectedDate).toISOString().split("T")[0];
+    if (marked[selectedDateStr]) {
+      marked[selectedDateStr].selected = true;
+    } else {
+      marked[selectedDateStr] = {
         selected: true,
-        selectedColor: "#8F99EB",
+        selectedColor: "#BEC2F5",
         dots: [],
       };
     }
 
     return marked;
-  }, [tasks, selectedDateString]);
+  }, [tasks, selectedDate]);
 
-  const handleDatePress = (day: { dateString: string }) => {
-    const timestamp = dateStringToNumber(day.dateString);
-    onDateSelect(timestamp);
+  // Convert selectedDate timestamp to date string for Calendar current prop
+  const currentDateStr = new Date(selectedDate).toISOString().split("T")[0];
+
+  const handleDayPress = (day: any) => {
+    // Convert date string back to timestamp at midnight
+    const dateTimestamp = new Date(day.dateString + "T00:00:00.000").getTime();
+    onDateSelect(dateTimestamp);
   };
 
   return (
@@ -101,10 +88,10 @@ const TasksCalendar = ({
       {/* Calendar */}
       <View className="px-6">
         <Calendar
-          current={selectedDateString}
-          onDayPress={handleDatePress}
+          current={currentDateStr}
+          onDayPress={handleDayPress}
           markingType="multi-dot"
-          markedDates={taskMarkedDates}
+          markedDates={markedDates}
           theme={{
             backgroundColor: "transparent",
             calendarBackground: "transparent",

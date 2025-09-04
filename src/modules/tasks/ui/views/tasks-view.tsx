@@ -6,19 +6,23 @@ import {
   Animated,
 } from "react-native";
 import React, { useState } from "react";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useScrollHeader } from "@/hooks/useScrollHeader";
 import { useQuery } from "convex/react";
 import { api } from "~/convex/_generated/api";
 import { TimeSlot, useTimeSlots } from "@/modules/tasks/hooks/useTimeSlots";
 import { ThemedIcon } from "@/components/ThemedIcon";
-import { subtractOneMinute } from "@/utils/time";
+import { hasPassed, subtractMinutes } from "@/utils/time";
 import TaskItem from "@/modules/tasks/ui/components/TaskItem";
 import WeekNavigation from "@/modules/tasks/ui/components/WeekNavigation";
 import { ScrollHeader } from "@/components/ScrollHeader";
+import { format, isAfter, isBefore, isSameDay } from "date-fns";
 
 const TasksView = () => {
   const router = useRouter();
+  const { today } = useLocalSearchParams<{
+    today: string;
+  }>();
 
   const userId = "j57fgqzy3wkwx3381xw5ezvjcs7pga7v";
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -26,12 +30,19 @@ const TasksView = () => {
 
   const { headerOpacity, handleScroll } = useScrollHeader(15);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      if (!!today) {
+        setSelectedDate(new Date());
+        router.setParams({ today: undefined });
+      }
+    }, [today, router]),
+  );
+
   const tasksForDate = useQuery(api.private.tasks.getTasksForDate, {
     userId,
     date: selectedDate.getTime(),
   });
-
-  const isPast = selectedDate.getTime() < new Date().setHours(0, 0, 0, 0);
 
   const handleDateChange = (date: Date) => {
     setSelectedDate(date);
@@ -39,6 +50,20 @@ const TasksView = () => {
 
   // Use the custom hook for time slots
   const timeSlots = useTimeSlots(tasksForDate);
+
+  const canAddTask = (timeSlot: TimeSlot) => {
+    const today = new Date();
+
+    if (isBefore(selectedDate, today) && !isSameDay(selectedDate, today)) {
+      return false;
+    }
+
+    if (isAfter(selectedDate, today) && !isSameDay(selectedDate, today)) {
+      return true;
+    }
+
+    return !hasPassed(timeSlot.endTimestamp);
+  };
 
   const handleAddTask = () => {
     router.push({
@@ -72,17 +97,23 @@ const TasksView = () => {
     );
   };
 
-  const renderTimeSlot = ({ item: timeSlot }: { item: TimeSlot }) => (
+  const renderTimeSlot = ({
+    item: timeSlot,
+    isLast,
+  }: {
+    item: TimeSlot;
+    isLast: boolean;
+  }) => (
     <View>
       {timeSlot.isFreeTime ? (
         <View className="flex-row mb-4 px-6">
           <View className={`w-16`}>
             <View className="justify-between flex-1">
               <Text className="text-muted-foreground font-medium text-sm">
-                {timeSlot.time}
+                {format(timeSlot.startTimestamp, "HH:mm")}
               </Text>
               <Text className="text-muted-foreground font-medium text-sm">
-                {subtractOneMinute(timeSlot.endTime)}
+                {subtractMinutes(timeSlot.endTimestamp, isLast ? 0 : 1)}
               </Text>
             </View>
           </View>
@@ -99,24 +130,39 @@ const TasksView = () => {
 
           <View className="flex-1 ml-4 h-20 justify-center">
             <View className="flex-row items-center justify-between py-2">
-              <View className="flex-row items-center gap-2">
-                <ThemedIcon
-                  name="coffee"
-                  size={16}
-                  library="feather"
-                  lightColor="#64748B"
-                  darkColor="#94A3B8"
-                />
-                <Text className="text-muted-foreground italic">
-                  ~ {timeSlot.freeTime}
-                </Text>
-              </View>
-              {!isPast && (
-                <TouchableOpacity onPress={handleAddTask}>
-                  <Text className="text-accent-foreground font-medium">
-                    + Add
+              {canAddTask(timeSlot) ? (
+                <>
+                  <View className="flex-row items-center gap-2">
+                    <ThemedIcon
+                      name="coffee"
+                      size={16}
+                      library="feather"
+                      lightColor="#64748B"
+                      darkColor="#94A3B8"
+                    />
+                    <Text className="text-muted-foreground italic">
+                      ~ {timeSlot.freeTime}
+                    </Text>
+                  </View>
+
+                  <TouchableOpacity onPress={handleAddTask}>
+                    <Text className="text-accent-foreground font-medium">
+                      + Add
+                    </Text>
+                  </TouchableOpacity>
+                </>
+              ) : (
+                <View className="flex-row items-center gap-2">
+                  <ThemedIcon
+                    name="bed-outline"
+                    size={16}
+                    lightColor="#64748B"
+                    darkColor="#94A3B8"
+                  />
+                  <Text className="text-muted-foreground italic">
+                    ~ Relax and recharge
                   </Text>
-                </TouchableOpacity>
+                </View>
               )}
             </View>
           </View>
@@ -126,10 +172,10 @@ const TasksView = () => {
           <View className="w-16 -mt-1">
             <View className="justify-between flex-1">
               <Text className="text-accent-foreground font-semibold">
-                {timeSlot.time}
+                {format(timeSlot.startTimestamp, "HH:mm")}
               </Text>
               <Text className="text-muted-foreground font-medium text-sm">
-                {subtractOneMinute(timeSlot.endTime)}
+                {subtractMinutes(timeSlot.endTimestamp, 1)}
               </Text>
             </View>
           </View>
@@ -152,7 +198,7 @@ const TasksView = () => {
                 <Text className="text-gray-400">
                   {timeSlot.freeTime || "You don't have any schedule"}
                 </Text>
-                {!isPast && (
+                {canAddTask(timeSlot) && (
                   <TouchableOpacity onPress={handleAddTask}>
                     <Text className="text-accent-foreground font-medium">
                       + Add
@@ -276,7 +322,9 @@ const TasksView = () => {
       {/* Time Slots FlatList */}
       <Animated.FlatList
         data={timeSlots}
-        renderItem={renderTimeSlot}
+        renderItem={({ item, index }) =>
+          renderTimeSlot({ item, isLast: index === timeSlots.length - 1 })
+        }
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         removeClippedSubviews={true}

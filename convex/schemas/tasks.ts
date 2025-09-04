@@ -17,8 +17,8 @@ export const tasks = defineTable({
   title: v.string(),
   description: v.optional(v.string()),
   date: v.number(),
-  startTime: v.string(),
-  endTime: v.string(),
+  startTime: v.number(),
+  endTime: v.number(),
   type: v.union(
     v.literal(TaskTypes.PERSONAL),
     v.literal(TaskTypes.WORK),
@@ -44,7 +44,6 @@ export const tasks = defineTable({
           v.literal(NotificationTypes.AT_START),
         ),
         scheduledTime: v.number(),
-        notificationId: v.optional(v.string()),
       }),
     ),
   ),
@@ -68,8 +67,6 @@ export const tasks = defineTable({
 // Table for recurring task templates
 export const recurrings = defineTable({
   title: v.string(),
-  startTime: v.string(),
-  endTime: v.string(),
   type: v.union(
     v.literal(TaskTypes.PERSONAL),
     v.literal(TaskTypes.WORK),

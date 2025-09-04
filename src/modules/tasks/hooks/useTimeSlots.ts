@@ -1,87 +1,95 @@
-import { calculateFreeTime, minutesToTime, timeToMinutes } from "@/utils/time";
+import { calculateFreeTime } from "@/utils/time";
 import { Task } from "@/types";
 import { useMemo } from "react";
+import { startOfDay, endOfDay } from "date-fns";
 
 export interface TimeSlot {
   id: string;
-  time: string;
+  startTimestamp: number;
+  endTimestamp: number;
   tasks: Task[];
   isEmpty: boolean;
   freeTime?: string;
   isFreeTime?: boolean;
-  endTime?: string;
   hasOverlap?: boolean;
 }
 
 const createFreeTimeSlot = (
   id: string,
-  startTime: string,
-  endTime: string,
+  startTimestamp: number,
+  endTimestamp: number,
   freeTimeText?: string,
 ): TimeSlot => ({
   id,
-  time: startTime,
+  startTimestamp,
+  endTimestamp,
   tasks: [],
   isEmpty: true,
-  freeTime: freeTimeText || calculateFreeTime(startTime, endTime),
+  freeTime: freeTimeText || calculateFreeTime(startTimestamp, endTimestamp),
   isFreeTime: true,
-  endTime,
 });
 
 const createTaskSlot = (
   id: string,
-  time: string,
+  startTimestamp: number,
+  endTimestamp: number,
   tasks: Task[],
-  endTime: string,
   hasOverlap: boolean = false,
 ): TimeSlot => ({
   id,
-  time,
+  startTimestamp,
+  endTimestamp,
   tasks,
   isEmpty: false,
-  endTime,
   hasOverlap,
 });
 
 const generateTimeSlots = (tasks: Task[]): TimeSlot[] => {
   // Handle empty day
   if (tasks.length === 0) {
+    // Get start and end of the current day
+    const today = new Date();
+    const dayStart = startOfDay(today).getTime();
+    const dayEnd = endOfDay(today).getTime();
+
     return [
       createFreeTimeSlot(
         "empty-day",
-        "00:00",
-        "24:00",
+        dayStart,
+        dayEnd,
         "No tasks scheduled for today",
       ),
     ];
   }
 
-  const sortedTasks = [...tasks].sort(
-    (a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime),
-  );
+  // Sort tasks by startTime timestamp
+  const sortedTasks = [...tasks].sort((a, b) => a.startTime - b.startTime);
 
   const slots: TimeSlot[] = [];
-  let lastEndTime: string | null = null;
+  let lastEndTimestamp: number | null = null;
+
+  // Get the day boundaries from the first task's actual startTime, not the date field
+  const firstTaskStartTime = sortedTasks[0].startTime;
+  const dayStart = startOfDay(new Date(firstTaskStartTime)).getTime();
+  const dayEnd = endOfDay(new Date(firstTaskStartTime)).getTime();
 
   // Add free time before first task if exists
-  const firstTask = sortedTasks[0];
-  const firstTaskStart = timeToMinutes(firstTask.startTime);
-  if (firstTaskStart > 0) {
-    slots.push(createFreeTimeSlot("free-start", "00:00", firstTask.startTime));
+  if (firstTaskStartTime > dayStart) {
+    slots.push(createFreeTimeSlot("free-start", dayStart, firstTaskStartTime));
   }
 
   // Process each task
   sortedTasks.forEach((task, taskIndex) => {
-    const startMinutes = timeToMinutes(task.startTime);
-    const endMinutes = timeToMinutes(task.endTime);
+    const startTimestamp = task.startTime;
+    const endTimestamp = task.endTime;
 
     // Add free time slot if there's a gap between tasks
-    if (lastEndTime && timeToMinutes(lastEndTime) < startMinutes) {
+    if (lastEndTimestamp && lastEndTimestamp < startTimestamp) {
       slots.push(
         createFreeTimeSlot(
-          `free-${lastEndTime}-${task.startTime}`,
-          lastEndTime,
-          task.startTime,
+          `free-${lastEndTimestamp}-${startTimestamp}`,
+          lastEndTimestamp,
+          startTimestamp,
         ),
       );
     }
@@ -91,52 +99,53 @@ const generateTimeSlots = (tasks: Task[]): TimeSlot[] => {
     const shouldMergeWithPrevious =
       prevSlot &&
       !prevSlot.isFreeTime &&
-      timeToMinutes(prevSlot.time) <= startMinutes &&
-      timeToMinutes(prevSlot.endTime || prevSlot.time) > startMinutes;
+      prevSlot.startTimestamp <= startTimestamp &&
+      prevSlot.endTimestamp > startTimestamp;
 
     if (shouldMergeWithPrevious) {
       // Merge with previous slot (overlap)
       prevSlot.tasks.push(task);
       prevSlot.hasOverlap = true;
-      prevSlot.endTime = minutesToTime(
-        Math.max(timeToMinutes(prevSlot.endTime || prevSlot.time), endMinutes),
-      );
-      prevSlot.id = `task-overlap-${prevSlot.time}`;
+      prevSlot.endTimestamp = Math.max(prevSlot.endTimestamp, endTimestamp);
+      prevSlot.id = `task-overlap-${prevSlot.startTimestamp}`;
     } else {
       // Create new task slot
       slots.push(
         createTaskSlot(
           `task-${task._id}-${taskIndex}`,
-          task.startTime,
+          startTimestamp,
+          endTimestamp,
           [task],
-          task.endTime,
           false,
         ),
       );
     }
 
-    // Update lastEndTime for non-free-time slots
+    // Update lastEndTimestamp for non-free-time slots
     const currentSlot = slots[slots.length - 1];
     if (!currentSlot.isFreeTime) {
-      const maxEndTime = Math.max(
-        ...currentSlot.tasks.map((t) => timeToMinutes(t.endTime)),
+      const maxEndTimestamp = Math.max(
+        ...currentSlot.tasks.map((t) => t.endTime),
       );
-      lastEndTime = minutesToTime(maxEndTime);
-      currentSlot.endTime = lastEndTime;
+      lastEndTimestamp = maxEndTimestamp;
+      currentSlot.endTimestamp = maxEndTimestamp;
     }
   });
 
   // Add free time after last task if needed
-  if (lastEndTime && timeToMinutes(lastEndTime) < 1440) {
-    slots.push(createFreeTimeSlot("free-end", lastEndTime, "24:00"));
+  if (lastEndTimestamp && lastEndTimestamp < dayEnd) {
+    slots.push(createFreeTimeSlot("free-end", lastEndTimestamp, dayEnd));
   }
 
   return slots;
 };
 
 export const useTimeSlots = (tasks: Task[] | undefined): TimeSlot[] => {
+  console.log("tasks", JSON.stringify(tasks, null, 2));
+
   return useMemo(() => {
     if (!tasks) return [];
+    console.log("generated", JSON.stringify(generateTimeSlots(tasks), null, 2));
     return generateTimeSlots(tasks);
   }, [tasks]);
 };

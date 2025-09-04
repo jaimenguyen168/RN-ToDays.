@@ -10,9 +10,7 @@ import CalendarView from "@/modules/activity/ui/views/calendar-view";
 
 const ActivityView = () => {
   const userId = "j57fgqzy3wkwx3381xw5ezvjcs7pga7v";
-  const [selectedDate, setSelectedDate] = useState(() =>
-    new Date().setHours(0, 0, 0, 0),
-  );
+
   const [activeTab, setActiveTab] = useState("calendar");
 
   const { headerOpacity, handleScroll } = useScrollHeader(15);
@@ -73,11 +71,7 @@ const ActivityView = () => {
 
         {/* Content based on active tab */}
         {activeTab === "calendar" ? (
-          <CalendarView
-            tasks={monthlyTasks}
-            selectedDate={selectedDate}
-            setSelectedDate={setSelectedDate}
-          />
+          <CalendarView tasks={monthlyTasks} />
         ) : (
           <AnalyticsView tasks={monthlyTasks} />
         )}

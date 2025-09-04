@@ -10,14 +10,21 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { format, addDays, startOfWeek } from "date-fns";
+import {
+  format,
+  addDays,
+  startOfWeek,
+  startOfDay,
+  addMinutes,
+  isToday,
+} from "date-fns";
 import { ThemedIcon } from "@/components/ThemedIcon";
 import DatePicker from "react-native-date-picker";
 import { z } from "zod";
 import { useMutation } from "convex/react";
 import { api } from "~/convex/_generated/api";
 import { NotificationTypes, TaskTypes } from "~/convex/schemas/tasks";
-import { createNotificationSettings } from "@/utils/noti";
+import { useNotifications } from "@/hooks/useNotifications";
 
 const taskSchemaForm = z.object({
   title: z.string().min(1, "Title is required"),
@@ -38,6 +45,7 @@ type TaskFormData = z.infer<typeof taskSchemaForm>;
 
 const AddTask = () => {
   const router = useRouter();
+  const { scheduleTaskNotifications, permissionStatus } = useNotifications();
 
   const { selectedDate } = useLocalSearchParams<{ selectedDate?: string }>();
 
@@ -54,8 +62,8 @@ const AddTask = () => {
     description: "",
     startDate: getInitialDate(),
     endDate: undefined,
-    startTime: new Date(),
-    endTime: new Date(),
+    startTime: addMinutes(new Date(), 30),
+    endTime: addMinutes(new Date(), 60),
     type: TaskTypes.PERSONAL,
     tags: [],
     hasEndDate: false,
@@ -70,6 +78,8 @@ const AddTask = () => {
   const [showEndTimePicker, setShowEndTimePicker] = useState(false);
   const [newTag, setNewTag] = useState("");
   const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [newTagInputRef, setNewTagInputRef] = useState<TextInput | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
 
   const updateFormData = (field: keyof TaskFormData, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -77,11 +87,15 @@ const AddTask = () => {
 
   const handleAddTag = () => {
     if (newTag.trim() !== "" && !availableTags.includes(newTag.trim())) {
-      const trimmedTag = newTag.trim();
+      const trimmedTag = newTag.trim().toLowerCase();
       setAvailableTags((prev) => [...prev, trimmedTag]);
       updateFormData("tags", [...formData.tags, trimmedTag]);
     }
     setNewTag("");
+
+    setTimeout(() => {
+      newTagInputRef?.focus();
+    }, 100);
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
@@ -130,44 +144,72 @@ const AddTask = () => {
   };
 
   const createTask = useMutation(api.private.tasks.create);
+  const canSubmit = taskSchemaForm.safeParse(formData).success;
 
   const handleCreate = async () => {
+    setIsCreating(true);
+
     try {
       const validatedData = taskSchemaForm.parse(formData);
 
       const userId = "j57fgqzy3wkwx3381xw5ezvjcs7pga7v";
 
-      // Simplified data preparation - remove the utility function calls
-      const selectedDayNames = validatedData.hasEndDate
-        ? validatedData.selectedWeekDays
-        : [];
-
-      const notificationSettings =
-        validatedData.notifications.length > 0
-          ? createNotificationSettings(
-              validatedData.notifications,
-              validatedData.startDate.getTime(),
-              validatedData.startTime.toTimeString().slice(0, 5),
-            )
-          : undefined;
-
       const taskData = {
         title: validatedData.title,
         description: validatedData.description,
         startDate: validatedData.startDate.getTime(),
-        endDate: validatedData?.endDate?.getTime(),
-        startTime: validatedData.startTime.toTimeString().slice(0, 5),
-        endTime: validatedData.endTime.toTimeString().slice(0, 5),
+        endDate: validatedData.endDate?.getTime(),
+        startTime: validatedData.startTime.getTime(),
+        endTime: validatedData.endTime.getTime(),
         type: validatedData.type,
         tags: validatedData.tags,
         hasEndDate: validatedData.hasEndDate,
-        selectedWeekDays: selectedDayNames,
-        notifications: notificationSettings,
+        selectedWeekDays: validatedData.selectedWeekDays,
         note: validatedData.note,
+        notifications: validatedData.notifications,
         userId,
       };
 
-      await createTask(taskData);
+      const result = await createTask(taskData);
+
+      if (permissionStatus === "granted") {
+        if (Array.isArray(result)) {
+          // Recurring tasks - each task has its own calculated notifications
+          console.log(`Created ${result.length} recurring tasks`);
+
+          for (const task of result) {
+            if (task.notifications && task.notifications.length > 0) {
+              try {
+                await scheduleTaskNotifications({
+                  _id: task._id,
+                  title: task.title,
+                  notifications: task.notifications,
+                });
+              } catch (notificationError) {
+                console.error(
+                  `Error scheduling notifications for task ${task._id}:`,
+                  notificationError,
+                );
+              }
+            }
+          }
+        } else {
+          if (result?.notifications && result?.notifications.length > 0) {
+            try {
+              await scheduleTaskNotifications({
+                _id: result._id,
+                title: result.title,
+                notifications: result.notifications,
+              });
+            } catch (notificationError) {
+              console.error(
+                `Error scheduling notifications for task ${result._id}:`,
+                notificationError,
+              );
+            }
+          }
+        }
+      }
 
       Alert.alert("Success", "Task created successfully");
       router.back();
@@ -179,7 +221,26 @@ const AddTask = () => {
         console.error("Error creating task:", error);
         Alert.alert("Error", "Failed to create task");
       }
+    } finally {
+      setIsCreating(false);
     }
+  };
+
+  const getMinimumStartTime = (startDate: Date) => {
+    if (isToday(startDate)) {
+      return new Date();
+    }
+    return undefined;
+  };
+
+  const getMinimumEndTime = (startDate: Date, startTime: Date) => {
+    if (isToday(startDate) && startTime) {
+      return startTime;
+    }
+    if (startTime) {
+      return startTime;
+    }
+    return undefined;
   };
 
   return (
@@ -189,10 +250,19 @@ const AddTask = () => {
         modal
         open={showStartDatePicker}
         date={formData.startDate}
+        minimumDate={new Date()}
         mode="date"
         onConfirm={(date) => {
           setShowStartDatePicker(false);
           updateFormData("startDate", date);
+
+          if (
+            isToday(date) &&
+            formData.startTime &&
+            formData.startTime < new Date()
+          ) {
+            updateFormData("startTime", new Date());
+          }
         }}
         onCancel={() => {
           setShowStartDatePicker(false);
@@ -219,9 +289,15 @@ const AddTask = () => {
         open={showStartTimePicker}
         date={formData.startTime}
         mode="time"
+        minimumDate={getMinimumStartTime(formData.startDate)}
         onConfirm={(time) => {
           setShowStartTimePicker(false);
           updateFormData("startTime", time);
+
+          if (formData.endTime && formData.endTime <= time) {
+            const newEndTime = new Date(time.getTime() + 30 * 60 * 1000);
+            updateFormData("endTime", newEndTime);
+          }
         }}
         onCancel={() => {
           setShowStartTimePicker(false);
@@ -470,18 +546,6 @@ const AddTask = () => {
               />
             </View>
 
-            {/* Note */}
-            <View className="gap-3">
-              <Text className="text-sm text-muted-foreground">Note</Text>
-              <TextInput
-                value={formData.note}
-                onChangeText={(value) => updateFormData("note", value)}
-                className="text-foreground border-b border-border pb-3"
-                placeholder="Add a personal note"
-                multiline
-              />
-            </View>
-
             {/* Type */}
             <View className="gap-3">
               <Text className="text-sm text-muted-foreground">Type</Text>
@@ -539,6 +603,7 @@ const AddTask = () => {
               </View>
 
               <TextInput
+                ref={(ref) => setNewTagInputRef(ref)}
                 value={newTag}
                 onChangeText={setNewTag}
                 placeholder="Add new tag"
@@ -565,13 +630,14 @@ const AddTask = () => {
         </ScrollView>
 
         {/* Create Button */}
-        <View className="px-6 pb-12">
+        <View className="px-6 pb-8">
           <TouchableOpacity
-            className="bg-primary-500 py-4 rounded-2xl"
+            className={`py-4 rounded-2xl ${isCreating || !canSubmit ? "bg-primary-300" : "bg-primary-500"}`}
             onPress={handleCreate}
+            disabled={isCreating || !canSubmit}
           >
             <Text className="text-white text-center text-lg font-semibold">
-              Create
+              {isCreating ? "Creating..." : "Create"}
             </Text>
           </TouchableOpacity>
         </View>

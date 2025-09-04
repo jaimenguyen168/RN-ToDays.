@@ -3,32 +3,28 @@ import { View, Text } from "react-native";
 import { format, isSameDay } from "date-fns";
 import { ThemedIcon } from "@/components/ThemedIcon";
 import { Task } from "@/types";
+import { api } from "~/convex/_generated/api";
+import { useQuery } from "convex/react";
 
 interface TaskStatsProps {
   selectedDate: number;
-  tasks: Task[] | undefined;
 }
 
-const TaskStats = ({ selectedDate, tasks }: TaskStatsProps) => {
-  const selectedDateObj = new Date(selectedDate);
+const TaskStats = ({ selectedDate }: TaskStatsProps) => {
+  const userId = "j57fgqzy3wkwx3381xw5ezvjcs7pga7v";
 
-  const selectedDateTasks = useMemo(() => {
-    if (!tasks) return [];
+  const dateTasks = useQuery(api.private.tasks.getTasksForDate, {
+    userId,
+    date: selectedDate,
+  });
 
-    return tasks.filter((task: Task) => {
-      const taskDate = new Date(task.date);
-      return isSameDay(taskDate, selectedDateObj);
-    });
-  }, [tasks]);
-
-  const formattedDate = isSameDay(selectedDateObj, new Date())
+  const formattedDate = isSameDay(selectedDate, new Date())
     ? "Today"
-    : format(selectedDateObj, "EEE, MMM d, yyyy");
+    : format(selectedDate, "EEE, MMM d, yyyy");
 
-  const total = selectedDateTasks.length;
-  const completed = selectedDateTasks.filter(
-    (task: Task) => task.isCompleted,
-  ).length;
+  const total = dateTasks?.length || 0;
+  const completed =
+    dateTasks?.filter((task: Task) => task.isCompleted).length || 0;
 
   const completionPercentage =
     total > 0 ? Math.round((completed / total) * 100) : 0;

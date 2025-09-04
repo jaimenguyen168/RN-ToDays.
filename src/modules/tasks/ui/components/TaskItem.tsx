@@ -1,5 +1,11 @@
-import React from "react";
-import { View, Text, TouchableOpacity, useColorScheme } from "react-native";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  useColorScheme,
+  Alert,
+} from "react-native";
 import {
   Menu,
   MenuOptions,
@@ -8,12 +14,17 @@ import {
 } from "react-native-popup-menu";
 import { ThemedIcon } from "@/components/ThemedIcon";
 import { TaskTypes } from "~/convex/schemas/tasks";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "~/convex/_generated/api";
 import { Id } from "~/convex/_generated/dataModel";
 import { useRouter } from "expo-router";
 import { Task } from "@/types";
-import { hasTimePassed } from "@/utils/time";
+import { useNotifications } from "@/hooks/useNotifications";
+import ScopeSelectionModal, {
+  ScopeType,
+} from "@/components/ScopeSelectionModal";
+import { format } from "date-fns";
+import { hasPassed } from "@/utils/time";
 
 interface TaskItemProps {
   task: Task;
@@ -23,13 +34,25 @@ interface TaskItemProps {
 const TaskItem = ({ task, onPress }: TaskItemProps) => {
   const router = useRouter();
   const colorScheme = useColorScheme();
+  const { cancelTaskNotifications } = useNotifications();
 
   const toggleCompleted = useMutation(api.private.tasks.toggleCompleted);
+  const deleteTask = useMutation(api.private.tasks.deleteTask);
+  const getRecurringTaskIds = useQuery(api.private.tasks.getRecurringTaskIds, {
+    recurringId: task?.recurringId as Id<"recurrings">,
+  });
+
+  const [showDeleteScopeModal, setShowDeleteScopeModal] = useState(false);
 
   const handleToggleCompleted = async () => {
-    await toggleCompleted({
-      taskId: task._id as Id<"tasks">,
-    });
+    try {
+      await toggleCompleted({
+        taskId: task._id as Id<"tasks">,
+      });
+    } catch (error) {
+      console.error("Error toggling task completion:", error);
+      Alert.alert("Error", "Failed to toggle task completion");
+    }
   };
 
   const handleEditTask = () => {
@@ -37,6 +60,43 @@ const TaskItem = ({ task, onPress }: TaskItemProps) => {
       pathname: "/edit-task",
       params: { taskId: task._id },
     });
+  };
+
+  const handleDeletePress = async () => {
+    if (task.recurringId) {
+      setShowDeleteScopeModal(true);
+      return;
+    }
+
+    await handleDelete("this_only");
+  };
+
+  const handleDelete = async (scope: ScopeType) => {
+    const notificationTypes = task.notifications?.map(
+      (notification) => notification.type,
+    ) as string[];
+
+    try {
+      if (scope === "this_only") {
+        await cancelTaskNotifications(task._id, notificationTypes);
+      } else {
+        if (getRecurringTaskIds && getRecurringTaskIds.length > 0) {
+          for (const taskId of getRecurringTaskIds) {
+            await cancelTaskNotifications(taskId, notificationTypes);
+          }
+        }
+      }
+
+      await deleteTask({
+        taskId: task._id as Id<"tasks">,
+        deleteScope: scope,
+      });
+
+      setShowDeleteScopeModal(false);
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      Alert.alert("Error", "Failed to delete task");
+    }
   };
 
   const getTaskColors = (type: string) => {
@@ -81,116 +141,148 @@ const TaskItem = ({ task, onPress }: TaskItemProps) => {
   };
 
   const colors = getTaskColors(task.type);
-  const timeHasPassed = hasTimePassed(task.endTime, task.date);
+  const timeHasPassed = hasPassed(task.endTime);
 
   return (
-    <TouchableOpacity
-      className={`p-4 rounded-2xl gap-4 ${colors.backgroundColor}`}
-      onPress={onPress}
-      activeOpacity={0.7}
-    >
-      <View className={`pl-4 border-l-[3px] ${colors.borderColor}`}>
-        <View className="flex-row items-center justify-between">
-          <View className="flex-row items-center flex-1 gap-2">
-            <Text
-              className={`text-lg font-semibold ${colors.tagText} ${
-                task.isCompleted ? "line-through opacity-60" : ""
-              }`}
-            >
-              {task.title}
-            </Text>
+    <>
+      <ScopeSelectionModal
+        visible={showDeleteScopeModal}
+        onClose={() => setShowDeleteScopeModal(false)}
+        onScopeSelect={handleDelete}
+        title="Delete Recurring Task"
+        subtitle="This task is part of a recurring series. What would you like to delete?"
+        actionType="delete"
+      />
 
-            {task.isCompleted && (
-              <ThemedIcon
-                name="checkmark-done"
-                size={20}
-                lightColor={colors.iconColor}
-                darkColor={colors.iconColor}
-              />
-            )}
+      <TouchableOpacity
+        className={`p-4 rounded-2xl gap-4 ${colors.backgroundColor}`}
+        onPress={onPress}
+        activeOpacity={0.7}
+      >
+        <View className={`pl-4 border-l-[3px] ${colors.borderColor}`}>
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center flex-1 gap-2">
+              <Text
+                className={`text-lg font-semibold ${colors.tagText} ${
+                  task.isCompleted ? "line-through opacity-60" : ""
+                }`}
+              >
+                {task.title}
+              </Text>
+
+              {task.isCompleted && (
+                <ThemedIcon
+                  name="checkmark-done"
+                  size={20}
+                  lightColor={colors.iconColor}
+                  darkColor={colors.iconColor}
+                />
+              )}
+            </View>
+
+            {/* Dropdown Menu */}
+            <Menu>
+              <MenuTrigger>
+                <ThemedIcon name="ellipsis-vertical" size={16} />
+              </MenuTrigger>
+              <MenuOptions
+                customStyles={{
+                  optionsContainer: {
+                    backgroundColor:
+                      colorScheme === "dark" ? "#1e1e1e" : "white",
+                    borderRadius: 12,
+                    padding: 4,
+                    shadowColor: "#000",
+                    shadowOffset: {
+                      width: 0,
+                      height: 2,
+                    },
+                    shadowOpacity: 0.25,
+                    shadowRadius: 3.84,
+                    elevation: 5,
+                  },
+                }}
+              >
+                <MenuOption onSelect={handleToggleCompleted}>
+                  <View className="flex-row items-center px-3 py-1 gap-3">
+                    <ThemedIcon
+                      name={task.isCompleted ? "close" : "checkmark"}
+                      size={16}
+                      lightColor={task.isCompleted ? "#ef4444" : "#22c55e"}
+                      darkColor={task.isCompleted ? "#ef4444" : "#22c55e"}
+                    />
+                    <Text className="text-foreground font-medium">
+                      {task.isCompleted
+                        ? "Mark as Incomplete"
+                        : "Mark as Complete"}
+                    </Text>
+                  </View>
+                </MenuOption>
+
+                <MenuOption onSelect={handleEditTask}>
+                  <View className="flex-row items-center px-3 py-1 gap-3">
+                    <ThemedIcon
+                      name="edit"
+                      size={16}
+                      lightColor="#6366f1"
+                      darkColor="#818cf8"
+                      library="antdesign"
+                    />
+                    <Text className="text-foreground font-medium">
+                      Edit Task
+                    </Text>
+                  </View>
+                </MenuOption>
+
+                <MenuOption onSelect={handleDeletePress}>
+                  <View className="flex-row items-center px-3 py-1 gap-3">
+                    <ThemedIcon
+                      name="delete"
+                      size={16}
+                      lightColor="#ef4444"
+                      darkColor="#ef4444"
+                      library="antdesign"
+                    />
+                    <Text className="text-foreground font-medium">
+                      Delete Task
+                    </Text>
+                  </View>
+                </MenuOption>
+              </MenuOptions>
+            </Menu>
           </View>
 
-          {/* Dropdown Menu */}
-          <Menu>
-            <MenuTrigger>
-              <ThemedIcon name="ellipsis-vertical" size={16} />
-            </MenuTrigger>
-            <MenuOptions
-              customStyles={{
-                optionsContainer: {
-                  backgroundColor: colorScheme === "dark" ? "#1e1e1e" : "white",
-                  borderRadius: 12,
-                  padding: 4,
-                  shadowColor: "#000",
-                  shadowOffset: {
-                    width: 0,
-                    height: 2,
-                  },
-                  shadowOpacity: 0.25,
-                  shadowRadius: 3.84,
-                  elevation: 5,
-                },
-              }}
+          <View className="flex-row items-center gap-2">
+            <Text
+              className={`${colors.tagText} font-light gap-3 ${
+                timeHasPassed || task.isCompleted
+                  ? "line-through opacity-60"
+                  : ""
+              }`}
             >
-              <MenuOption onSelect={handleToggleCompleted}>
-                <View className="flex-row items-center px-3 py-2 gap-3">
-                  <ThemedIcon
-                    name={task.isCompleted ? "close" : "checkmark"}
-                    size={16}
-                    lightColor={task.isCompleted ? "#ef4444" : "#22c55e"}
-                    darkColor={task.isCompleted ? "#ef4444" : "#22c55e"}
-                  />
-                  <Text className="text-foreground font-medium">
-                    {task.isCompleted
-                      ? "Mark as Incomplete"
-                      : "Mark as Complete"}
-                  </Text>
-                </View>
-              </MenuOption>
-
-              <MenuOption onSelect={handleEditTask}>
-                <View className="flex-row items-center px-3 py-2 gap-3">
-                  <ThemedIcon
-                    name="edit"
-                    size={16}
-                    lightColor="#6366f1"
-                    darkColor="#818cf8"
-                    library="antdesign"
-                  />
-                  <Text className="text-foreground font-medium">Edit Task</Text>
-                </View>
-              </MenuOption>
-            </MenuOptions>
-          </Menu>
+              {format(task.startTime, "h:mm a")} -{" "}
+              {format(task.endTime, "h:mm a")}
+            </Text>
+          </View>
         </View>
 
-        <View className="flex-row items-center gap-2">
-          <Text
-            className={`${colors.tagText} font-light gap-3 ${
-              timeHasPassed || task.isCompleted ? "line-through opacity-60" : ""
-            }`}
-          >
-            {task.startTime} - {task.endTime}
-          </Text>
-        </View>
-      </View>
-
-      {/* Tags */}
-      {task.tags.length > 0 && (
-        <View className="flex-row items-center flex-wrap pl-4 gap-2">
-          {task.tags.map((tag, index) => (
-            <View
-              key={index}
-              className={`${colors.tagBackground} px-3 py-1 rounded-full`}
-            >
-              <Text className={`text-xs font-semibold ${colors.tagText}`}>
-                {tag}
-              </Text>
-            </View>
-          ))}
-        </View>
-      )}
-    </TouchableOpacity>
+        {/* Tags */}
+        {task.tags.length > 0 && (
+          <View className="flex-row items-center flex-wrap pl-4 gap-2">
+            {task.tags.map((tag, index) => (
+              <View
+                key={index}
+                className={`${colors.tagBackground} px-3 py-1 rounded-full`}
+              >
+                <Text className={`text-xs font-semibold ${colors.tagText}`}>
+                  {tag}
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
+      </TouchableOpacity>
+    </>
   );
 };
 
