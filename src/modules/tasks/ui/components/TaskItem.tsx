@@ -19,11 +19,12 @@ import { api } from "~/convex/_generated/api";
 import { Id } from "~/convex/_generated/dataModel";
 import { useRouter } from "expo-router";
 import { Task } from "@/types";
-import { hasTimePassed } from "@/utils/time";
 import { useNotifications } from "@/hooks/useNotifications";
 import ScopeSelectionModal, {
   ScopeType,
 } from "@/components/ScopeSelectionModal";
+import { format } from "date-fns";
+import { hasPassed } from "@/utils/time";
 
 interface TaskItemProps {
   task: Task;
@@ -140,7 +141,7 @@ const TaskItem = ({ task, onPress }: TaskItemProps) => {
   };
 
   const colors = getTaskColors(task.type);
-  const timeHasPassed = hasTimePassed(task.endTime, task.date);
+  const timeHasPassed = hasPassed(task.endTime);
 
   return (
     <>
@@ -259,7 +260,8 @@ const TaskItem = ({ task, onPress }: TaskItemProps) => {
                   : ""
               }`}
             >
-              {task.startTime} - {task.endTime}
+              {format(task.startTime, "h:mm a")} -{" "}
+              {format(task.endTime, "h:mm a")}
             </Text>
           </View>
         </View>

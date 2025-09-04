@@ -17,8 +17,9 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "~/convex/_generated/api";
 import { NotificationTypes, TaskTypes } from "~/convex/schemas/tasks";
 import { Id } from "~/convex/_generated/dataModel";
-import { createNotificationSettings } from "@/utils/noti";
 import ScopeSelectionModal from "@/components/ScopeSelectionModal";
+import { useNotifications } from "@/hooks/useNotifications";
+import { formatDateTime } from "@/utils/time";
 
 const taskSchemaForm = z.object({
   title: z.string().min(1, "Title is required"),
@@ -37,6 +38,12 @@ const EditTask = () => {
   const router = useRouter();
   const { taskId } = useLocalSearchParams<{ taskId: string }>();
 
+  const {
+    scheduleTaskNotifications,
+    cancelTaskNotifications,
+    permissionStatus,
+  } = useNotifications();
+
   const task = useQuery(api.private.tasks.getTaskById, {
     taskId: taskId as Id<"tasks">,
   });
@@ -52,7 +59,10 @@ const EditTask = () => {
     notifications: [],
   });
 
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [originalStartTime, setOriginalStartTime] = useState<Date | null>(null);
+  const [originalNotifications, setOriginalNotifications] = useState<string[]>(
+    [],
+  );
   const [showStartTimePicker, setShowStartTimePicker] = useState(false);
   const [showEndTimePicker, setShowEndTimePicker] = useState(false);
   const [newTag, setNewTag] = useState("");
@@ -66,14 +76,11 @@ const EditTask = () => {
   // Load task data when component mounts
   useEffect(() => {
     if (task) {
-      const [startHour, startMinute] = task.startTime.split(":").map(Number);
-      const [endHour, endMinute] = task.endTime.split(":").map(Number);
+      // Convert timestamps back to Date objects
+      const startTime = new Date(task.startTime);
+      const endTime = new Date(task.endTime);
 
-      const startTime = new Date();
-      startTime.setHours(startHour, startMinute, 0, 0);
-
-      const endTime = new Date();
-      endTime.setHours(endHour, endMinute, 0, 0);
+      const notifications = task.notifications?.map((n) => n.type) || [];
 
       setFormData({
         title: task.title,
@@ -83,8 +90,12 @@ const EditTask = () => {
         type: task.type,
         tags: task.tags,
         note: task.note || "",
-        notifications: task.notifications?.map((n) => n.type) || [],
+        notifications,
       });
+
+      // Store original values for comparison
+      setOriginalStartTime(startTime);
+      setOriginalNotifications(notifications);
       setAvailableTags(task.tags);
     }
   }, [task]);
@@ -104,14 +115,6 @@ const EditTask = () => {
       "tags",
       formData.tags.filter((tag) => tag !== tagToRemove),
     );
-  };
-
-  const formatDate = (date: Date) => {
-    return format(date, "MM-dd-yyyy");
-  };
-
-  const formatTime = (date: Date) => {
-    return format(date, "h:mm a");
   };
 
   const editTask = useMutation(api.private.tasks.editTask);
@@ -144,32 +147,70 @@ const EditTask = () => {
   const updateTask = async (
     editScope: "this_only" | "all" | "this_and_future",
   ) => {
+    if (!task || !originalStartTime) return;
+
     try {
       const validatedData = taskSchemaForm.parse(formData);
 
       const updates = {
         title: validatedData.title,
         description: validatedData.description,
-        startTime: validatedData.startTime.toTimeString().slice(0, 5),
-        endTime: validatedData.endTime.toTimeString().slice(0, 5),
+        startTime: validatedData.startTime.getTime(), // Convert to timestamp
+        endTime: validatedData.endTime.getTime(), // Convert to timestamp
         type: validatedData.type,
         tags: validatedData.tags,
         note: validatedData.note,
-        notifications:
-          validatedData.notifications.length > 0
-            ? createNotificationSettings(
-                validatedData.notifications,
-                task?.date || 0,
-                validatedData.startTime.toTimeString().slice(0, 5),
-              )
-            : undefined,
+        notifications: validatedData.notifications,
       };
 
-      await editTask({
+      const result = await editTask({
         taskId: taskId as Id<"tasks">,
         updates,
         editScope,
       });
+
+      // Check if we need to update notifications (start time or notifications changed)
+      const startTimeChanged =
+        originalStartTime.getTime() !== validatedData.startTime.getTime();
+      const notificationsChanged =
+        originalNotifications.length !== validatedData.notifications.length ||
+        !originalNotifications.every((n) =>
+          validatedData.notifications.includes(n),
+        );
+
+      if (
+        permissionStatus === "granted" &&
+        (startTimeChanged || notificationsChanged)
+      ) {
+        console.log(`Updated ${result.length} tasks`);
+
+        for (const updatedTask of result) {
+          // Cancel existing notifications for this task
+          if (task.notifications && task.notifications.length > 0) {
+            const existingTypes = task.notifications.map((n) => n.type);
+            await cancelTaskNotifications(updatedTask._id, existingTypes);
+          }
+
+          // Schedule new notifications if they exist
+          if (
+            updatedTask.notifications &&
+            updatedTask.notifications.length > 0
+          ) {
+            try {
+              await scheduleTaskNotifications({
+                _id: updatedTask._id,
+                title: updatedTask.title,
+                notifications: updatedTask.notifications,
+              });
+            } catch (notificationError) {
+              console.error(
+                `Error scheduling notifications for task ${updatedTask._id}:`,
+                notificationError,
+              );
+            }
+          }
+        }
+      }
 
       setShowEditScopeModal(false);
       Alert.alert("Success", "Task updated successfully");
@@ -198,6 +239,12 @@ const EditTask = () => {
         onConfirm={(time) => {
           setShowStartTimePicker(false);
           updateFormData("startTime", time);
+
+          // Auto-adjust end time if it becomes before start time
+          if (formData.endTime && formData.endTime <= time) {
+            const newEndTime = new Date(time.getTime() + 30 * 60 * 1000);
+            updateFormData("endTime", newEndTime);
+          }
         }}
         onCancel={() => {
           setShowStartTimePicker(false);
@@ -285,15 +332,12 @@ const EditTask = () => {
               />
             </View>
 
-            {/* Date */}
+            {/* Date - Disabled */}
             <View className="gap-3">
               <Text className="text-sm text-muted-foreground">Date</Text>
-              <TouchableOpacity
-                onPress={() => setShowDatePicker(true)}
-                className="flex-row items-center justify-between border-b border-border pb-3"
-              >
-                <Text className="text-foreground">
-                  {formatDate(new Date(task.date))}
+              <View className="flex-row items-center justify-between border-b border-border pb-3 opacity-50">
+                <Text className="text-muted-foreground">
+                  {formatDateTime(new Date(task.date), "date")}
                 </Text>
                 <ThemedIcon
                   name="calendar-outline"
@@ -301,7 +345,7 @@ const EditTask = () => {
                   lightColor="#64748B"
                   darkColor="#94A3B8"
                 />
-              </TouchableOpacity>
+              </View>
             </View>
 
             {/* Time */}
@@ -313,7 +357,7 @@ const EditTask = () => {
                   className="flex-1 border-b border-border pb-3 items-center justify-center"
                 >
                   <Text className="text-foreground font-medium">
-                    {formatTime(formData.startTime)}
+                    {formatDateTime(formData.startTime, "time")}
                   </Text>
                 </TouchableOpacity>
 
@@ -322,7 +366,7 @@ const EditTask = () => {
                   className="flex-1 border-b border-border pb-3 items-center justify-center"
                 >
                   <Text className="text-foreground font-medium">
-                    {formatTime(formData.endTime)}
+                    {formatDateTime(formData.endTime, "time")}
                   </Text>
                 </TouchableOpacity>
               </View>

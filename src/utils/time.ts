@@ -1,21 +1,10 @@
-export const timeToMinutes = (timeStr: string): number => {
-  const [hours, minutes] = timeStr.split(":").map(Number);
-  return hours * 60 + minutes;
-};
-
-export const minutesToTime = (minutes: number): string => {
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
-};
+import { format, isPast, subMinutes } from "date-fns";
 
 export const calculateFreeTime = (
-  startTime: string,
-  endTime: string,
+  startTime: number,
+  endTime: number,
 ): string => {
-  const startMinutes = timeToMinutes(startTime);
-  const endMinutes = timeToMinutes(endTime);
-  const diffMinutes = endMinutes - startMinutes;
+  const diffMinutes = Math.floor((endTime - startTime) / (1000 * 60));
 
   if (diffMinutes <= 0) return "";
 
@@ -31,67 +20,55 @@ export const calculateFreeTime = (
   }
 };
 
-export const subtractOneMinute = (timeStr: string | undefined): string => {
-  if (!timeStr) return "";
-
-  const [hours, minutes] = timeStr.split(":").map(Number);
-  let totalMinutes = hours * 60 + minutes;
-
-  totalMinutes -= 1;
-
-  if (totalMinutes < 0) {
-    totalMinutes = 1439; // 23:59
-  }
-
-  const newHours = Math.floor(totalMinutes / 60);
-  const newMinutes = totalMinutes % 60;
-
-  return `${newHours.toString().padStart(2, "0")}:${newMinutes.toString().padStart(2, "0")}`;
+export const subtractMinutes = (timestamp: number, minutes: number): string => {
+  const newTimestamp = subMinutes(timestamp, minutes);
+  return format(newTimestamp, "HH:mm");
 };
 
-export const hasTimePassed = (
-  endTime: string | undefined,
-  targetDate: number | undefined,
-): boolean => {
-  if (!endTime || !targetDate) return false;
-
-  const now = new Date();
-  const targetDateOnly = new Date(targetDate);
-  targetDateOnly.setHours(0, 0, 0, 0);
-
-  const todayOnly = new Date(now);
-  todayOnly.setHours(0, 0, 0, 0);
-
-  // If the target date is in the future, time hasn't passed yet
-  if (targetDateOnly > todayOnly) {
-    return false;
-  }
-
-  // If the target date is in the past, time has passed
-  if (targetDateOnly < todayOnly) {
-    return true;
-  }
-
-  // If it's today, compare the actual times
-  const currentHour = now.getHours();
-  const currentMinute = now.getMinutes();
-
-  // Parse the endTime string (e.g., "7:30")
-  const [endHour, endMinute] = endTime.split(":").map(Number);
-
-  // Convert both times to minutes for easier comparison
-  const currentTimeInMinutes = currentHour * 60 + currentMinute;
-  const endTimeInMinutes = endHour * 60 + endMinute;
-
-  return currentTimeInMinutes > endTimeInMinutes;
+export const hasPassed = (timestamp: number): boolean => {
+  return isPast(timestamp);
 };
 
-export const normalizeDate = (date: Date) => {
-  return new Date(date.getTime()).setHours(0, 0, 0, 0);
-};
+type FormatType =
+  | "date"
+  | "time"
+  | "datetime"
+  | "short-date"
+  | "long-date"
+  | "time-24"
+  | "datetime-24"
+  | "compact";
 
-export const normalizeDateTo6AM = (timestamp: number): number => {
-  const date = new Date(timestamp);
-  date.setHours(6, 0, 0, 0);
-  return date.getTime();
+export const formatDateTime = (
+  date: Date,
+  type: FormatType = "date",
+): string => {
+  switch (type) {
+    case "date":
+      return format(date, "MM-dd-yyyy");
+
+    case "time":
+      return format(date, "h:mm a");
+
+    case "datetime":
+      return format(date, "MM-dd-yyyy h:mm a");
+
+    case "short-date":
+      return format(date, "MM/dd/yy");
+
+    case "long-date":
+      return format(date, "MMMM dd, yyyy");
+
+    case "time-24":
+      return format(date, "HH:mm");
+
+    case "datetime-24":
+      return format(date, "MM-dd-yyyy HH:mm");
+
+    case "compact":
+      return format(date, "MMddyy");
+
+    default:
+      return format(date, "MM-dd-yyyy");
+  }
 };

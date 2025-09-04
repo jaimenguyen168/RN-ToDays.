@@ -10,7 +10,14 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { format, addDays, startOfWeek, startOfDay, addMinutes } from "date-fns";
+import {
+  format,
+  addDays,
+  startOfWeek,
+  startOfDay,
+  addMinutes,
+  isToday,
+} from "date-fns";
 import { ThemedIcon } from "@/components/ThemedIcon";
 import DatePicker from "react-native-date-picker";
 import { z } from "zod";
@@ -147,19 +154,13 @@ const AddTask = () => {
 
       const userId = "j57fgqzy3wkwx3381xw5ezvjcs7pga7v";
 
-      const normalizedStartDate = startOfDay(validatedData.startDate);
-      const normalizedEndDate = validatedData.endDate
-        ? startOfDay(validatedData.endDate)
-        : undefined;
-
-      // In your handleCreate function, change this line:
       const taskData = {
         title: validatedData.title,
         description: validatedData.description,
-        startDate: normalizedStartDate.getTime(),
-        endDate: normalizedEndDate?.getTime(),
-        startTime: validatedData.startTime.toTimeString().slice(0, 5),
-        endTime: validatedData.endTime.toTimeString().slice(0, 5),
+        startDate: validatedData.startDate.getTime(),
+        endDate: validatedData.endDate?.getTime(),
+        startTime: validatedData.startTime.getTime(),
+        endTime: validatedData.endTime.getTime(),
         type: validatedData.type,
         tags: validatedData.tags,
         hasEndDate: validatedData.hasEndDate,
@@ -225,6 +226,23 @@ const AddTask = () => {
     }
   };
 
+  const getMinimumStartTime = (startDate: Date) => {
+    if (isToday(startDate)) {
+      return new Date();
+    }
+    return undefined;
+  };
+
+  const getMinimumEndTime = (startDate: Date, startTime: Date) => {
+    if (isToday(startDate) && startTime) {
+      return startTime;
+    }
+    if (startTime) {
+      return startTime;
+    }
+    return undefined;
+  };
+
   return (
     <>
       {/* Date/Time Pickers */}
@@ -237,6 +255,14 @@ const AddTask = () => {
         onConfirm={(date) => {
           setShowStartDatePicker(false);
           updateFormData("startDate", date);
+
+          if (
+            isToday(date) &&
+            formData.startTime &&
+            formData.startTime < new Date()
+          ) {
+            updateFormData("startTime", new Date());
+          }
         }}
         onCancel={() => {
           setShowStartDatePicker(false);
@@ -263,9 +289,15 @@ const AddTask = () => {
         open={showStartTimePicker}
         date={formData.startTime}
         mode="time"
+        minimumDate={getMinimumStartTime(formData.startDate)}
         onConfirm={(time) => {
           setShowStartTimePicker(false);
           updateFormData("startTime", time);
+
+          if (formData.endTime && formData.endTime <= time) {
+            const newEndTime = new Date(time.getTime() + 30 * 60 * 1000);
+            updateFormData("endTime", newEndTime);
+          }
         }}
         onCancel={() => {
           setShowStartTimePicker(false);

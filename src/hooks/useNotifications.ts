@@ -151,14 +151,36 @@ export const useNotifications = () => {
   };
 
   const cancelTaskNotifications = async (taskId: string, types: string[]) => {
-    try {
-      const cancelPromises = types.map((type) =>
-        Notifications.cancelScheduledNotificationAsync(`${taskId}_${type}`),
+    const results = await Promise.allSettled(
+      types.map(async (type) => {
+        try {
+          await Notifications.cancelScheduledNotificationAsync(
+            `${taskId}_${type}`,
+          );
+          return { type, success: true };
+        } catch (error) {
+          // Log the error but don't throw - notification might already be deleted
+          console.warn(
+            `Failed to cancel notification ${taskId}_${type}:`,
+            error,
+          );
+          return { type, success: false, error };
+        }
+      }),
+    );
+
+    const successful = results.filter(
+      (r) => r.status === "fulfilled" && r.value.success,
+    ).length;
+    const failed = results.length - successful;
+
+    console.log(
+      `Cancelled ${successful}/${types.length} notifications for task: ${taskId}`,
+    );
+    if (failed > 0) {
+      console.log(
+        `${failed} notifications were already cancelled or not found`,
       );
-      await Promise.all(cancelPromises);
-      console.log(`Cancelled notifications for task: ${taskId}`);
-    } catch (error) {
-      console.error("Error cancelling task notifications:", error);
     }
   };
 

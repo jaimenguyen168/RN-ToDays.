@@ -7,7 +7,6 @@ import { ScrollHeader } from "@/components/ScrollHeader";
 import TabPicker from "@/components/TabPicker";
 import AnalyticsView from "@/modules/activity/ui/views/analytics-view";
 import CalendarView from "@/modules/activity/ui/views/calendar-view";
-import { getDate } from "date-fns";
 
 const ActivityView = () => {
   const userId = "j57fgqzy3wkwx3381xw5ezvjcs7pga7v";

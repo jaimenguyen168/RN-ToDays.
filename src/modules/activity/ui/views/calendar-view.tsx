@@ -5,7 +5,6 @@ import { Task } from "@/types";
 import TaskStats from "@/modules/activity/ui/components/TaskStats";
 import TaskItem from "@/modules/tasks/ui/components/TaskItem";
 import EmptyState from "@/modules/activity/ui/components/EmptyState";
-import { normalizeDate } from "@/utils/time";
 import { isSameDay } from "date-fns";
 
 interface CalendarViewProps {
@@ -13,7 +12,7 @@ interface CalendarViewProps {
 }
 
 const CalendarView = ({ tasks }: CalendarViewProps) => {
-  const [selectedDate, setSelectedDate] = useState(normalizeDate(new Date()));
+  const [selectedDate, setSelectedDate] = useState(new Date().getTime());
 
   const todayTasks = tasks.filter((task) => isSameDay(task.date, selectedDate));
 
@@ -33,8 +32,8 @@ const CalendarView = ({ tasks }: CalendarViewProps) => {
       {/*/!* Tasks for Selected Date *!/*/}
       <View className="px-6 gap-3">
         {/*  /!* Task List *!/*/}
-        {tasks.length > 0 ? (
-          <View>
+        {todayTasks.length > 0 ? (
+          <View className="gap-3">
             <Text className="text-lg font-semibold text-foreground">
               Task List
             </Text>

@@ -13,6 +13,7 @@ import EmptyState from "@/modules/activity/ui/components/EmptyState";
 import { useQuery } from "convex/react";
 import TaskGroupCard from "@/modules/home/ui/components/TaskGroupCard";
 import { normalizeDate } from "@/utils/time";
+import { startOfToday } from "date-fns";
 
 interface TaskCounts {
   completed: number;
@@ -37,14 +38,11 @@ const HomeView = () => {
     userId,
   });
 
-  const todayDate = normalizeDate(new Date());
-
+  const todayDate = startOfToday().getTime();
   const todayTasks = useQuery(api.private.tasks.getTasksForDate, {
     userId,
     date: todayDate,
   });
-
-  console.log("Today Tasks", todayTasks);
 
   const calculateTaskCounts = (): TaskCounts => {
     if (!allTasks)
@@ -67,13 +65,10 @@ const HomeView = () => {
         completed++;
       }
 
-      // Pending count
+      // Pending count - now using timestamp directly
       if (!task.isCompleted) {
-        const [hours, minutes] = task.endTime.split(":").map(Number);
-        const taskEndDateTime = new Date(task.date);
-        taskEndDateTime.setHours(hours, minutes, 0, 0);
-
-        if (taskEndDateTime.getTime() < now) {
+        // task.endTime is already a timestamp, so compare directly
+        if (task.endTime < now) {
           pending++;
         }
       }

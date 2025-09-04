@@ -10,32 +10,26 @@ export type TaskNotification = {
 };
 
 export const calculateNotifications = (
-  taskDate: number,
-  startTime: string,
+  startTime: number,
   types: string[],
-) => {
+): TaskNotification[] | undefined => {
   if (!types || types.length === 0) return undefined;
 
   return types.map((type) => {
-    const [hours, minutes] = startTime.split(":").map(Number);
+    let scheduledTime: number;
 
-    // Since taskDate is already a timestamp, just add the hours and minutes
-    const taskStartTime =
-      taskDate + hours * 60 * 60 * 1000 + minutes * 60 * 1000;
-
-    let scheduledTime;
     switch (type) {
       case NotificationTypes.FIFTEEN_MINUTES:
-        scheduledTime = taskStartTime - 15 * 60 * 1000;
+        scheduledTime = startTime - 15 * 60 * 1000;
         break;
       case NotificationTypes.FIVE_MINUTES:
-        scheduledTime = taskStartTime - 5 * 60 * 1000;
+        scheduledTime = startTime - 5 * 60 * 1000;
         break;
       case NotificationTypes.AT_START:
-        scheduledTime = taskStartTime;
+        scheduledTime = startTime;
         break;
       default:
-        scheduledTime = taskStartTime;
+        scheduledTime = startTime;
     }
 
     return {
