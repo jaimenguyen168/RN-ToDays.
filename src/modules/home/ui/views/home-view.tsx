@@ -12,6 +12,8 @@ import TaskItem from "@/modules/tasks/ui/components/TaskItem";
 import EmptyState from "@/modules/activity/ui/components/EmptyState";
 import { useQuery } from "convex/react";
 import TaskGroupCard from "@/modules/home/ui/components/TaskGroupCard";
+import { normalizeDate } from "@/utils/time";
+import { startOfToday } from "date-fns";
 
 interface TaskCounts {
   completed: number;
@@ -36,15 +38,11 @@ const HomeView = () => {
     userId,
   });
 
-  const isToday = (timestamp: number) => {
-    const today = new Date();
-    const date = new Date(timestamp);
-    return (
-      date.getFullYear() === today.getFullYear() &&
-      date.getMonth() === today.getMonth() &&
-      date.getDate() === today.getDate()
-    );
-  };
+  const todayDate = startOfToday().getTime();
+  const todayTasks = useQuery(api.private.tasks.getTasksForDate, {
+    userId,
+    date: todayDate,
+  });
 
   const calculateTaskCounts = (): TaskCounts => {
     if (!allTasks)
@@ -67,13 +65,10 @@ const HomeView = () => {
         completed++;
       }
 
-      // Pending count
+      // Pending count - now using timestamp directly
       if (!task.isCompleted) {
-        const [hours, minutes] = task.endTime.split(":").map(Number);
-        const taskEndDateTime = new Date(task.date);
-        taskEndDateTime.setHours(hours, minutes, 0, 0);
-
-        if (taskEndDateTime.getTime() < now) {
+        // task.endTime is already a timestamp, so compare directly
+        if (task.endTime < now) {
           pending++;
         }
       }
@@ -82,27 +77,7 @@ const HomeView = () => {
     return { completed, pending, onGoing, emergency };
   };
 
-  const getTodayTasks = (): Task[] => {
-    if (!allTasks) return [];
-
-    return allTasks
-      .filter((task) => isToday(task.date))
-      .map((task) => ({
-        _id: task._id,
-        title: task.title,
-        startTime: task.startTime,
-        endTime: task.endTime,
-        tags: task.tags,
-        type: task.type,
-        isCompleted: task.isCompleted,
-        note: task.note,
-        date: task.date,
-      }))
-      .sort((a, b) => a.startTime.localeCompare(b.startTime));
-  };
-
   const taskCounts = calculateTaskCounts();
-  const todayTasks = getTodayTasks();
 
   const renderHeader = () => (
     <View className="bg-background pt-20 gap-8">
@@ -171,7 +146,16 @@ const HomeView = () => {
           <Text className="text-xl font-semibold text-foreground">
             Today Task
           </Text>
-          <TouchableOpacity onPress={() => router.push("/tasks")}>
+          <TouchableOpacity
+            onPress={() =>
+              router.push({
+                pathname: "/tasks",
+                params: {
+                  today: Boolean(true).toString(),
+                },
+              })
+            }
+          >
             <Text className="text-accent-foreground font-medium">View all</Text>
           </TouchableOpacity>
         </View>

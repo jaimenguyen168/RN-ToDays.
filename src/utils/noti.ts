@@ -1,50 +1,40 @@
-import { NotificationTypes } from "~/convex/schemas/tasks";
+const NotificationTypes = {
+  FIFTEEN_MINUTES: "15_minutes",
+  FIVE_MINUTES: "5_minutes",
+  AT_START: "at_start",
+} as const;
 
 export type TaskNotification = {
   type: (typeof NotificationTypes)[keyof typeof NotificationTypes];
   scheduledTime: number;
-  notificationId?: string;
 };
 
-export const calculateNotificationTime = (
-  taskDate: number,
-  startTime: string,
-  notificationType: string,
-): number => {
-  const [hours, minutes] = startTime.split(":").map(Number);
+export const calculateNotifications = (
+  startTime: number,
+  types: string[],
+): TaskNotification[] | undefined => {
+  if (!types || types.length === 0) return undefined;
 
-  const taskStartDate = new Date(taskDate);
-  taskStartDate.setHours(hours, minutes, 0, 0);
-  const taskStartTime = taskStartDate.getTime();
+  return types.map((type) => {
+    let scheduledTime: number;
 
-  switch (notificationType) {
-    case NotificationTypes.FIFTEEN_MINUTES:
-      return taskStartTime - 15 * 60 * 1000;
-    case NotificationTypes.FIVE_MINUTES:
-      return taskStartTime - 5 * 60 * 1000;
-    case NotificationTypes.AT_START:
-      return taskStartTime;
-    default:
-      return taskStartTime;
-  }
-};
-
-export const createNotificationSettings = (
-  selectedTypes: string[],
-  taskDate: number,
-  startTime: string,
-): TaskNotification[] => {
-  if (!selectedTypes.length) {
-    return [];
-  }
-
-  return selectedTypes.map((type) => {
-    const scheduledTime = calculateNotificationTime(taskDate, startTime, type);
+    switch (type) {
+      case NotificationTypes.FIFTEEN_MINUTES:
+        scheduledTime = startTime - 15 * 60 * 1000;
+        break;
+      case NotificationTypes.FIVE_MINUTES:
+        scheduledTime = startTime - 5 * 60 * 1000;
+        break;
+      case NotificationTypes.AT_START:
+        scheduledTime = startTime;
+        break;
+      default:
+        scheduledTime = startTime;
+    }
 
     return {
       type: type as (typeof NotificationTypes)[keyof typeof NotificationTypes],
       scheduledTime,
-      notificationId: undefined,
     };
   });
 };
