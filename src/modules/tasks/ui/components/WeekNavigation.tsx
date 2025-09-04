@@ -30,6 +30,27 @@ export const useWeekNavigation = (
 ): WeekNavigationReturn => {
   const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
 
+  // Helper function to calculate which week a date belongs to
+  const calculateWeekOffset = (date: Date): number => {
+    const today = new Date();
+    const currentDay = today.getDay();
+    const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay;
+
+    const thisWeekMonday = new Date(today);
+    thisWeekMonday.setDate(today.getDate() + mondayOffset);
+    thisWeekMonday.setHours(0, 0, 0, 0);
+
+    const selectedDay = date.getDay();
+    const selectedMondayOffset = selectedDay === 0 ? -6 : 1 - selectedDay;
+
+    const selectedWeekMonday = new Date(date);
+    selectedWeekMonday.setDate(date.getDate() + selectedMondayOffset);
+    selectedWeekMonday.setHours(0, 0, 0, 0);
+
+    const diffTime = selectedWeekMonday.getTime() - thisWeekMonday.getTime();
+    return Math.round(diffTime / (1000 * 60 * 60 * 24 * 7));
+  };
+
   const generateWeekDays = (weekOffset: number): DayItem[] => {
     const today = new Date();
     const currentDay = today.getDay();
@@ -62,6 +83,14 @@ export const useWeekNavigation = (
   };
 
   const [weekDays, setWeekDays] = useState(generateWeekDays(0));
+
+  // Update week offset when selectedDate changes from outside
+  useEffect(() => {
+    const correctWeekOffset = calculateWeekOffset(selectedDate);
+    if (correctWeekOffset !== currentWeekOffset) {
+      setCurrentWeekOffset(correctWeekOffset);
+    }
+  }, [selectedDate]);
 
   useEffect(() => {
     const newWeekDays = generateWeekDays(currentWeekOffset);
@@ -100,7 +129,6 @@ export const useWeekNavigation = (
 const WeekNavigation = ({
   selectedDate,
   onDateChange,
-  onWeekChange,
 }: WeekNavigationProps) => {
   const { weekDays, handlePrevWeek, handleNextWeek, handleDateSelect } =
     useWeekNavigation(selectedDate, onDateChange);

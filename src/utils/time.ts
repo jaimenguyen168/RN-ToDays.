@@ -85,3 +85,13 @@ export const hasTimePassed = (
 
   return currentTimeInMinutes > endTimeInMinutes;
 };
+
+export const normalizeDate = (date: Date) => {
+  return new Date(date.getTime()).setHours(0, 0, 0, 0);
+};
+
+export const normalizeDateTo6AM = (timestamp: number): number => {
+  const date = new Date(timestamp);
+  date.setHours(6, 0, 0, 0);
+  return date.getTime();
+};

@@ -2,14 +2,15 @@ import { ConvexError, v } from "convex/values";
 import { mutation, query } from "../_generated/server";
 import { NotificationTypes, TaskTypes } from "../schemas/tasks";
 import { calculateNotifications } from "../../src/utils/noti";
+import { normalizeDateTo6AM } from "../../src/utils/time";
 
 export const create = mutation({
   args: {
     title: v.string(),
     description: v.optional(v.string()),
-    startDate: v.number(), // UTC timestamp for the date (midnight)
-    endDate: v.optional(v.number()), // UTC timestamp for the date (midnight)
-    startTime: v.string(), // e.g. "08:00"
+    startDate: v.number(),
+    endDate: v.optional(v.number()),
+    startTime: v.string(),
     endTime: v.string(),
     type: v.union(
       v.literal(TaskTypes.PERSONAL),
@@ -26,12 +27,14 @@ export const create = mutation({
   handler: async (ctx, args) => {
     const now = Date.now();
 
-    // ✅ Handle one-time task
+    // One-time task
     if (!args.hasEndDate || !args.endDate) {
+      const normalizedDate = normalizeDateTo6AM(args.startDate);
+
       const taskId = await ctx.db.insert("tasks", {
         title: args.title,
         description: args.description,
-        date: args.startDate, // keep midnight UTC timestamp
+        date: normalizedDate,
         startTime: args.startTime,
         endTime: args.endTime,
         type: args.type,
@@ -50,7 +53,6 @@ export const create = mutation({
       return await ctx.db.get(taskId);
     }
 
-    // ✅ Recurring task
     const recurringId = await ctx.db.insert("recurrings", {
       title: args.title,
       startTime: args.startTime,
@@ -67,7 +69,6 @@ export const create = mutation({
     const tasks = [];
     const isDaily =
       !args.selectedWeekDays || args.selectedWeekDays.length === 0;
-
     const weekdays = [
       "sunday",
       "monday",
@@ -77,24 +78,23 @@ export const create = mutation({
       "friday",
       "saturday",
     ];
+    const oneDayMs = 24 * 60 * 60 * 1000;
 
-    // Use calendar-based UTC increments (DST-safe)
-    let currentDate = new Date(args.startDate);
-    const endDate = new Date(args.endDate!);
+    let currentTimestamp = args.startDate;
 
-    while (currentDate <= endDate) {
-      let shouldCreate = isDaily;
-
-      if (!isDaily && args.selectedWeekDays) {
-        const currentDayName = weekdays[currentDate.getUTCDay()];
-        shouldCreate = args.selectedWeekDays.includes(currentDayName);
-      }
+    while (currentTimestamp <= args.endDate!) {
+      const currentDate = new Date(currentTimestamp);
+      const shouldCreate =
+        isDaily ||
+        args.selectedWeekDays?.includes(weekdays[currentDate.getDay()]);
 
       if (shouldCreate) {
+        const normalizedDate = normalizeDateTo6AM(currentTimestamp);
+
         const taskId = await ctx.db.insert("tasks", {
           title: args.title,
           description: args.description,
-          date: currentDate.getTime(), // always midnight UTC
+          date: normalizedDate,
           startTime: args.startTime,
           endTime: args.endTime,
           type: args.type,
@@ -115,14 +115,7 @@ export const create = mutation({
         if (task) tasks.push(task);
       }
 
-      // ✅ Increment by 1 calendar day in UTC (DST-safe)
-      currentDate = new Date(
-        Date.UTC(
-          currentDate.getUTCFullYear(),
-          currentDate.getUTCMonth(),
-          currentDate.getUTCDate() + 1,
-        ),
-      );
+      currentTimestamp += oneDayMs;
     }
 
     return tasks;
@@ -186,22 +179,24 @@ export const getTasksForDate = query({
     date: v.number(),
   },
   handler: async (ctx, args) => {
-    const targetDate = new Date(args.date);
-    targetDate.setHours(0, 0, 0, 0);
-    const targetTimestamp = targetDate.getTime();
+    const startOfDay = new Date(args.date);
+    startOfDay.setUTCHours(0, 0, 0, 0);
+    const startTimestamp = startOfDay.getTime();
 
-    // Get all tasks for the user
-    const allTasks = await ctx.db
+    const endOfDay = new Date(args.date);
+    endOfDay.setUTCHours(23, 59, 59, 999);
+    const endTimestamp = endOfDay.getTime();
+
+    return await ctx.db
       .query("tasks")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .filter((q) =>
+        q.and(
+          q.gte(q.field("date"), startTimestamp),
+          q.lte(q.field("date"), endTimestamp),
+        ),
+      )
       .collect();
-
-    // Filter tasks that match the exact date
-    return allTasks.filter((task) => {
-      const taskDate = new Date(task.date);
-      taskDate.setHours(0, 0, 0, 0);
-      return taskDate.getTime() === targetTimestamp;
-    });
   },
 });
 

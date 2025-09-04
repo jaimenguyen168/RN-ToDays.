@@ -5,13 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="848daa69-0b20-4967-b608-52402236c448" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ios/Podfile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Podfile.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ios/rntodays.xcodeproj/project.pbxproj" beforeDir="false" afterPath="$PROJECT_DIR$/ios/rntodays.xcodeproj/project.pbxproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(app)/(tabs)/activity.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(app)/(tabs)/activity.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/types/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/convex/private/tasks.ts" beforeDir="false" afterPath="$PROJECT_DIR$/convex/private/tasks.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(app)/(tabs)/profile.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(app)/(tabs)/profile.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/activity/ui/components/TaskStats.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/activity/ui/components/TaskStats.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/activity/ui/components/TasksCalendar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/activity/ui/components/TasksCalendar.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/activity/ui/views/activity-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/activity/ui/views/activity-view.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/activity/ui/views/calendar-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/activity/ui/views/calendar-view.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/home/ui/views/home-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/home/ui/views/home-view.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/tasks/ui/components/WeekNavigation.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/tasks/ui/components/WeekNavigation.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/tasks/ui/views/tasks-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/tasks/ui/views/tasks-view.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/noti.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/noti.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/time.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/time.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,7 +58,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "05-activity",
+    "git-widget-placeholder": "06-notifications",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -77,10 +81,11 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/src/app/(app)/(modals)" />
-      <recent name="$PROJECT_DIR$/src/assets/images" />
-      <recent name="$PROJECT_DIR$/convex" />
+      <recent name="$PROJECT_DIR$/src/modules/tasks/ui/components" />
+      <recent name="$PROJECT_DIR$/src/modules/tasks/hooks" />
+      <recent name="$PROJECT_DIR$/src/modules/activity/ui/components" />
       <recent name="$PROJECT_DIR$/src" />
+      <recent name="$PROJECT_DIR$/src/app/(app)/(modals)" />
     </key>
   </component>
   <component name="SharedIndexes">
@@ -100,10 +105,23 @@
       <workItem from="1756409530532" duration="179000" />
       <workItem from="1756409727680" duration="25356000" />
       <workItem from="1756494006936" duration="12911000" />
+      <workItem from="1756693485280" duration="69519000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/src/app/(app)/(modals)/edit-task.tsx</url>
+          <line>37</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
