@@ -5,15 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="848daa69-0b20-4967-b608-52402236c448" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/convex/private/tasks.ts" beforeDir="false" afterPath="$PROJECT_DIR$/convex/private/tasks.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(app)/(tabs)/profile.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(app)/(tabs)/profile.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/activity/ui/components/TaskStats.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/activity/ui/components/TaskStats.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/activity/ui/components/TasksCalendar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/activity/ui/components/TasksCalendar.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/convex/schemas/tasks.ts" beforeDir="false" afterPath="$PROJECT_DIR$/convex/schemas/tasks.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(app)/(modals)/add-task.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(app)/(modals)/add-task.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(app)/(modals)/edit-task.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(app)/(modals)/edit-task.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hooks/useNotifications.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/useNotifications.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/modules/activity/ui/views/activity-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/activity/ui/views/activity-view.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/modules/activity/ui/views/calendar-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/activity/ui/views/calendar-view.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/modules/home/ui/views/home-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/home/ui/views/home-view.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/tasks/ui/components/WeekNavigation.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/tasks/ui/components/WeekNavigation.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/tasks/hooks/useTimeSlots.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/tasks/hooks/useTimeSlots.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/tasks/ui/components/TaskItem.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/tasks/ui/components/TaskItem.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/modules/tasks/ui/views/tasks-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/tasks/ui/views/tasks-view.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/types/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/index.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/utils/noti.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/noti.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/utils/time.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/time.ts" afterDir="false" />
     </list>
@@ -52,24 +56,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "06-notifications",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "prettierjs.PrettierConfiguration.Package": "/Users/jaime168/Local/rn-to-days./node_modules/prettier",
-    "settings.editor.selected.configurable": "settings.javascript.prettier",
-    "ts.external.directory.path": "/Users/jaime168/Local/rn-to-days./node_modules/typescript/lib",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;06-notifications&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;prettierjs.PrettierConfiguration.Package&quot;: &quot;/Users/jaime168/Local/rn-to-days./node_modules/prettier&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;settings.javascript.prettier&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Users/jaime168/Local/rn-to-days./node_modules/typescript/lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="ReactDesignerToolWindowState">
     <option name="myId2Visible">
       <map>
@@ -106,6 +112,8 @@
       <workItem from="1756409727680" duration="25356000" />
       <workItem from="1756494006936" duration="12911000" />
       <workItem from="1756693485280" duration="69519000" />
+      <workItem from="1756958892347" duration="10440000" />
+      <workItem from="1756995115369" duration="5074000" />
     </task>
     <servers />
   </component>
@@ -117,8 +125,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/src/app/(app)/(modals)/edit-task.tsx</url>
-          <line>37</line>
-          <properties lambdaOrdinal="-1" />
+          <line>38</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
       </breakpoints>

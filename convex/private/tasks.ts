@@ -1,8 +1,7 @@
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "../_generated/server";
-import { NotificationTypes, TaskTypes } from "../schemas/tasks";
+import { TaskTypes } from "../schemas/tasks";
 import { calculateNotifications } from "../../src/utils/noti";
-import { normalizeDateTo6AM } from "../../src/utils/time";
 
 export const create = mutation({
   args: {
@@ -10,8 +9,8 @@ export const create = mutation({
     description: v.optional(v.string()),
     startDate: v.number(),
     endDate: v.optional(v.number()),
-    startTime: v.string(),
-    endTime: v.string(),
+    startTime: v.number(), // Now a timestamp instead of string
+    endTime: v.number(), // Now a timestamp instead of string
     type: v.union(
       v.literal(TaskTypes.PERSONAL),
       v.literal(TaskTypes.WORK),
@@ -29,19 +28,16 @@ export const create = mutation({
 
     // One-time task
     if (!args.hasEndDate || !args.endDate) {
-      const normalizedDate = normalizeDateTo6AM(args.startDate);
-
       const taskId = await ctx.db.insert("tasks", {
         title: args.title,
         description: args.description,
-        date: normalizedDate,
+        date: args.startDate,
         startTime: args.startTime,
         endTime: args.endTime,
         type: args.type,
         tags: args.tags,
         isCompleted: false,
         notifications: calculateNotifications(
-          args.startDate,
           args.startTime,
           args.notifications || [],
         ),
@@ -55,8 +51,6 @@ export const create = mutation({
 
     const recurringId = await ctx.db.insert("recurrings", {
       title: args.title,
-      startTime: args.startTime,
-      endTime: args.endTime,
       type: args.type,
       tags: args.tags,
       selectedWeekDays: args.selectedWeekDays,
@@ -80,30 +74,29 @@ export const create = mutation({
     ];
     const oneDayMs = 24 * 60 * 60 * 1000;
 
-    let currentTimestamp = args.startDate;
+    // Start with the original timestamps
+    let currentStartTime = args.startTime;
+    let currentEndTime = args.endTime;
+    let currentDate = args.startDate;
 
-    while (currentTimestamp <= args.endDate!) {
-      const currentDate = new Date(currentTimestamp);
+    while (currentDate <= args.endDate!) {
+      const dateObj = new Date(currentDate);
       const shouldCreate =
-        isDaily ||
-        args.selectedWeekDays?.includes(weekdays[currentDate.getDay()]);
+        isDaily || args.selectedWeekDays?.includes(weekdays[dateObj.getDay()]);
 
       if (shouldCreate) {
-        const normalizedDate = normalizeDateTo6AM(currentTimestamp);
-
         const taskId = await ctx.db.insert("tasks", {
           title: args.title,
           description: args.description,
-          date: normalizedDate,
-          startTime: args.startTime,
-          endTime: args.endTime,
+          date: currentDate,
+          startTime: currentStartTime,
+          endTime: currentEndTime,
           type: args.type,
           tags: args.tags,
           isCompleted: false,
           recurringId,
           notifications: calculateNotifications(
-            currentDate.getTime(),
-            args.startTime,
+            currentStartTime,
             args.notifications || [],
           ),
           note: args.note,
@@ -115,7 +108,10 @@ export const create = mutation({
         if (task) tasks.push(task);
       }
 
-      currentTimestamp += oneDayMs;
+      // Simply add 24 hours to all timestamps for next day
+      currentDate += oneDayMs;
+      currentStartTime += oneDayMs;
+      currentEndTime += oneDayMs;
     }
 
     return tasks;
@@ -187,7 +183,7 @@ export const getTasksForDate = query({
     endOfDay.setUTCHours(23, 59, 59, 999);
     const endTimestamp = endOfDay.getTime();
 
-    return await ctx.db
+    const tasks = await ctx.db
       .query("tasks")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .filter((q) =>
@@ -197,6 +193,8 @@ export const getTasksForDate = query({
         ),
       )
       .collect();
+
+    return tasks.sort((a, b) => a.startTime - b.startTime);
   },
 });
 
@@ -257,28 +255,18 @@ export const editTask = mutation({
     updates: v.object({
       title: v.optional(v.string()),
       description: v.optional(v.string()),
-      startTime: v.optional(v.string()),
-      endTime: v.optional(v.string()),
-      type: v.union(
-        v.literal(TaskTypes.PERSONAL),
-        v.literal(TaskTypes.WORK),
-        v.literal(TaskTypes.EMERGENCY),
+      startTime: v.optional(v.number()),
+      endTime: v.optional(v.number()),
+      type: v.optional(
+        v.union(
+          v.literal(TaskTypes.PERSONAL),
+          v.literal(TaskTypes.WORK),
+          v.literal(TaskTypes.EMERGENCY),
+        ),
       ),
       tags: v.optional(v.array(v.string())),
       note: v.optional(v.string()),
-      notifications: v.optional(
-        v.array(
-          v.object({
-            type: v.union(
-              v.literal(NotificationTypes.FIFTEEN_MINUTES),
-              v.literal(NotificationTypes.FIVE_MINUTES),
-              v.literal(NotificationTypes.AT_START),
-            ),
-            scheduledTime: v.number(),
-            notificationId: v.optional(v.string()),
-          }),
-        ),
-      ),
+      notifications: v.optional(v.array(v.string())),
     }),
     editScope: v.union(
       v.literal("this_only"),
@@ -296,19 +284,50 @@ export const editTask = mutation({
       });
     }
 
+    const now = Date.now();
+
+    // Prepare updates with recalculated notifications if needed
+    const prepareUpdates = (taskToUpdate: any) => {
+      const { notifications, ...otherUpdates } = args.updates;
+      const baseUpdates = { ...otherUpdates, updatedAt: now };
+
+      // Recalculate notifications if provided
+      if (notifications !== undefined) {
+        const startTimeToUse = args.updates.startTime || taskToUpdate.startTime;
+        const calculatedNotifications = calculateNotifications(
+          startTimeToUse, // Use timestamp directly like create
+          notifications || [],
+        );
+
+        return {
+          ...baseUpdates,
+          notifications: calculatedNotifications,
+        };
+      }
+
+      return baseUpdates;
+    };
+
+    // Handle one-time task
     if (!task?.recurringId) {
-      return await ctx.db.patch(args.taskId, args.updates);
+      const updates = prepareUpdates(task);
+      await ctx.db.patch(args.taskId, updates);
+      const updatedTask = await ctx.db.get(args.taskId);
+      return updatedTask ? [updatedTask] : [];
     }
 
-    const now = Date.now();
+    // Handle recurring tasks
+    const updatedTasks = [];
 
     switch (args.editScope) {
       case "this_only":
-        await ctx.db.patch(args.taskId, {
-          ...args.updates,
-          recurringId: undefined,
-          updatedAt: now,
-        });
+        const thisOnlyUpdates = {
+          ...prepareUpdates(task),
+          recurringId: undefined, // Detach from recurring series
+        };
+        await ctx.db.patch(args.taskId, thisOnlyUpdates);
+        const singleTask = await ctx.db.get(args.taskId);
+        if (singleTask) updatedTasks.push(singleTask);
         break;
 
       case "all":
@@ -320,7 +339,10 @@ export const editTask = mutation({
           .collect();
 
         for (const t of allTasks) {
-          await ctx.db.patch(t._id, { ...args.updates, updatedAt: now });
+          const updates = prepareUpdates(t);
+          await ctx.db.patch(t._id, updates);
+          const updatedTask = await ctx.db.get(t._id);
+          if (updatedTask) updatedTasks.push(updatedTask);
         }
         break;
 
@@ -334,10 +356,15 @@ export const editTask = mutation({
           .collect();
 
         for (const t of futureTasks) {
-          await ctx.db.patch(t._id, { ...args.updates, updatedAt: now });
+          const updates = prepareUpdates(t);
+          await ctx.db.patch(t._id, updates);
+          const updatedTask = await ctx.db.get(t._id);
+          if (updatedTask) updatedTasks.push(updatedTask);
         }
         break;
     }
+
+    return updatedTasks;
   },
 });
 
