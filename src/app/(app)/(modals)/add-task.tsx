@@ -25,6 +25,7 @@ import { useMutation } from "convex/react";
 import { api } from "~/convex/_generated/api";
 import { NotificationTypes, TaskTypes } from "~/convex/schemas/tasks";
 import { useNotifications } from "@/hooks/useNotifications";
+import AppButton from "@/components/AppButton";
 
 const taskSchemaForm = z.object({
   title: z.string().min(1, "Title is required"),
@@ -347,7 +348,7 @@ const AddTask = () => {
         </View>
 
         <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-          <View className="px-8 pt-4 pb-10 gap-6">
+          <View className="px-8 pt-4 pb-12 gap-6">
             {/* Title */}
             <View className="gap-3">
               <Text className="text-sm text-muted-foreground">Title</Text>
@@ -630,16 +631,14 @@ const AddTask = () => {
         </ScrollView>
 
         {/* Create Button */}
-        <View className="px-6 pb-8">
-          <TouchableOpacity
-            className={`py-4 rounded-2xl ${isCreating || !canSubmit ? "bg-primary-300" : "bg-primary-500"}`}
+        <View className="px-6 pb-12">
+          <AppButton
+            title="Create"
+            loadingTitle="Creating..."
             onPress={handleCreate}
             disabled={isCreating || !canSubmit}
-          >
-            <Text className="text-white text-center text-lg font-semibold">
-              {isCreating ? "Creating..." : "Create"}
-            </Text>
-          </TouchableOpacity>
+            isLoading={isCreating}
+          />
         </View>
       </View>
     </>
