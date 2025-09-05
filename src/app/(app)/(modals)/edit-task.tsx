@@ -20,6 +20,7 @@ import { Id } from "~/convex/_generated/dataModel";
 import ScopeSelectionModal from "@/components/ScopeSelectionModal";
 import { useNotifications } from "@/hooks/useNotifications";
 import { formatDateTime } from "@/utils/time";
+import AppButton from "@/components/AppButton";
 
 const taskSchemaForm = z.object({
   title: z.string().min(1, "Title is required"),
@@ -68,9 +69,12 @@ const EditTask = () => {
   const [newTag, setNewTag] = useState("");
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [showEditScopeModal, setShowEditScopeModal] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [didEdit, setDidEdit] = useState(false);
 
   const updateFormData = (field: keyof TaskFormData, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    setDidEdit(true);
   };
 
   // Load task data when component mounts
@@ -121,17 +125,14 @@ const EditTask = () => {
 
   const handleUpdate = async () => {
     if (!task) return;
+    setIsUpdating(true);
 
     try {
-      const validatedData = taskSchemaForm.parse(formData);
-
-      // If task has recurringId, show scope selection modal
       if (task.recurringId) {
         setShowEditScopeModal(true);
         return;
       }
 
-      // Direct update for one-time tasks
       await updateTask("this_only");
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -141,6 +142,8 @@ const EditTask = () => {
         console.error("Error updating task:", error);
         Alert.alert("Error", "Failed to update task");
       }
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -148,6 +151,7 @@ const EditTask = () => {
     editScope: "this_only" | "all" | "this_and_future",
   ) => {
     if (!task || !originalStartTime) return;
+    setIsUpdating(true);
 
     try {
       const validatedData = taskSchemaForm.parse(formData);
@@ -218,6 +222,8 @@ const EditTask = () => {
     } catch (error) {
       console.error("Error updating task:", error);
       Alert.alert("Error", "Failed to update task");
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -523,14 +529,13 @@ const EditTask = () => {
 
         {/* Update Button */}
         <View className="px-6 pb-12">
-          <TouchableOpacity
-            className="bg-primary-500 py-4 rounded-2xl"
+          <AppButton
+            title="Update"
+            loadingTitle="Updating..."
             onPress={handleUpdate}
-          >
-            <Text className="text-white text-center text-lg font-semibold">
-              Update
-            </Text>
-          </TouchableOpacity>
+            disabled={isUpdating || !didEdit}
+            isLoading={isUpdating}
+          />
         </View>
       </View>
     </>
