@@ -10,7 +10,7 @@ import {
   HindSiliguri_700Bold,
 } from "@expo-google-fonts/hind-siliguri";
 import { useEffect } from "react";
-import { LogBox, useColorScheme } from "react-native";
+import { useColorScheme } from "react-native";
 import { DarkTheme, DefaultTheme } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ThemeProvider } from "@react-navigation/core";

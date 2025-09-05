@@ -27,22 +27,39 @@ export const useNotifications = () => {
     useState<string>("undetermined");
   const [isLoading, setIsLoading] = useState(true);
 
+  // Check current permission status
+  const checkPermissionStatus = async () => {
+    try {
+      const { status } = await Notifications.getPermissionsAsync();
+      setPermissionStatus(status);
+      return status;
+    } catch (error) {
+      console.error("Error checking permissions:", error);
+      return "undetermined";
+    }
+  };
+
   // Request notification permissions
   const requestPermissions = async () => {
     try {
-      const { status: existingStatus } =
-        await Notifications.getPermissionsAsync();
-      let finalStatus = existingStatus;
+      // First check current status
+      const currentStatus = await checkPermissionStatus();
 
-      if (existingStatus !== "granted") {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
+      if (currentStatus === "granted") {
+        return true;
       }
 
-      setPermissionStatus(finalStatus);
+      // Request permissions
+      const { status } = await Notifications.requestPermissionsAsync();
 
-      if (finalStatus !== "granted") {
-        alert("Permission to show notifications was denied");
+      // Add a small delay to ensure iOS has processed the permission
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Update the status
+      setPermissionStatus(status);
+
+      if (status !== "granted") {
+        console.log("Permission to show notifications was denied");
         return false;
       }
 
@@ -72,7 +89,10 @@ export const useNotifications = () => {
     data?: any,
   ): Promise<string | undefined> => {
     try {
-      if (permissionStatus !== "granted") {
+      // Check permission status right before scheduling
+      const currentStatus = await checkPermissionStatus();
+
+      if (currentStatus !== "granted") {
         console.warn("Notification permission not granted");
         return;
       }
@@ -213,11 +233,11 @@ export const useNotifications = () => {
     }
   };
 
-  // Initialize
+  // Initialize and set up listeners
   useEffect(() => {
     const initialize = async () => {
       setIsLoading(true);
-      await requestPermissions();
+      await checkPermissionStatus();
       setIsLoading(false);
     };
 
@@ -241,9 +261,15 @@ export const useNotifications = () => {
         }
       });
 
+    // Also check permission status when app comes to foreground
+    const subscription = Notifications.addNotificationReceivedListener(() => {
+      checkPermissionStatus();
+    });
+
     return () => {
       notificationListener.remove();
       responseListener.remove();
+      subscription.remove();
     };
   }, []);
 
@@ -255,6 +281,7 @@ export const useNotifications = () => {
 
     // Functions
     requestPermissions,
+    checkPermissionStatus,
     scheduleNotification,
     scheduleTaskNotifications,
     cancelTaskNotifications,
