@@ -24,7 +24,6 @@ const TasksView = () => {
     today: string;
   }>();
 
-  const userId = "j57fgqzy3wkwx3381xw5ezvjcs7pga7v";
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -40,7 +39,6 @@ const TasksView = () => {
   );
 
   const tasksForDate = useQuery(api.private.tasks.getTasksForDate, {
-    userId,
     date: selectedDate.getTime(),
   });
 

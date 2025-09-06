@@ -5,22 +5,28 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="848daa69-0b20-4967-b608-52402236c448" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/app/(auth)/_layout.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/(auth)/login.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/(auth)/signup.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/(auth)/welcome.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/assets/images/facebook.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/assets/images/google.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/assets/images/welcome.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/AppButton.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/modules/auth/ui/views/login-view.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/modules/auth/ui/views/signup-view.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/modules/auth/ui/views/welcome-view.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/convex/auth.config.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/convex/auth.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/convex/http.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/convex/_generated/api.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/convex/_generated/api.d.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/convex/private/tasks.ts" beforeDir="false" afterPath="$PROJECT_DIR$/convex/private/tasks.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/convex/private/users.ts" beforeDir="false" afterPath="$PROJECT_DIR$/convex/private/users.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/convex/schemas/users.ts" beforeDir="false" afterPath="$PROJECT_DIR$/convex/schemas/users.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/ToDays.xcodeproj/project.pbxproj" beforeDir="false" afterPath="$PROJECT_DIR$/ios/ToDays.xcodeproj/project.pbxproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/ToDays/ToDays.entitlements" beforeDir="false" afterPath="$PROJECT_DIR$/ios/ToDays/ToDays.entitlements" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(app)/(modals)/add-task.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(app)/(modals)/add-task.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(app)/(modals)/edit-task.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(app)/(modals)/edit-task.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(app)/(tabs)/_layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(app)/(tabs)/_layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/_layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/_layout.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/constants/images.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/constants/images.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/activity/ui/components/TaskStats.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/activity/ui/components/TaskStats.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/activity/ui/views/activity-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/activity/ui/views/activity-view.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/auth/ui/views/login-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/auth/ui/views/login-view.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/auth/ui/views/signup-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/auth/ui/views/signup-view.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/home/ui/views/home-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/home/ui/views/home-view.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/tasks/ui/views/tasks-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/tasks/ui/views/tasks-view.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
