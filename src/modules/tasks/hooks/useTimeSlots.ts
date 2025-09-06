@@ -141,11 +141,8 @@ const generateTimeSlots = (tasks: Task[]): TimeSlot[] => {
 };
 
 export const useTimeSlots = (tasks: Task[] | undefined): TimeSlot[] => {
-  console.log("tasks", JSON.stringify(tasks, null, 2));
-
   return useMemo(() => {
     if (!tasks) return [];
-    console.log("generated", JSON.stringify(generateTimeSlots(tasks), null, 2));
     return generateTimeSlots(tasks);
   }, [tasks]);
 };

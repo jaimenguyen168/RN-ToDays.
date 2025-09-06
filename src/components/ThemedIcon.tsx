@@ -14,6 +14,13 @@ type MaterialIconsName = keyof typeof MaterialIcons.glyphMap;
 type AntDesignName = keyof typeof AntDesign.glyphMap;
 type FeatherName = keyof typeof Feather.glyphMap;
 
+export type IconLibrary =
+  | "ionicons"
+  | "fontawesome6"
+  | "material"
+  | "antdesign"
+  | "feather";
+
 interface BaseIconProps {
   size?: number;
   lightColor?: string;

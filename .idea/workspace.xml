@@ -5,21 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="848daa69-0b20-4967-b608-52402236c448" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/modules/auth/ui/components/FormField.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/modules/auth/ui/components/OAuthButton.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/convex/private/tasks.ts" beforeDir="false" afterPath="$PROJECT_DIR$/convex/private/tasks.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/convex/schemas/tasks.ts" beforeDir="false" afterPath="$PROJECT_DIR$/convex/schemas/tasks.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(app)/(modals)/add-task.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(app)/(modals)/add-task.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(app)/(modals)/edit-task.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(app)/(modals)/edit-task.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hooks/useNotifications.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/useNotifications.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/activity/ui/views/activity-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/activity/ui/views/activity-view.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/activity/ui/views/calendar-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/activity/ui/views/calendar-view.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/home/ui/views/home-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/home/ui/views/home-view.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/tasks/hooks/useTimeSlots.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/tasks/hooks/useTimeSlots.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/tasks/ui/components/TaskItem.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/tasks/ui/components/TaskItem.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/tasks/ui/views/tasks-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/tasks/ui/views/tasks-view.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/types/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/noti.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/noti.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/time.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/time.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/ThemedIcon.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ThemedIcon.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/auth/ui/views/login-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/auth/ui/views/login-view.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/auth/ui/views/signup-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/auth/ui/views/signup-view.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,26 +47,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;06-notifications&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;prettierjs.PrettierConfiguration.Package&quot;: &quot;/Users/jaime168/Local/rn-to-days./node_modules/prettier&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;settings.javascript.prettier&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;/Users/jaime168/Local/rn-to-days./node_modules/typescript/lib&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "07-auth",
+    "junie.onboarding.icon.badge.shown": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "prettierjs.PrettierConfiguration.Package": "/Users/jaime168/Local/rn-to-days./node_modules/prettier",
+    "settings.editor.selected.configurable": "settings.javascript.prettier",
+    "to.speed.mode.migration.done": "true",
+    "ts.external.directory.path": "/Users/jaime168/Local/rn-to-days./node_modules/typescript/lib",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="ReactDesignerToolWindowState">
     <option name="myId2Visible">
       <map>
@@ -87,11 +78,11 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/assets/images" />
+      <recent name="$PROJECT_DIR$/src/assets/icons" />
+      <recent name="$PROJECT_DIR$/src/assets" />
       <recent name="$PROJECT_DIR$/src/modules/tasks/ui/components" />
       <recent name="$PROJECT_DIR$/src/modules/tasks/hooks" />
-      <recent name="$PROJECT_DIR$/src/modules/activity/ui/components" />
-      <recent name="$PROJECT_DIR$/src" />
-      <recent name="$PROJECT_DIR$/src/app/(app)/(modals)" />
     </key>
   </component>
   <component name="SharedIndexes">
@@ -125,7 +116,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/src/app/(app)/(modals)/edit-task.tsx</url>
-          <line>38</line>
+          <line>39</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
       </breakpoints>

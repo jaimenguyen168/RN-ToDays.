@@ -2,6 +2,8 @@ import { ConvexError, v } from "convex/values";
 import { mutation, query } from "../_generated/server";
 import { TaskTypes } from "../schemas/tasks";
 import { calculateNotifications } from "../../src/utils/noti";
+import { api } from "../_generated/api";
+import { Id } from "../_generated/dataModel";
 
 export const create = mutation({
   args: {
@@ -9,8 +11,8 @@ export const create = mutation({
     description: v.optional(v.string()),
     startDate: v.number(),
     endDate: v.optional(v.number()),
-    startTime: v.number(), // Now a timestamp instead of string
-    endTime: v.number(), // Now a timestamp instead of string
+    startTime: v.number(),
+    endTime: v.number(),
     type: v.union(
       v.literal(TaskTypes.PERSONAL),
       v.literal(TaskTypes.WORK),
@@ -21,9 +23,11 @@ export const create = mutation({
     selectedWeekDays: v.optional(v.array(v.string())),
     note: v.optional(v.string()),
     notifications: v.optional(v.array(v.string())),
-    userId: v.string(),
   },
   handler: async (ctx, args) => {
+    const currentUser = await ctx.runQuery(api.private.users.getUser);
+    const userId = currentUser._id as Id<"users">;
+
     const now = Date.now();
 
     // One-time task
@@ -43,7 +47,7 @@ export const create = mutation({
         ),
         note: args.note,
         updatedAt: now,
-        userId: args.userId,
+        userId,
       });
 
       return await ctx.db.get(taskId);
@@ -57,7 +61,7 @@ export const create = mutation({
       startDate: args.startDate,
       endDate: args.endDate,
       isActive: true,
-      userId: args.userId,
+      userId,
     });
 
     const tasks = [];
@@ -101,7 +105,7 @@ export const create = mutation({
           ),
           note: args.note,
           updatedAt: now,
-          userId: args.userId,
+          userId,
         });
 
         const task = await ctx.db.get(taskId);
@@ -129,7 +133,6 @@ export const getTaskById = query({
 
 export const getTasksWithFilters = query({
   args: {
-    userId: v.string(),
     type: v.optional(
       v.union(
         v.literal(TaskTypes.PERSONAL),
@@ -141,9 +144,12 @@ export const getTasksWithFilters = query({
     tags: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
+    const currentUser = await ctx.runQuery(api.private.users.getUser);
+    const userId = currentUser._id as Id<"users">;
+
     let query = ctx.db
       .query("tasks")
-      .withIndex("by_user", (q) => q.eq("userId", args.userId));
+      .withIndex("by_user", (q) => q.eq("userId", userId));
 
     let filteredTasks = await query.collect();
 
@@ -171,10 +177,12 @@ export const getTasksWithFilters = query({
 
 export const getTasksForDate = query({
   args: {
-    userId: v.string(),
     date: v.number(),
   },
   handler: async (ctx, args) => {
+    const currentUser = await ctx.runQuery(api.private.users.getUser);
+    const userId = currentUser._id as Id<"users">;
+
     const startOfDay = new Date(args.date);
     startOfDay.setUTCHours(0, 0, 0, 0);
     const startTimestamp = startOfDay.getTime();
@@ -185,7 +193,7 @@ export const getTasksForDate = query({
 
     const tasks = await ctx.db
       .query("tasks")
-      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .withIndex("by_user", (q) => q.eq("userId", userId))
       .filter((q) =>
         q.and(
           q.gte(q.field("date"), startTimestamp),
@@ -220,13 +228,14 @@ export const toggleCompleted = mutation({
 });
 
 export const getRecurringTasks = query({
-  args: {
-    userId: v.string(),
-  },
+  args: {},
   handler: async (ctx, args) => {
+    const currentUser = await ctx.runQuery(api.private.users.getUser);
+    const userId = currentUser._id as Id<"users">;
+
     return await ctx.db
       .query("recurrings")
-      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .withIndex("by_user", (q) => q.eq("userId", userId))
       .collect();
   },
 });

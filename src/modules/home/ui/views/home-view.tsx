@@ -5,14 +5,12 @@ import { useScrollHeader } from "@/hooks/useScrollHeader";
 import { api } from "~/convex/_generated/api";
 import { Id } from "~/convex/_generated/dataModel";
 import { TaskTypes } from "~/convex/schemas/tasks";
-import { Task } from "@/types";
 import { images } from "@/constants/images";
 import { ScrollHeader } from "@/components/ScrollHeader";
 import TaskItem from "@/modules/tasks/ui/components/TaskItem";
 import EmptyState from "@/modules/activity/ui/components/EmptyState";
 import { useQuery } from "convex/react";
 import TaskGroupCard from "@/modules/home/ui/components/TaskGroupCard";
-import { normalizeDate } from "@/utils/time";
 import { startOfToday } from "date-fns";
 
 interface TaskCounts {
@@ -24,23 +22,15 @@ interface TaskCounts {
 
 const HomeView = () => {
   const router = useRouter();
-  const userId = "j57fgqzy3wkwx3381xw5ezvjcs7pga7v";
   const { headerOpacity, handleScroll } = useScrollHeader(15);
 
-  const user = useQuery(api.private.users.getUser, {
-    userId: userId as Id<"users">,
-  });
+  const user = useQuery(api.private.users.getUser);
 
-  const allTasks = useQuery(api.private.tasks.getTasksWithFilters, {
-    userId,
-  });
-  const allRecurringTasks = useQuery(api.private.tasks.getRecurringTasks, {
-    userId,
-  });
+  const allTasks = useQuery(api.private.tasks.getTasksWithFilters, {});
+  const allRecurringTasks = useQuery(api.private.tasks.getRecurringTasks);
 
   const todayDate = startOfToday().getTime();
   const todayTasks = useQuery(api.private.tasks.getTasksForDate, {
-    userId,
     date: todayDate,
   });
 
@@ -86,7 +76,7 @@ const HomeView = () => {
         <View className="flex-row items-center justify-between">
           <View>
             <Text className="text-foreground text-2xl font-semibold">
-              Hi, {user?.fullName?.split(" ")[0] || "User"}
+              Hi, {user?.username}
             </Text>
             <Text className="text-muted-foreground text-sm">
               Let&apos;s make this day productive

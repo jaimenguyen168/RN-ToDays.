@@ -25,6 +25,7 @@ import { useMutation } from "convex/react";
 import { api } from "~/convex/_generated/api";
 import { NotificationTypes, TaskTypes } from "~/convex/schemas/tasks";
 import { useNotifications } from "@/hooks/useNotifications";
+import AppButton from "@/components/AppButton";
 
 const taskSchemaForm = z.object({
   title: z.string().min(1, "Title is required"),
@@ -152,8 +153,6 @@ const AddTask = () => {
     try {
       const validatedData = taskSchemaForm.parse(formData);
 
-      const userId = "j57fgqzy3wkwx3381xw5ezvjcs7pga7v";
-
       const taskData = {
         title: validatedData.title,
         description: validatedData.description,
@@ -167,14 +166,12 @@ const AddTask = () => {
         selectedWeekDays: validatedData.selectedWeekDays,
         note: validatedData.note,
         notifications: validatedData.notifications,
-        userId,
       };
 
       const result = await createTask(taskData);
 
       if (permissionStatus === "granted") {
         if (Array.isArray(result)) {
-          // Recurring tasks - each task has its own calculated notifications
           console.log(`Created ${result.length} recurring tasks`);
 
           for (const task of result) {
@@ -256,13 +253,25 @@ const AddTask = () => {
           setShowStartDatePicker(false);
           updateFormData("startDate", date);
 
-          if (
-            isToday(date) &&
-            formData.startTime &&
-            formData.startTime < new Date()
-          ) {
-            updateFormData("startTime", new Date());
-          }
+          // Update times to match the selected date
+          const newStartTime = new Date(date);
+          newStartTime.setHours(
+            formData.startTime.getHours(),
+            formData.startTime.getMinutes(),
+            0,
+            0,
+          );
+
+          const newEndTime = new Date(date);
+          newEndTime.setHours(
+            formData.endTime.getHours(),
+            formData.endTime.getMinutes(),
+            0,
+            0,
+          );
+
+          updateFormData("startTime", newStartTime);
+          updateFormData("endTime", newEndTime);
         }}
         onCancel={() => {
           setShowStartDatePicker(false);
@@ -347,7 +356,7 @@ const AddTask = () => {
         </View>
 
         <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-          <View className="px-8 pt-4 pb-10 gap-6">
+          <View className="px-8 pt-4 pb-12 gap-6">
             {/* Title */}
             <View className="gap-3">
               <Text className="text-sm text-muted-foreground">Title</Text>
@@ -630,16 +639,14 @@ const AddTask = () => {
         </ScrollView>
 
         {/* Create Button */}
-        <View className="px-6 pb-8">
-          <TouchableOpacity
-            className={`py-4 rounded-2xl ${isCreating || !canSubmit ? "bg-primary-300" : "bg-primary-500"}`}
+        <View className="px-6 pb-12">
+          <AppButton
+            title="Create"
+            loadingTitle="Creating..."
             onPress={handleCreate}
             disabled={isCreating || !canSubmit}
-          >
-            <Text className="text-white text-center text-lg font-semibold">
-              {isCreating ? "Creating..." : "Create"}
-            </Text>
-          </TouchableOpacity>
+            isLoading={isCreating}
+          />
         </View>
       </View>
     </>

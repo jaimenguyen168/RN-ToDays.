@@ -1,5 +1,5 @@
 import { Tabs, useRouter } from "expo-router";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity, useColorScheme, View } from "react-native";
 import { useNotifications } from "@/hooks/useNotifications";
@@ -10,16 +10,46 @@ const TabsLayout = () => {
 
   const router = useRouter();
 
-  const { notification, permissionStatus } = useNotifications();
+  const hasRequestedPermissions = useRef(false);
+
+  const {
+    notification,
+    permissionStatus,
+    requestPermissions,
+    checkPermissionStatus,
+    isLoading,
+  } = useNotifications();
+
+  // Check if user has permission status, if no then request
+  useEffect(() => {
+    const checkAndRequest = async () => {
+      if (hasRequestedPermissions.current || isLoading) return;
+
+      const currentStatus = await checkPermissionStatus();
+      console.log("Permission status:", currentStatus);
+
+      if (currentStatus === "undetermined") {
+        hasRequestedPermissions.current = true;
+        console.log("No permission status, requesting...");
+        await requestPermissions();
+      }
+    };
+
+    checkAndRequest();
+  }, [isLoading]);
 
   useEffect(() => {
     if (notification) {
-      console.log("Received notification:", notification.request.content.title);
-    }
-    if (permissionStatus === "granted") {
-      console.log("Permission granted");
+      console.log(
+        "📱 Received notification:",
+        notification.request.content.title,
+      );
     }
   }, [notification]);
+
+  useEffect(() => {
+    console.log("🔔 Permission status changed to:", permissionStatus);
+  }, [permissionStatus]);
 
   const handleAddPress = () => {
     router.push("/add-task");
