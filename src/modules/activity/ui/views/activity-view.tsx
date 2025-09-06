@@ -9,15 +9,11 @@ import AnalyticsView from "@/modules/activity/ui/views/analytics-view";
 import CalendarView from "@/modules/activity/ui/views/calendar-view";
 
 const ActivityView = () => {
-  const userId = "j57fgqzy3wkwx3381xw5ezvjcs7pga7v";
-
   const [activeTab, setActiveTab] = useState("calendar");
 
   const { headerOpacity, handleScroll } = useScrollHeader(15);
 
-  const monthlyTasks = useQuery(api.private.tasks.getTasksWithFilters, {
-    userId,
-  });
+  const monthlyTasks = useQuery(api.private.tasks.getTasksWithFilters, {});
 
   const tabOptions = [
     { value: "calendar", label: "Calendar" },

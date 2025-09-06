@@ -1,10 +1,18 @@
-import { View, Text, TextInput, TouchableOpacity, Image } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  Alert,
+} from "react-native";
 import React, { useState } from "react";
 import { useRouter } from "expo-router";
 import * as z from "zod";
 import { ThemedIcon } from "@/components/ThemedIcon";
 import AppButton from "@/components/AppButton";
 import { images } from "@/constants/images";
+import { useSignUp } from "@clerk/clerk-expo";
 
 const signupSchema = z
   .object({
@@ -21,6 +29,8 @@ type SignupForm = z.infer<typeof signupSchema>;
 
 const SignupView = () => {
   const router = useRouter();
+  const { signUp, setActive, isLoaded } = useSignUp();
+
   const [form, setForm] = useState<SignupForm>({
     username: "",
     password: "",
@@ -31,6 +41,7 @@ const SignupView = () => {
   const [errors, setErrors] = useState<
     Partial<Record<keyof SignupForm, string>>
   >({});
+  const [loading, setLoading] = useState(false);
 
   const handleInputChange = (field: keyof SignupForm, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -58,9 +69,25 @@ const SignupView = () => {
     }
   };
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
     if (validateForm()) {
-      console.log("Signup data:", form);
+      setLoading(true);
+
+      try {
+        const result = await signUp?.create({
+          username: form.username,
+          password: form.password,
+        });
+
+        if (result?.status === "complete") {
+          await setActive?.({ session: result.createdSessionId });
+          router.push("/");
+        }
+      } catch (error: any) {
+        Alert.alert("Error", error.errors[0]?.message || "Sign up failed");
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -79,6 +106,9 @@ const SignupView = () => {
   const handleSignIn = () => {
     router.back();
   };
+
+  const disabled =
+    loading || !isLoaded || form.username === "" || form.password === "";
 
   return (
     <View className="flex-1 bg-background px-10 py-20">
@@ -188,7 +218,11 @@ const SignupView = () => {
 
         {/* Create Button */}
         <View className="mt-12">
-          <AppButton title="Create" onPress={handleSignup} />
+          <AppButton
+            title="Create"
+            onPress={handleSignup}
+            disabled={disabled}
+          />
         </View>
 
         {/* Divider */}

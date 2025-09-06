@@ -14,7 +14,15 @@ import { useColorScheme } from "react-native";
 import { DarkTheme, DefaultTheme } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ThemeProvider } from "@react-navigation/core";
-import { ConvexProvider, ConvexReactClient } from "convex/react";
+import { ConvexReactClient } from "convex/react";
+import {
+  ClerkProvider,
+  ClerkLoaded,
+  useAuth,
+  useUser,
+} from "@clerk/clerk-expo";
+import { ConvexProviderWithClerk } from "convex/react-clerk";
+import { tokenCache } from "@clerk/clerk-expo/token-cache";
 import { MenuProvider } from "react-native-popup-menu";
 
 SplashScreen.setOptions({
@@ -24,11 +32,14 @@ SplashScreen.setOptions({
 
 SplashScreen.preventAutoHideAsync();
 
+const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
 const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!, {
   unsavedChangesWarning: false,
 });
 
 const InitialLayout = function () {
+  const user = useUser();
+
   const [fontsLoaded] = useFonts({
     HindSiliguri_300Light,
     HindSiliguri_400Regular,
@@ -52,16 +63,20 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <ConvexProvider client={convex}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <ThemeProvider
-          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-        >
-          <MenuProvider>
-            <InitialLayout />
-          </MenuProvider>
-        </ThemeProvider>
-      </GestureHandlerRootView>
-    </ConvexProvider>
+    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+      <ClerkLoaded>
+        <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <ThemeProvider
+              value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+            >
+              <MenuProvider>
+                <InitialLayout />
+              </MenuProvider>
+            </ThemeProvider>
+          </GestureHandlerRootView>
+        </ConvexProviderWithClerk>
+      </ClerkLoaded>
+    </ClerkProvider>
   );
 }

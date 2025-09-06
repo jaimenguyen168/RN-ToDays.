@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { View, Text } from "react-native";
 import { format, isSameDay } from "date-fns";
 import { ThemedIcon } from "@/components/ThemedIcon";
@@ -11,10 +11,7 @@ interface TaskStatsProps {
 }
 
 const TaskStats = ({ selectedDate }: TaskStatsProps) => {
-  const userId = "j57fgqzy3wkwx3381xw5ezvjcs7pga7v";
-
   const dateTasks = useQuery(api.private.tasks.getTasksForDate, {
-    userId,
     date: selectedDate,
   });
 

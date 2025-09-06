@@ -1,10 +1,18 @@
-import { View, Text, TextInput, TouchableOpacity, Image } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  Alert,
+} from "react-native";
 import React, { useState } from "react";
 import { useRouter } from "expo-router";
 import { ThemedIcon } from "@/components/ThemedIcon";
 import AppButton from "@/components/AppButton";
 import { images } from "@/constants/images";
 import { z } from "zod";
+import { useSignIn } from "@clerk/clerk-expo";
 
 const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -15,6 +23,8 @@ type LoginForm = z.infer<typeof loginSchema>;
 
 const LoginView = () => {
   const router = useRouter();
+  const { signIn, setActive, isLoaded } = useSignIn();
+
   const [form, setForm] = useState<LoginForm>({
     username: "",
     password: "",
@@ -23,6 +33,7 @@ const LoginView = () => {
   const [errors, setErrors] = useState<
     Partial<Record<keyof LoginForm, string>>
   >({});
+  const [loading, setLoading] = useState(false);
 
   const handleInputChange = (field: keyof LoginForm, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -50,10 +61,25 @@ const LoginView = () => {
     }
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (validateForm()) {
-      console.log("Login data:", form);
-      // Handle login logic here
+      setLoading(true);
+
+      try {
+        const result = await signIn?.create({
+          identifier: form.username,
+          password: form.password,
+        });
+
+        if (result?.status === "complete") {
+          await setActive?.({ session: result.createdSessionId });
+          router.push("/");
+        }
+      } catch (error: any) {
+        Alert.alert("Error", error.errors[0]?.message || "Sign in failed");
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -76,6 +102,9 @@ const LoginView = () => {
   const handleSignUp = () => {
     router.push("/signup");
   };
+
+  const disabled =
+    loading || !isLoaded || form.username === "" || form.password === "";
 
   return (
     <View className="flex-1 bg-background px-10 py-20">
@@ -156,7 +185,7 @@ const LoginView = () => {
 
         {/* Login Button */}
         <View className="mt-8">
-          <AppButton title="Login" onPress={handleLogin} />
+          <AppButton title="Login" onPress={handleLogin} disabled={disabled} />
         </View>
 
         {/* Divider */}
