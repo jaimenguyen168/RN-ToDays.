@@ -1,11 +1,4 @@
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Image,
-  Alert,
-} from "react-native";
+import { View, Text, TouchableOpacity, Image, Alert } from "react-native";
 import React, { useState } from "react";
 import { useRouter } from "expo-router";
 import { ThemedIcon } from "@/components/ThemedIcon";
@@ -13,6 +6,11 @@ import AppButton from "@/components/AppButton";
 import { images } from "@/constants/images";
 import { z } from "zod";
 import { useSignIn } from "@clerk/clerk-expo";
+import FormField from "@/modules/auth/ui/components/FormField";
+import {
+  OAuthButton,
+  OAuthProvider,
+} from "@/modules/auth/ui/components/OAuthButton";
 
 const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -34,6 +32,7 @@ const LoginView = () => {
     Partial<Record<keyof LoginForm, string>>
   >({});
   const [loading, setLoading] = useState(false);
+  const [oauthLoading, setOAuthLoading] = useState<OAuthProvider | null>(null);
 
   const handleInputChange = (field: keyof LoginForm, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -83,18 +82,6 @@ const LoginView = () => {
     }
   };
 
-  const handleGoogleLogin = () => {
-    console.log("Google login pressed");
-  };
-
-  const handleAppleLogin = () => {
-    console.log("Apple login pressed");
-  };
-
-  const handleFacebookLogin = () => {
-    console.log("Facebook login pressed");
-  };
-
   const handleForgotPassword = () => {
     console.log("Forgot password pressed");
   };
@@ -117,62 +104,30 @@ const LoginView = () => {
 
       {/* Form Section */}
       <View className="flex-1 gap-8">
-        {/* Email Input */}
-        <View>
-          <View className="flex-row items-center border-b border-border pb-3 gap-4">
-            <ThemedIcon
-              name="mail-outline"
-              size={20}
-              lightColor="#64748B"
-              darkColor="#94A3B8"
-            />
-            <TextInput
-              placeholder="Username"
-              placeholderTextColor="#9CA3AF"
-              value={form.username}
-              onChangeText={(value) => handleInputChange("username", value)}
-              className="flex-1 text-foreground font-light text-lg tracking-wider"
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-          </View>
-          {errors.username && (
-            <Text className="text-red-500 text-sm mt-1">{errors.username}</Text>
-          )}
-        </View>
+        {/* Username Input */}
+        <FormField
+          placeholder="Username"
+          value={form.username}
+          onChangeText={(value) => handleInputChange("username", value)}
+          icon="user"
+          iconLibrary="fontawesome6"
+          error={errors.username}
+          autoCapitalize="none"
+        />
 
         {/* Password Input */}
-        <View>
-          <View className="flex-row items-center border-b border-border pb-3 gap-4">
-            <ThemedIcon
-              name="lock"
-              size={20}
-              library="feather"
-              lightColor="#64748B"
-              darkColor="#94A3B8"
-            />
-            <TextInput
-              placeholder="Password"
-              placeholderTextColor="#9CA3AF"
-              value={form.password}
-              onChangeText={(value) => handleInputChange("password", value)}
-              secureTextEntry={!showPassword}
-              className="flex-1 text-foreground font-light text-lg tracking-wider"
-              autoCapitalize="none"
-            />
-            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-              <ThemedIcon
-                name={showPassword ? "eye-outline" : "eye-off-outline"}
-                size={20}
-                lightColor="#64748B"
-                darkColor="#94A3B8"
-              />
-            </TouchableOpacity>
-          </View>
-          {errors.password && (
-            <Text className="text-red-500 text-sm mt-1">{errors.password}</Text>
-          )}
-        </View>
+        <FormField
+          placeholder="Password"
+          value={form.password}
+          onChangeText={(value) => handleInputChange("password", value)}
+          icon="lock"
+          iconLibrary="feather"
+          error={errors.password}
+          showPasswordToggle
+          isPassword={!showPassword}
+          onTogglePassword={() => setShowPassword(!showPassword)}
+          autoCapitalize="none"
+        />
 
         {/* Forgot Password */}
         <View className="items-end">
@@ -202,28 +157,25 @@ const LoginView = () => {
         {/* Social Login Buttons */}
         <View className="flex-row justify-center gap-6">
           {/* Google Button */}
-          <TouchableOpacity
-            onPress={handleGoogleLogin}
-            className="w-14 h-14 rounded-full bg-background items-center justify-center border border-border"
-          >
-            <Image source={images.google} className="size-8" />
-          </TouchableOpacity>
+          <OAuthButton
+            provider="google"
+            loading={oauthLoading}
+            setLoading={setOAuthLoading}
+          />
 
           {/* Apple Button */}
-          <TouchableOpacity
-            onPress={handleAppleLogin}
-            className="w-14 h-14 rounded-full bg-background items-center justify-center border border-border pb-1"
-          >
-            <ThemedIcon name="apple" size={28} library="fontawesome6" />
-          </TouchableOpacity>
+          <OAuthButton
+            provider="apple"
+            loading={oauthLoading}
+            setLoading={setOAuthLoading}
+          />
 
           {/* Facebook Button */}
-          <TouchableOpacity
-            onPress={handleFacebookLogin}
-            className="w-14 h-14 rounded-full bg-background items-center justify-center border border-border"
-          >
-            <Image source={images.facebook} className="size-8" />
-          </TouchableOpacity>
+          <OAuthButton
+            provider="facebook"
+            loading={oauthLoading}
+            setLoading={setOAuthLoading}
+          />
         </View>
       </View>
 
