@@ -19,6 +19,14 @@ const TasksCalendar = ({
   const colorScheme = useColorScheme();
   if (!tasks) return null;
 
+  const timestampToLocalDateString = (timestamp: number): string => {
+    const date = new Date(timestamp);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   // Group tasks by date and create marked dates object
   const markedDates = React.useMemo(() => {
     const marked: any = {};
@@ -26,7 +34,7 @@ const TasksCalendar = ({
     // Group tasks by date string (YYYY-MM-DD format)
     const tasksByDate = tasks.reduce(
       (acc, task) => {
-        const dateStr = new Date(task.date).toISOString().split("T")[0]; // Get YYYY-MM-DD
+        const dateStr = timestampToLocalDateString(task.date);
         if (!acc[dateStr]) {
           acc[dateStr] = [];
         }
@@ -55,7 +63,7 @@ const TasksCalendar = ({
     });
 
     // Mark the selected date
-    const selectedDateStr = new Date(selectedDate).toISOString().split("T")[0];
+    const selectedDateStr = timestampToLocalDateString(selectedDate);
     if (marked[selectedDateStr]) {
       marked[selectedDateStr].selected = true;
     } else {
@@ -70,10 +78,9 @@ const TasksCalendar = ({
   }, [tasks, selectedDate]);
 
   // Convert selectedDate timestamp to date string for Calendar current prop
-  const currentDateStr = new Date(selectedDate).toISOString().split("T")[0];
+  const currentDateStr = timestampToLocalDateString(selectedDate);
 
   const handleDayPress = (day: any) => {
-    // Convert date string back to timestamp at midnight
     const dateTimestamp = new Date(day.dateString + "T00:00:00.000").getTime();
     onDateSelect(dateTimestamp);
   };

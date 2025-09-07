@@ -6,12 +6,6 @@ import {
   useColorScheme,
   Alert,
 } from "react-native";
-import {
-  Menu,
-  MenuOptions,
-  MenuOption,
-  MenuTrigger,
-} from "react-native-popup-menu";
 import { ThemedIcon } from "@/components/ThemedIcon";
 import { TaskTypes } from "~/convex/schemas/tasks";
 import { useMutation, useQuery } from "convex/react";
@@ -25,6 +19,7 @@ import ScopeSelectionModal, {
 } from "@/components/ScopeSelectionModal";
 import { format } from "date-fns";
 import { hasPassed } from "@/utils/time";
+import DropdownMenu, { MenuItem } from "@/components/DropdownMenu";
 
 interface TaskItemProps {
   task: Task;
@@ -143,6 +138,33 @@ const TaskItem = ({ task, onPress }: TaskItemProps) => {
   const colors = getTaskColors(task.type);
   const timeHasPassed = hasPassed(task.endTime);
 
+  const taskMenuItems: MenuItem[] = [
+    {
+      title: task.isCompleted ? "Mark as Incomplete" : "Mark as Complete",
+      icon: task.isCompleted ? "close" : "checkmark",
+      library: "ionicons",
+      lightColor: task.isCompleted ? "#ef4444" : "#22c55e",
+      darkColor: task.isCompleted ? "#ef4444" : "#22c55e",
+      onPress: handleToggleCompleted,
+    },
+    {
+      title: "Edit Task",
+      icon: "edit",
+      library: "antdesign",
+      lightColor: "#6366f1",
+      darkColor: "#818cf8",
+      onPress: handleEditTask,
+    },
+    {
+      title: "Delete Task",
+      icon: "delete-outline",
+      library: "material-community",
+      lightColor: "#ef4444",
+      darkColor: "#ef4444",
+      onPress: handleDeletePress,
+    },
+  ];
+
   return (
     <>
       <ScopeSelectionModal
@@ -181,75 +203,9 @@ const TaskItem = ({ task, onPress }: TaskItemProps) => {
             </View>
 
             {/* Dropdown Menu */}
-            <Menu>
-              <MenuTrigger>
-                <ThemedIcon name="ellipsis-vertical" size={16} />
-              </MenuTrigger>
-              <MenuOptions
-                customStyles={{
-                  optionsContainer: {
-                    backgroundColor:
-                      colorScheme === "dark" ? "#1e1e1e" : "white",
-                    borderRadius: 12,
-                    padding: 4,
-                    shadowColor: "#000",
-                    shadowOffset: {
-                      width: 0,
-                      height: 2,
-                    },
-                    shadowOpacity: 0.25,
-                    shadowRadius: 3.84,
-                    elevation: 5,
-                  },
-                }}
-              >
-                <MenuOption onSelect={handleToggleCompleted}>
-                  <View className="flex-row items-center px-3 py-1 gap-3">
-                    <ThemedIcon
-                      name={task.isCompleted ? "close" : "checkmark"}
-                      size={16}
-                      lightColor={task.isCompleted ? "#ef4444" : "#22c55e"}
-                      darkColor={task.isCompleted ? "#ef4444" : "#22c55e"}
-                    />
-                    <Text className="text-foreground font-medium">
-                      {task.isCompleted
-                        ? "Mark as Incomplete"
-                        : "Mark as Complete"}
-                    </Text>
-                  </View>
-                </MenuOption>
-
-                <MenuOption onSelect={handleEditTask}>
-                  <View className="flex-row items-center px-3 py-1 gap-3">
-                    <ThemedIcon
-                      name="edit"
-                      size={16}
-                      lightColor="#6366f1"
-                      darkColor="#818cf8"
-                      library="antdesign"
-                    />
-                    <Text className="text-foreground font-medium">
-                      Edit Task
-                    </Text>
-                  </View>
-                </MenuOption>
-
-                <MenuOption onSelect={handleDeletePress}>
-                  <View className="flex-row items-center px-3 py-1 gap-3">
-                    <ThemedIcon
-                      name="delete"
-                      size={16}
-                      lightColor="#ef4444"
-                      darkColor="#ef4444"
-                      library="antdesign"
-                    />
-                    <Text className="text-foreground font-medium">
-                      Delete Task
-                    </Text>
-                  </View>
-                </MenuOption>
-              </MenuOptions>
-            </Menu>
+            <DropdownMenu menuItems={taskMenuItems} menuWidth={190}>
+              <ThemedIcon name="ellipsis-vertical" size={16} />
+            </DropdownMenu>
           </View>
 
           <View className="flex-row items-center gap-2">
