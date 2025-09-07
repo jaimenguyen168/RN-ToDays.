@@ -5,6 +5,7 @@ import {
   MaterialIcons,
   AntDesign,
   Feather,
+  MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import { useColorScheme } from "react-native";
 
@@ -13,13 +14,15 @@ type FontAwesome6Name = keyof typeof FontAwesome6.glyphMap;
 type MaterialIconsName = keyof typeof MaterialIcons.glyphMap;
 type AntDesignName = keyof typeof AntDesign.glyphMap;
 type FeatherName = keyof typeof Feather.glyphMap;
+type MaterialCommunityIconsName = keyof typeof MaterialCommunityIcons.glyphMap;
 
 export type IconLibrary =
   | "ionicons"
   | "fontawesome6"
   | "material"
   | "antdesign"
-  | "feather";
+  | "feather"
+  | "material-community";
 
 interface BaseIconProps {
   size?: number;
@@ -53,12 +56,18 @@ interface FeatherProps extends BaseIconProps {
   name: FeatherName;
 }
 
+interface MaterialCommunityIconsProps extends BaseIconProps {
+  library: "material-community";
+  name: MaterialCommunityIconsName;
+}
+
 export type ThemedIconProps =
   | IoniconsProps
   | FontAwesome6Props
   | MaterialIconsProps
   | AntDesignProps
-  | FeatherProps;
+  | FeatherProps
+  | MaterialCommunityIconsProps;
 
 export function ThemedIcon({
   name,
@@ -106,6 +115,16 @@ export function ThemedIcon({
       return (
         <Feather
           name={name as FeatherName}
+          size={size}
+          color={color}
+          style={style}
+        />
+      );
+
+    case "material-community":
+      return (
+        <MaterialCommunityIcons
+          name={name as MaterialCommunityIconsName}
           size={size}
           color={color}
           style={style}

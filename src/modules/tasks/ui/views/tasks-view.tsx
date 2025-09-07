@@ -4,6 +4,7 @@ import {
   TouchableOpacity,
   TextInput,
   Animated,
+  SafeAreaView,
 } from "react-native";
 import React, { useState } from "react";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
@@ -337,7 +338,7 @@ const TasksView = () => {
   );
 
   return (
-    <View className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-background">
       {/* Animated Top Bar */}
       <ScrollHeader opacity={headerOpacity}>
         <View className="flex-row justify-between items-center px-6">
@@ -353,14 +354,11 @@ const TasksView = () => {
         renderItem={renderMainContent}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          flexGrow: 1,
-          paddingTop: 56,
-        }}
+        contentContainerStyle={{ flexGrow: 1 }}
         onScroll={handleScroll}
         scrollEventThrottle={16}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 export default TasksView;

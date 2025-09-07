@@ -15,6 +15,7 @@ import type {
 } from "convex/server";
 import type * as auth from "../auth.js";
 import type * as http from "../http.js";
+import type * as private_storage from "../private/storage.js";
 import type * as private_tasks from "../private/tasks.js";
 import type * as private_users from "../private/users.js";
 import type * as schemas_tasks from "../schemas/tasks.js";
@@ -31,6 +32,7 @@ import type * as schemas_users from "../schemas/users.js";
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   http: typeof http;
+  "private/storage": typeof private_storage;
   "private/tasks": typeof private_tasks;
   "private/users": typeof private_users;
   "schemas/tasks": typeof schemas_tasks;
