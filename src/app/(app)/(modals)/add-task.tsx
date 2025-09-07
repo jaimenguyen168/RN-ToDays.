@@ -10,14 +10,7 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import {
-  format,
-  addDays,
-  startOfWeek,
-  startOfDay,
-  addMinutes,
-  isToday,
-} from "date-fns";
+import { format, addDays, startOfWeek, addMinutes, isToday } from "date-fns";
 import { ThemedIcon } from "@/components/ThemedIcon";
 import DatePicker from "react-native-date-picker";
 import { z } from "zod";
@@ -26,6 +19,7 @@ import { api } from "~/convex/_generated/api";
 import { NotificationTypes, TaskTypes } from "~/convex/schemas/tasks";
 import { useNotifications } from "@/hooks/useNotifications";
 import AppButton from "@/components/AppButton";
+import ActionButton from "@/components/ActionButton";
 
 const taskSchemaForm = z.object({
   title: z.string().min(1, "Title is required"),
@@ -337,22 +331,12 @@ const AddTask = () => {
             Add Task
           </Text>
 
-          <TouchableOpacity
+          <ActionButton
             onPress={() => router.back()}
-            className="p-2 rounded-xl bg-background"
-            style={{
-              shadowColor: "#8F99EB",
-              shadowOffset: {
-                width: 0,
-                height: 4,
-              },
-              shadowOpacity: 0.15,
-              shadowRadius: 3,
-              elevation: 3,
-            }}
-          >
-            <ThemedIcon name="x" size={24} library="feather" />
-          </TouchableOpacity>
+            icon="x"
+            iconLibrary="feather"
+            size={24}
+          />
         </View>
 
         <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>

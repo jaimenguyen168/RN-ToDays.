@@ -6,7 +6,7 @@ export const upsertFromClerk = internalMutation({
   args: { data: v.any() as Validator<UserJSON> },
   async handler(ctx, { data }) {
     const email = data.email_addresses?.[0]?.email_address;
-    const firstName = data.first_name || "";
+    const firstName = data.first_name || "Username";
     const lastName = data.last_name || "";
     const fullName = `${firstName} ${lastName}`.trim();
 
