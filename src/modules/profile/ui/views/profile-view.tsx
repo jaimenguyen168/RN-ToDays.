@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Image, ScrollView, useColorScheme } from "react-native";
+import { View, Text, ScrollView } from "react-native";
 import { useQuery } from "convex/react";
 import { api } from "~/convex/_generated/api";
 import ActionButton from "@/components/ActionButton";
@@ -9,6 +9,7 @@ import { useRouter } from "expo-router";
 import { TaskTypes } from "~/convex/schemas/tasks";
 import { startOfToday } from "date-fns";
 import DropdownMenu, { MenuItem } from "@/components/DropdownMenu";
+import ProfileImageUpload from "@/modules/profile/ui/components/ProfileImageUpload";
 
 interface TaskCounts {
   personal: number;
@@ -20,7 +21,6 @@ interface TaskCounts {
 }
 
 const ProfileView = () => {
-  const colorScheme = useColorScheme();
   const router = useRouter();
   const { signOut } = useClerk();
 
@@ -117,17 +117,7 @@ const ProfileView = () => {
           <View className="items-center">
             {/* Avatar */}
             <View className="mb-6">
-              {user?.imageUrl ? (
-                <Image
-                  source={{ uri: user.imageUrl }}
-                  className="w-24 h-24 rounded-full"
-                  resizeMode="cover"
-                />
-              ) : (
-                <View className="w-24 h-24 rounded-full bg-muted items-center justify-center">
-                  <Text className="text-4xl">👨‍💻</Text>
-                </View>
-              )}
+              <ProfileImageUpload currentImageUrl={user?.imageUrl} />
             </View>
 
             {/* User Info */}
