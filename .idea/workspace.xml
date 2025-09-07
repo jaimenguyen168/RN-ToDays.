@@ -5,12 +5,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="848daa69-0b20-4967-b608-52402236c448" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/modules/auth/ui/components/FormField.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/modules/auth/ui/components/OAuthButton.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/(app)/(settings)/_layout.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/(app)/(settings)/settings.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/ActionButton.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/modules/profile/ui/components/TaskProfileCard.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/modules/profile/ui/views/profile-view.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/modules/profile/ui/views/settings.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/convex/auth.ts" beforeDir="false" afterPath="$PROJECT_DIR$/convex/auth.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(app)/(modals)/add-task.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(app)/(modals)/add-task.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(app)/(tabs)/profile.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(app)/(tabs)/profile.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/ThemedIcon.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ThemedIcon.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/activity/ui/components/TaskStats.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/activity/ui/components/TaskStats.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/activity/ui/components/TasksCalendar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/activity/ui/components/TasksCalendar.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/auth/ui/components/OAuthButton.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/auth/ui/components/OAuthButton.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/modules/auth/ui/views/login-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/auth/ui/views/login-view.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/modules/auth/ui/views/signup-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/auth/ui/views/signup-view.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/home/ui/views/home-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/home/ui/views/home-view.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,7 +63,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "07-auth",
+    "git-widget-placeholder": "08-profile",
     "junie.onboarding.icon.badge.shown": "true",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -78,11 +88,11 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/modules/profile/ui/components" />
       <recent name="$PROJECT_DIR$/src/assets/images" />
       <recent name="$PROJECT_DIR$/src/assets/icons" />
       <recent name="$PROJECT_DIR$/src/assets" />
       <recent name="$PROJECT_DIR$/src/modules/tasks/ui/components" />
-      <recent name="$PROJECT_DIR$/src/modules/tasks/hooks" />
     </key>
   </component>
   <component name="SharedIndexes">

@@ -1,9 +1,15 @@
-import { View, Text, Image, TouchableOpacity, Animated } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  Animated,
+  SafeAreaView,
+} from "react-native";
 import React from "react";
 import { useRouter } from "expo-router";
 import { useScrollHeader } from "@/hooks/useScrollHeader";
 import { api } from "~/convex/_generated/api";
-import { Id } from "~/convex/_generated/dataModel";
 import { TaskTypes } from "~/convex/schemas/tasks";
 import { images } from "@/constants/images";
 import { ScrollHeader } from "@/components/ScrollHeader";
@@ -70,7 +76,7 @@ const HomeView = () => {
   const taskCounts = calculateTaskCounts();
 
   const renderHeader = () => (
-    <View className="bg-background pt-20 gap-8">
+    <View className="bg-background pt-4 gap-8">
       {/* Header */}
       <View className="mr-2">
         <View className="flex-row items-center justify-between">
@@ -83,13 +89,13 @@ const HomeView = () => {
             </Text>
           </View>
 
-          {user?.imageUrl && (
+          <TouchableOpacity onPress={() => router.push("/profile")}>
             <Image
-              source={{ uri: user.imageUrl }}
+              source={{ uri: user?.imageUrl }}
               className="w-12 h-12 rounded-full"
               resizeMode="cover"
             />
-          )}
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -102,13 +108,13 @@ const HomeView = () => {
             <TaskGroupCard
               title="Completed"
               count={taskCounts.completed}
-              colors={["#84fab0", "#4ade80", "#22c55e"]}
+              colors={["#FED7AA", "#FB923C", "#F97316"]}
               image={images.complete}
             />
             <TaskGroupCard
               title="Pending"
               count={taskCounts.pending}
-              colors={["#818cf8", "#6366f1", "#4f46e5"]}
+              colors={["#D1D5DB", "#9CA3AF", "#6B7280"]}
               icon="clock"
             />
           </View>
@@ -156,7 +162,7 @@ const HomeView = () => {
   const renderFooter = () => <View className="h-36" />;
 
   return (
-    <View className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-background">
       {/* Animated Top Bar */}
       <ScrollHeader opacity={headerOpacity}>
         <Text className="text-foreground text-lg font-semibold text-center">
@@ -187,7 +193,7 @@ const HomeView = () => {
         onScroll={handleScroll}
         scrollEventThrottle={16}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 export default HomeView;

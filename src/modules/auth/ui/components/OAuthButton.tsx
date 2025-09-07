@@ -59,7 +59,7 @@ export function OAuthButton({
       if (createdSessionId) {
         console.log("createdSessionId", createdSessionId);
         await setActive!({ session: createdSessionId });
-        router.replace("/");
+        router.replace("/home");
       }
     } catch (error) {
       if (isClerkAPIResponseError(error)) {

@@ -72,7 +72,7 @@ const LoginView = () => {
 
         if (result?.status === "complete") {
           await setActive?.({ session: result.createdSessionId });
-          router.push("/");
+          router.replace("/home");
         }
       } catch (error: any) {
         Alert.alert("Error", error.errors[0]?.message || "Sign in failed");

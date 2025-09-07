@@ -11,8 +11,10 @@ interface TaskStatsProps {
 }
 
 const TaskStats = ({ selectedDate }: TaskStatsProps) => {
+  const adjustedDate = selectedDate + 24 * 60 * 60 * 1000;
+
   const dateTasks = useQuery(api.private.tasks.getTasksForDate, {
-    date: selectedDate,
+    date: adjustedDate,
   });
 
   const formattedDate = isSameDay(selectedDate, new Date())
