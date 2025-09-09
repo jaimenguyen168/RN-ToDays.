@@ -9,6 +9,7 @@ interface TaskGroupCardProps {
   icon?: string;
   image?: any;
   height?: number;
+  onPress?: () => void;
 }
 
 const TaskGroupCard = ({
@@ -18,8 +19,10 @@ const TaskGroupCard = ({
   icon,
   image,
   height,
+  onPress,
 }: TaskGroupCardProps) => (
   <TouchableOpacity
+    onPress={onPress}
     className={`${height && `h-${height}`} rounded-3xl px-6 pt-6 pb-4 justify-between flex-1 overflow-hidden`}
     style={{
       elevation: 10,
@@ -47,7 +50,7 @@ const TaskGroupCard = ({
 
     <View className="w-full">
       <View className="flex-row items-start justify-between gap-2">
-        {icon && <FontAwesome6 name={icon} size={20} color="white" />}
+        {icon && <Ionicons name={icon as any} size={20} color="white" />}
         {image && (
           <Image source={image} className="size-20" resizeMode="cover" />
         )}

@@ -64,7 +64,6 @@ export const tasks = defineTable({
   .index("by_notifications", ["notifications"])
   .index("by_user_and_notifications", ["userId", "notifications"]);
 
-// Table for recurring task templates
 export const recurrings = defineTable({
   title: v.string(),
   type: v.union(

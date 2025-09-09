@@ -95,6 +95,15 @@ const ProfileView = () => {
     },
   ];
 
+  const navigateToTaskList = (category: string) => {
+    router.push({
+      pathname: "/task-list",
+      params: {
+        category,
+      },
+    });
+  };
+
   return (
     <View className="flex-1 bg-background">
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
@@ -125,9 +134,7 @@ const ProfileView = () => {
               {user?.username || "Steve Job"}
             </Text>
             {user?.email && (
-              <Text className="text-muted-foreground text-base">
-                {user.email}
-              </Text>
+              <Text className="text-muted-foreground">{user.email}</Text>
             )}
           </View>
         </View>
@@ -142,7 +149,7 @@ const ProfileView = () => {
               iconLibrary="feather"
               iconColor="#7C3AED"
               colors={["#A5B4FC", "#8B5CF6"]}
-              onPress={() => console.log("Personal tasks")}
+              onPress={() => navigateToTaskList("personal")}
             />
             <TaskProfileCard
               title="Work"
@@ -150,7 +157,7 @@ const ProfileView = () => {
               icon="briefcase"
               iconColor="#16A34A"
               colors={["#BBF7D0", "#22C55E"]}
-              onPress={() => console.log("Work tasks")}
+              onPress={() => navigateToTaskList("work")}
             />
           </View>
 
@@ -162,7 +169,7 @@ const ProfileView = () => {
               iconLibrary="material-community"
               iconColor="#DC2626"
               colors={["#FECACA", "#EF4444"]}
-              onPress={() => console.log("Emergency tasks")}
+              onPress={() => navigateToTaskList("emergency")}
             />
             <TaskProfileCard
               title="Today"
@@ -170,7 +177,7 @@ const ProfileView = () => {
               icon="today-outline"
               iconColor="#0891B2"
               colors={["#A5F3FC", "#06B6D4"]}
-              onPress={() => console.log("Today tasks")}
+              onPress={() => navigateToTaskList("today")}
             />
           </View>
 
@@ -182,7 +189,7 @@ const ProfileView = () => {
               iconColor="#EA580C"
               icon="calendar-outline"
               colors={["#FED7AA", "#F97316"]}
-              onPress={() => console.log("Completed tasks")}
+              onPress={() => navigateToTaskList("completed")}
             />
             <TaskProfileCard
               title="Pending"
@@ -191,7 +198,7 @@ const ProfileView = () => {
               iconColor="#4B5563"
               iconLibrary="feather"
               colors={["#D1D5DB", "#6B7280"]}
-              onPress={() => console.log("Pending tasks")}
+              onPress={() => navigateToTaskList("pending")}
             />
           </View>
         </View>
