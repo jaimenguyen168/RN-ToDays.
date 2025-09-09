@@ -6,81 +6,32 @@ import {
   Animated,
 } from "react-native";
 import React, { useState, useMemo } from "react";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter } from "expo-router";
 import { useQuery } from "convex/react";
 import { api } from "~/convex/_generated/api";
 import { useScrollHeader } from "@/hooks/useScrollHeader";
 import { ScrollHeader } from "@/components/ScrollHeader";
 import TaskItem from "@/modules/tasks/ui/components/TaskItem";
 import EmptyState from "@/modules/activity/ui/components/EmptyState";
-import { IconLibrary, ThemedIcon } from "@/components/ThemedIcon";
+import { ThemedIcon } from "@/components/ThemedIcon";
 import ActionButton from "@/components/ActionButton";
 import SearchBar from "@/modules/tasks/ui/components/SearchBar";
 import { Ionicons } from "@expo/vector-icons";
-import { TaskTypes } from "~/convex/schemas/tasks";
-import { Id } from "~/convex/_generated/dataModel";
+import { useDebounce } from "@/modules/tasks/hooks/useDebounce";
 
-const TaskListView = () => {
+const SearchTasksView = () => {
   const router = useRouter();
-  const { category, recurringId, recurringTitle } = useLocalSearchParams<{
-    category: string;
-    recurringId: string;
-    recurringTitle: string;
-  }>();
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const { headerOpacity, handleScroll } = useScrollHeader(15);
 
-  const getQueryArgs = () => {
-    if (recurringId) {
-      return { recurringId: recurringId as Id<"recurrings"> };
-    }
-
-    switch (category?.toLowerCase()) {
-      case "completed":
-        return { isCompleted: true };
-      case "pending":
-        return { isPending: true };
-      case "emergency":
-        return { type: TaskTypes.EMERGENCY };
-      case "work":
-        return { type: TaskTypes.WORK };
-      case "personal":
-        return { type: TaskTypes.PERSONAL };
-      case "today":
-        return { isToday: true };
-      case "search":
-      default:
-        return {}; // Return all tasks for search
-    }
-  };
-
-  const allTasks = useQuery(
-    api.private.tasks.getTasksWithFilters,
-    getQueryArgs(),
+  // Search query - only run when there's a search term
+  const searchResults = useQuery(
+    api.private.tasks.searchTasks,
+    debouncedSearchQuery.trim()
+      ? { searchQuery: debouncedSearchQuery }
+      : "skip",
   );
-
-  const getTitle = (): string => {
-    if (recurringTitle) {
-      return recurringTitle;
-    }
-
-    switch (category.toLowerCase()) {
-      case "completed":
-        return "Completed Tasks";
-      case "pending":
-        return "Pending Tasks";
-      case "emergency":
-        return "Emergency Tasks";
-      case "work":
-        return "Work Tasks";
-      case "personal":
-        return "Personal Tasks";
-      case "today":
-        return "Today's Tasks";
-      default:
-        return "All Tasks";
-    }
-  };
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -94,24 +45,10 @@ const TaskListView = () => {
     };
   };
 
-  const filteredTasks = useMemo(() => {
-    if (!allTasks) return [];
+  const groupedTasks = useMemo(() => {
+    if (!searchResults || searchResults.length === 0) return [];
 
-    let tasksToProcess = allTasks;
-
-    // Apply search filter
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase().trim();
-      tasksToProcess = tasksToProcess.filter(
-        (task) =>
-          task.title?.toLowerCase().includes(query) ||
-          task.description?.toLowerCase().includes(query) ||
-          task.note?.toLowerCase().includes(query) ||
-          task.tags.some((tag) => tag.toLowerCase().includes(query)),
-      );
-    }
-
-    const sortedTasks = tasksToProcess.sort((a, b) => {
+    const sortedTasks = searchResults.sort((a, b) => {
       return a.date - b.date;
     });
 
@@ -177,7 +114,7 @@ const TaskListView = () => {
     });
 
     return grouped;
-  }, [allTasks, searchQuery]);
+  }, [searchResults]);
 
   const renderTaskItem = ({ item }: { item: any }) => {
     if (item.type === "month") {
@@ -216,62 +153,7 @@ const TaskListView = () => {
   };
 
   const renderEmptyState = () => {
-    const getEmptyStateConfig = () => {
-      switch (category) {
-        case "completed":
-          return {
-            icon: "check-circle",
-            title: "No completed tasks",
-            description: "Complete some tasks to see them here",
-            library: "fontawesome6",
-          };
-        case "pending":
-          return {
-            icon: "clock",
-            title: "No pending tasks",
-            description: "Great! You're all caught up with overdue tasks",
-            library: "fontawesome6",
-          };
-        case "emergency":
-          return {
-            icon: "alert-triangle",
-            title: "No emergency tasks",
-            description: "No urgent tasks at the moment",
-            library: "feather",
-          };
-        case "work":
-          return {
-            icon: "briefcase",
-            title: "No work tasks",
-            description: "No work-related tasks found",
-            library: "feather",
-          };
-        case "personal":
-          return {
-            icon: "user",
-            title: "No personal tasks",
-            description: "No personal tasks found",
-            library: "feather",
-          };
-        case "today":
-          return {
-            icon: "calendar",
-            title: "No tasks for today",
-            description: "Your schedule is clear for today",
-            library: "feather",
-          };
-        default:
-          return {
-            icon: "calendar",
-            title: "No tasks found",
-            description: "Try adjusting your search or add new tasks",
-            library: "feather",
-          };
-      }
-    };
-
-    const config = getEmptyStateConfig();
-
+    // If there's a search query but no results
     if (searchQuery.trim()) {
       return (
         <EmptyState
@@ -283,13 +165,14 @@ const TaskListView = () => {
       );
     }
 
+    // Default empty state for search
     return (
       <View className="pt-4">
         <EmptyState
-          icon={config.icon}
-          title={config.title}
-          description={config.description}
-          library={config.library as IconLibrary}
+          icon="search"
+          title="Search your tasks"
+          description="Enter a search term to find your tasks by title, description, notes, or tags"
+          library="feather"
         />
       </View>
     );
@@ -309,29 +192,30 @@ const TaskListView = () => {
           />
           <View className="flex-1 items-center">
             <Text className="text-foreground text-xl font-semibold">
-              {getTitle()}
+              Search Tasks
             </Text>
           </View>
           <View className="w-10" />
         </View>
 
         {/* Search Bar */}
-        <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
+        <SearchBar
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholder="Search tasks, notes, or tags..."
+        />
 
-        {/* Results count */}
-        {searchQuery.trim() && (
+        {/* Results count - only show when searching and have results */}
+        {searchQuery.trim() && searchResults && (
           <Text className="text-muted-foreground text-sm">
-            {filteredTasks.filter((item) => !item.type).length} task
-            {filteredTasks.filter((item) => !item.type).length !== 1
-              ? "s"
-              : ""}{" "}
+            {searchResults.length} task{searchResults.length !== 1 ? "s" : ""}{" "}
             found
           </Text>
         )}
 
         {/* Tasks FlatList */}
         <Animated.FlatList
-          data={filteredTasks}
+          data={groupedTasks}
           renderItem={renderTaskItem}
           keyExtractor={(item) => item._id}
           showsVerticalScrollIndicator={false}
@@ -359,8 +243,9 @@ const TaskListView = () => {
             <ThemedIcon name="chevron-left" size={20} library="feather" />
           </TouchableOpacity>
           <Text className="text-foreground text-lg font-semibold">
-            {getTitle()}
+            Search Tasks
           </Text>
+          <View className="w-6" />
         </View>
       </ScrollHeader>
 
@@ -392,4 +277,4 @@ const TaskListView = () => {
   );
 };
 
-export default TaskListView;
+export default SearchTasksView;
