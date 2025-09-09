@@ -5,31 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="848daa69-0b20-4967-b608-52402236c448" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/copilot.data.migration.agent.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/copilot.data.migration.edit.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/(app)/(nav)/recurring-task-list.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/(app)/(nav)/task-list.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/modules/tasks/ui/components/RecurringTaskItem.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/modules/tasks/ui/components/SearchBar.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/modules/tasks/ui/views/recurring-task-list-view.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/modules/tasks/ui/views/task-list-view.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/project.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/project.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/modules/tasks/hooks/useDebounce.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/modules/tasks/ui/views/search-tasks-view.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/convex/private/tasks.ts" beforeDir="false" afterPath="$PROJECT_DIR$/convex/private/tasks.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/convex/schemas/tasks.ts" beforeDir="false" afterPath="$PROJECT_DIR$/convex/schemas/tasks.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(app)/(settings)/_layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(app)/(nav)/_layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(app)/(settings)/settings.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(app)/(nav)/settings.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/ScrollHeader.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ScrollHeader.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/activity/ui/components/EmptyState.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/activity/ui/components/EmptyState.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/activity/ui/components/TaskStats.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/activity/ui/components/TaskStats.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/home/ui/components/TaskGroupCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/home/ui/components/TaskGroupCard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(app)/(nav)/task-list.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(app)/(nav)/task-list.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/modules/home/ui/views/home-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/home/ui/views/home-view.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/profile/ui/views/profile-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/profile/ui/views/profile-view.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/profile/ui/views/settings.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/profile/ui/views/settings.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/tasks/ui/components/TaskItem.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/tasks/ui/components/TaskItem.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/tasks/ui/components/SearchBar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/tasks/ui/components/SearchBar.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/tasks/ui/views/task-list-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/tasks/ui/views/task-list-view.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/modules/tasks/ui/views/tasks-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/tasks/ui/views/tasks-view.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/types/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/time.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/time.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -72,7 +56,7 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;09-list&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;10-search&quot;,
     &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
@@ -126,6 +110,7 @@
       <workItem from="1756995115369" duration="5074000" />
       <workItem from="1757215680395" duration="32838000" />
       <workItem from="1757348895202" duration="12642000" />
+      <workItem from="1757448560841" duration="3271000" />
     </task>
     <servers />
   </component>
