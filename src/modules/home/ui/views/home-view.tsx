@@ -18,6 +18,7 @@ import EmptyState from "@/modules/activity/ui/components/EmptyState";
 import { useQuery } from "convex/react";
 import TaskGroupCard from "@/modules/home/ui/components/TaskGroupCard";
 import { startOfToday } from "date-fns";
+import SearchBar from "@/modules/tasks/ui/components/SearchBar";
 
 interface TaskCounts {
   completed: number;
@@ -88,7 +89,7 @@ const HomeView = () => {
   };
 
   const renderHeader = () => (
-    <View className="bg-background pt-4 gap-8">
+    <View className="bg-background pt-4 gap-6">
       {/* Header */}
       <View className="mr-2">
         <View className="flex-row items-center justify-between">
@@ -110,6 +111,18 @@ const HomeView = () => {
           </TouchableOpacity>
         </View>
       </View>
+
+      <TouchableOpacity
+        onPress={() => router.push("/task-list?mode=search")}
+        activeOpacity={0.7}
+      >
+        <SearchBar
+          value=""
+          onChangeText={() => {}}
+          placeholder="Search tasks, notes, or tags..."
+          disabled={true}
+        />
+      </TouchableOpacity>
 
       {/* Task Cards */}
       <View className="gap-3">

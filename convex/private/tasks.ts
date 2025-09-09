@@ -159,7 +159,9 @@ export const getTasksWithFilters = query({
 
     // Filter by type
     if (args.type) {
-      filteredTasks = filteredTasks.filter((task) => task.type === args.type);
+      filteredTasks = filteredTasks
+        .filter((task) => task.type === args.type)
+        .filter((task) => !isPast(task.date));
     }
 
     // Filter by completion status
@@ -171,15 +173,9 @@ export const getTasksWithFilters = query({
 
     // Filter by pending status
     if (args.isPending !== undefined) {
-      if (args.isPending) {
-        filteredTasks = filteredTasks.filter(
-          (task) => !task.isCompleted && isPast(task.endTime),
-        );
-      } else {
-        filteredTasks = filteredTasks.filter(
-          (task) => task.isCompleted || !isPast(task.endTime),
-        );
-      }
+      filteredTasks = filteredTasks.filter(
+        (task) => !task.isCompleted && isPast(task.endTime),
+      );
     }
 
     // Filter by today's date
@@ -201,19 +197,9 @@ export const getTasksWithFilters = query({
       );
     }
 
-    // For filters other than isCompleted and isPending, exclude tasks in the past
-    // (unless specifically filtering by completion or pending status)
-    if (
-      args.isCompleted === undefined &&
-      args.isPending === undefined &&
-      (args.type || args.isToday)
-    ) {
-      filteredTasks = filteredTasks.filter(
-        (task) => task.isCompleted || !isPast(task.endTime),
-      );
-    }
-
     filteredTasks.sort((a, b) => b.startTime - a.startTime);
+
+    console.log("Filtered tasks:", filteredTasks.length);
 
     return filteredTasks;
   },
@@ -527,5 +513,47 @@ export const deleteTask = mutation({
         }
         break;
     }
+  },
+});
+
+export const searchTasks = query({
+  args: {
+    searchQuery: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const currentUser = await ctx.runQuery(api.private.users.getUser);
+    const userId = currentUser._id as Id<"users">;
+
+    // Get all user's tasks
+    const allTasks = await ctx.db
+      .query("tasks")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+
+    const searchQuery = args.searchQuery.toLowerCase().trim();
+
+    if (!searchQuery) {
+      return [];
+    }
+
+    let filteredTasks = [];
+
+    // Filter tasks that match the search query
+    filteredTasks = allTasks.filter((task) => {
+      const title = task.title.toLowerCase();
+      const description = (task.description || "").toLowerCase();
+      const note = (task.note || "").toLowerCase();
+      const tags = task.tags.map((tag) => tag.toLowerCase()).join(" ");
+
+      return (
+        title.includes(searchQuery) ||
+        description.includes(searchQuery) ||
+        note.includes(searchQuery) ||
+        tags.includes(searchQuery)
+      );
+    });
+
+    // Sort by most recent first
+    return filteredTasks.sort((a, b) => b.startTime - a.startTime);
   },
 });
