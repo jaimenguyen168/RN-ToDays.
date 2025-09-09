@@ -72,3 +72,35 @@ export const formatDateTime = (
       return format(date, "MM-dd-yyyy");
   }
 };
+
+export const formatWeekDays = (weekDays?: string[]) => {
+  if (!weekDays || weekDays.length === 0) return "Daily";
+
+  const dayAbbrevs: { [key: string]: string } = {
+    monday: "Mon",
+    tuesday: "Tue",
+    wednesday: "Wed",
+    thursday: "Thu",
+    friday: "Fri",
+    saturday: "Sat",
+    sunday: "Sun",
+  };
+
+  if (weekDays.length === 7) return "Daily";
+  if (
+    weekDays.length === 5 &&
+    !weekDays.includes("saturday") &&
+    !weekDays.includes("sunday")
+  ) {
+    return "Weekdays";
+  }
+  if (
+    weekDays.length === 2 &&
+    weekDays.includes("saturday") &&
+    weekDays.includes("sunday")
+  ) {
+    return "Weekends";
+  }
+
+  return weekDays.map((day) => dayAbbrevs[day] || day).join(", ");
+};

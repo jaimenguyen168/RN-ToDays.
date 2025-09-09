@@ -4,6 +4,7 @@ import { TaskTypes } from "../schemas/tasks";
 import { calculateNotifications } from "../../src/utils/noti";
 import { api } from "../_generated/api";
 import { Id } from "../_generated/dataModel";
+import { isPast, isToday } from "date-fns";
 
 export const create = mutation({
   args: {
@@ -141,7 +142,10 @@ export const getTasksWithFilters = query({
       ),
     ),
     isCompleted: v.optional(v.boolean()),
+    isPending: v.optional(v.boolean()),
+    isToday: v.optional(v.boolean()),
     tags: v.optional(v.array(v.string())),
+    recurringId: v.optional(v.id("recurrings")),
   },
   handler: async (ctx, args) => {
     const currentUser = await ctx.runQuery(api.private.users.getUser);
@@ -153,23 +157,63 @@ export const getTasksWithFilters = query({
 
     let filteredTasks = await query.collect();
 
+    // Filter by type
     if (args.type) {
       filteredTasks = filteredTasks.filter((task) => task.type === args.type);
     }
 
+    // Filter by completion status
     if (args.isCompleted !== undefined) {
       filteredTasks = filteredTasks.filter(
         (task) => task.isCompleted === args.isCompleted,
       );
     }
 
+    // Filter by pending status
+    if (args.isPending !== undefined) {
+      if (args.isPending) {
+        filteredTasks = filteredTasks.filter(
+          (task) => !task.isCompleted && isPast(task.endTime),
+        );
+      } else {
+        filteredTasks = filteredTasks.filter(
+          (task) => task.isCompleted || !isPast(task.endTime),
+        );
+      }
+    }
+
+    // Filter by today's date
+    if (args.isToday !== undefined && args.isToday) {
+      filteredTasks = filteredTasks.filter((task) => isToday(task.date));
+    }
+
+    // Filter by tags
     if (args.tags && args.tags.length > 0) {
       filteredTasks = filteredTasks.filter((task) =>
         args.tags!.some((tag) => task.tags.includes(tag)),
       );
     }
 
-    filteredTasks.sort((a, b) => b.date - a.date);
+    // Filter by recurringId
+    if (args.recurringId) {
+      filteredTasks = filteredTasks.filter(
+        (task) => task.recurringId === args.recurringId,
+      );
+    }
+
+    // For filters other than isCompleted and isPending, exclude tasks in the past
+    // (unless specifically filtering by completion or pending status)
+    if (
+      args.isCompleted === undefined &&
+      args.isPending === undefined &&
+      (args.type || args.isToday)
+    ) {
+      filteredTasks = filteredTasks.filter(
+        (task) => task.isCompleted || !isPast(task.endTime),
+      );
+    }
+
+    filteredTasks.sort((a, b) => b.startTime - a.startTime);
 
     return filteredTasks;
   },
@@ -229,14 +273,29 @@ export const toggleCompleted = mutation({
 
 export const getRecurringTasks = query({
   args: {},
-  handler: async (ctx, args) => {
+  handler: async (ctx) => {
     const currentUser = await ctx.runQuery(api.private.users.getUser);
     const userId = currentUser._id as Id<"users">;
 
-    return await ctx.db
+    const recurrings = await ctx.db
       .query("recurrings")
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .collect();
+
+    return await Promise.all(
+      recurrings.map(async (recurring) => {
+        const taskCount = await ctx.db
+          .query("tasks")
+          .withIndex("by_recurring", (q) => q.eq("recurringId", recurring._id))
+          .collect()
+          .then((tasks) => tasks.length);
+
+        return {
+          ...recurring,
+          taskCount,
+        };
+      }),
+    );
   },
 });
 
@@ -317,6 +376,24 @@ export const editTask = mutation({
       return baseUpdates;
     };
 
+    // Prepare recurring table updates from task updates
+    const prepareRecurringUpdates = () => {
+      const recurringUpdates: any = {};
+
+      if (args.updates.title !== undefined) {
+        recurringUpdates.title = args.updates.title;
+      }
+      if (args.updates.type !== undefined) {
+        recurringUpdates.type = args.updates.type;
+      }
+      if (args.updates.tags !== undefined) {
+        recurringUpdates.tags = args.updates.tags;
+      }
+
+      // Only return updates if there are relevant fields to update
+      return Object.keys(recurringUpdates).length > 0 ? recurringUpdates : null;
+    };
+
     // Handle one-time task
     if (!task?.recurringId) {
       const updates = prepareUpdates(task);
@@ -340,6 +417,13 @@ export const editTask = mutation({
         break;
 
       case "all":
+        // Update the recurring template
+        const recurringUpdatesForAll = prepareRecurringUpdates();
+        if (recurringUpdatesForAll && task.recurringId) {
+          await ctx.db.patch(task.recurringId, recurringUpdatesForAll);
+        }
+
+        // Update all tasks in the series
         const allTasks = await ctx.db
           .query("tasks")
           .withIndex("by_recurring", (q) =>
@@ -356,6 +440,13 @@ export const editTask = mutation({
         break;
 
       case "this_and_future":
+        // Update the recurring template
+        const recurringUpdatesForFuture = prepareRecurringUpdates();
+        if (recurringUpdatesForFuture && task.recurringId) {
+          await ctx.db.patch(task.recurringId, recurringUpdatesForFuture);
+        }
+
+        // Update this task and future tasks
         const futureTasks = await ctx.db
           .query("tasks")
           .withIndex("by_recurring", (q) =>

@@ -136,18 +136,20 @@ const SettingsView = () => {
     <SafeAreaView className="flex-1 bg-background">
       <View className="px-6 pt-4">
         {/* Header */}
-        <View className="flex-row items-center mb-8">
+        <View className="flex-row items-center mb-8 justify-between">
           <ActionButton
             onPress={() => router.back()}
             icon="arrow-left"
             iconLibrary="feather"
             size={24}
           />
-          <View className="flex-1 items-center mr-6">
+          <View className="flex-1 items-center">
             <Text className="text-foreground text-xl font-semibold">
               Setting
             </Text>
           </View>
+
+          <View className="w-10" />
         </View>
 
         {/* General Section */}
