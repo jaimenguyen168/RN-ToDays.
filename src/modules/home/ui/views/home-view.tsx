@@ -22,7 +22,6 @@ import { startOfToday } from "date-fns";
 interface TaskCounts {
   completed: number;
   pending: number;
-  onGoing: number;
   emergency: number;
 }
 
@@ -41,13 +40,11 @@ const HomeView = () => {
   });
 
   const calculateTaskCounts = (): TaskCounts => {
-    if (!allTasks)
-      return { completed: 0, pending: 0, onGoing: 0, emergency: 0 };
+    if (!allTasks) return { completed: 0, pending: 0, emergency: 0 };
 
     const now = Date.now();
     let completed = 0;
     let pending = 0;
-    let onGoing = allRecurringTasks?.length || 0;
     let emergency = 0;
 
     allTasks.forEach((task) => {
@@ -70,10 +67,25 @@ const HomeView = () => {
       }
     });
 
-    return { completed, pending, onGoing, emergency };
+    return { completed, pending, emergency };
   };
 
   const taskCounts = calculateTaskCounts();
+
+  const navigateToTaskList = (category: string) => {
+    router.push({
+      pathname: "/task-list",
+      params: {
+        category,
+      },
+    });
+  };
+
+  const navigateToRecurringTaskList = () => {
+    router.push({
+      pathname: "/recurring-task-list",
+    });
+  };
 
   const renderHeader = () => (
     <View className="bg-background pt-4 gap-8">
@@ -110,27 +122,31 @@ const HomeView = () => {
               count={taskCounts.completed}
               colors={["#FED7AA", "#FB923C", "#F97316"]}
               image={images.complete}
+              onPress={() => navigateToTaskList("completed")}
             />
             <TaskGroupCard
               title="Pending"
               count={taskCounts.pending}
               colors={["#D1D5DB", "#9CA3AF", "#6B7280"]}
-              icon="clock"
+              icon="timer-outline"
+              onPress={() => navigateToTaskList("pending")}
             />
           </View>
 
           <View className="gap-4 flex-1">
             <TaskGroupCard
-              title="On Going"
-              count={taskCounts.onGoing}
+              title="Recurring"
+              count={allRecurringTasks?.length || 0}
               colors={["#7dd3fc", "#22d3ee", "#06b6d4"]}
-              icon="play-circle"
+              icon="refresh"
+              onPress={navigateToRecurringTaskList}
             />
             <TaskGroupCard
               title="Emergency"
               count={taskCounts.emergency}
               colors={["#ff6b6b", "#ff4757", "#e74c3c"]}
               image={images.emergency}
+              onPress={() => navigateToTaskList("emergency")}
             />
           </View>
         </View>

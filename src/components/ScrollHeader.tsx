@@ -5,12 +5,14 @@ interface ScrollHeaderProps {
   children: React.ReactNode;
   opacity: Animated.AnimatedInterpolation<number>;
   className?: string;
+  height?: number;
 }
 
 export const ScrollHeader = ({
   children,
   opacity,
   className = "",
+  height = 90,
 }: ScrollHeaderProps) => {
   const colorScheme = useColorScheme();
   const shadowColor = colorScheme === "dark" ? "#334155" : "#ECEAFF";
@@ -21,7 +23,7 @@ export const ScrollHeader = ({
       style={{
         opacity,
         paddingTop: 60,
-        height: 90,
+        height: height,
         shadowColor: shadowColor,
         shadowOffset: {
           width: 0,
