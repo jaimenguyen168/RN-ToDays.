@@ -1,11 +1,5 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  useColorScheme,
-  Alert,
-} from "react-native";
+import { View, Text, TouchableOpacity, Alert } from "react-native";
 import { ThemedIcon } from "@/components/ThemedIcon";
 import { TaskTypes } from "~/convex/schemas/tasks";
 import { useMutation, useQuery } from "convex/react";
@@ -28,7 +22,6 @@ interface TaskItemProps {
 
 const TaskItem = ({ task, onPress }: TaskItemProps) => {
   const router = useRouter();
-  const colorScheme = useColorScheme();
   const { cancelTaskNotifications } = useNotifications();
 
   const toggleCompleted = useMutation(api.private.tasks.toggleCompleted);
@@ -67,9 +60,9 @@ const TaskItem = ({ task, onPress }: TaskItemProps) => {
   };
 
   const handleDelete = async (scope: ScopeType) => {
-    const notificationTypes = task.notifications?.map(
+    const notificationTypes = (task.notifications || []).map(
       (notification) => notification.type,
-    ) as string[];
+    );
 
     try {
       if (scope === "this_only") {

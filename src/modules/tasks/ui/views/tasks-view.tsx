@@ -2,7 +2,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  TextInput,
   Animated,
   SafeAreaView,
 } from "react-native";
@@ -18,6 +17,7 @@ import TaskItem from "@/modules/tasks/ui/components/TaskItem";
 import WeekNavigation from "@/modules/tasks/ui/components/WeekNavigation";
 import { ScrollHeader } from "@/components/ScrollHeader";
 import { format, isAfter, isBefore, isSameDay } from "date-fns";
+import SearchBar from "@/modules/tasks/ui/components/SearchBar";
 
 const TasksView = () => {
   const router = useRouter();
@@ -242,24 +242,7 @@ const TasksView = () => {
       {/* Header Content */}
       <View className="px-6 pt-4 gap-6">
         {/* Search Bar */}
-        <View className="flex-row items-center bg-muted rounded-full px-4 h-14 gap-3">
-          <ThemedIcon name="search" size={20} />
-          <TextInput
-            placeholder="Search for task"
-            className="flex-1 text-foreground"
-            placeholderTextColor="#9CA3AF"
-            onChangeText={setSearchQuery}
-            value={searchQuery}
-          />
-          {searchQuery.length > 0 && (
-            <TouchableOpacity
-              onPress={() => setSearchQuery("")}
-              className="p-3"
-            >
-              <ThemedIcon name="xmark" size={16} library="fontawesome6" />
-            </TouchableOpacity>
-          )}
-        </View>
+        <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
 
         {/* Task Title and Date */}
         <View className="flex-row justify-between items-center">
