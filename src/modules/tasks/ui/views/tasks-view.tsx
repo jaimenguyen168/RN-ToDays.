@@ -17,7 +17,6 @@ import TaskItem from "@/modules/tasks/ui/components/TaskItem";
 import WeekNavigation from "@/modules/tasks/ui/components/WeekNavigation";
 import { ScrollHeader } from "@/components/ScrollHeader";
 import { format, isAfter, isBefore, isSameDay } from "date-fns";
-import SearchBar from "@/modules/tasks/ui/components/SearchBar";
 
 const TasksView = () => {
   const router = useRouter();
@@ -26,8 +25,6 @@ const TasksView = () => {
   }>();
 
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [searchQuery, setSearchQuery] = useState("");
-
   const { headerOpacity, handleScroll } = useScrollHeader(15);
 
   useFocusEffect(
@@ -241,9 +238,6 @@ const TasksView = () => {
     <View className="flex-1">
       {/* Header Content */}
       <View className="px-6 pt-4 gap-6">
-        {/* Search Bar */}
-        <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
-
         {/* Task Title and Date */}
         <View className="flex-row justify-between items-center">
           <Text className="text-2xl font-semibold text-foreground justify-center -mb-2">
