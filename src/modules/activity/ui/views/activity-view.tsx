@@ -47,11 +47,11 @@ const ActivityView = () => {
         scrollEventThrottle={16}
       >
         {/* Header */}
-        <View className="px-6 pt-4 pb-6">
-          <Text className="text-2xl font-semibold text-foreground">
+        <View className="tab-container pb-6">
+          <Text className="text-3xl font-semibold text-foreground">
             Activity
           </Text>
-          <Text className="text-muted-foreground">
+          <Text className="text-muted-foreground font-medium">
             Track your tasks and productivity
           </Text>
         </View>

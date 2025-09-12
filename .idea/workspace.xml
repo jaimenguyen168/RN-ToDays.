@@ -5,14 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="848daa69-0b20-4967-b608-52402236c448" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/modules/tasks/hooks/useDebounce.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/modules/tasks/ui/views/search-tasks-view.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/convex/private/tasks.ts" beforeDir="false" afterPath="$PROJECT_DIR$/convex/private/tasks.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(app)/(nav)/task-list.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(app)/(nav)/task-list.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/Podfile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Podfile.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(app)/(modals)/add-task.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(app)/(modals)/add-task.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/global.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/global.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/activity/ui/views/activity-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/activity/ui/views/activity-view.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/modules/home/ui/views/home-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/home/ui/views/home-view.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/profile/ui/views/profile-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/profile/ui/views/profile-view.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/modules/tasks/ui/components/SearchBar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/tasks/ui/components/SearchBar.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/tasks/ui/views/task-list-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/tasks/ui/views/task-list-view.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/tasks/ui/components/WeekNavigation.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/tasks/ui/components/WeekNavigation.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/tasks/ui/views/search-tasks-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/tasks/ui/views/search-tasks-view.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/modules/tasks/ui/views/tasks-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/tasks/ui/views/tasks-view.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -56,7 +60,7 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;10-search&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;11-adjustment&quot;,
     &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
@@ -111,6 +115,8 @@
       <workItem from="1757215680395" duration="32838000" />
       <workItem from="1757348895202" duration="12642000" />
       <workItem from="1757448560841" duration="3271000" />
+      <workItem from="1757563129334" duration="3902000" />
+      <workItem from="1757604826824" duration="7000" />
     </task>
     <servers />
   </component>

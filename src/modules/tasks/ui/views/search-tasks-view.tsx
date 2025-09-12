@@ -223,7 +223,7 @@ const SearchTasksView = () => {
           maxToRenderPerBatch={10}
           windowSize={10}
           initialNumToRender={20}
-          className="-mt-6"
+          className={`${!searchQuery && "-mt-6"}`}
           contentContainerStyle={{
             flexGrow: 1,
           }}

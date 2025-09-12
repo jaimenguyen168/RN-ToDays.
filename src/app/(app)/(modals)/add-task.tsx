@@ -4,7 +4,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  ScrollView,
   Switch,
   Alert,
 } from "react-native";
@@ -12,7 +11,6 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { format, addDays, startOfWeek, addMinutes, isToday } from "date-fns";
 import { ThemedIcon } from "@/components/ThemedIcon";
-import DatePicker from "react-native-date-picker";
 import { z } from "zod";
 import { useMutation } from "convex/react";
 import { api } from "~/convex/_generated/api";
@@ -20,6 +18,11 @@ import { NotificationTypes, TaskTypes } from "~/convex/schemas/tasks";
 import { useNotifications } from "@/hooks/useNotifications";
 import AppButton from "@/components/AppButton";
 import ActionButton from "@/components/ActionButton";
+import {
+  KeyboardAwareScrollView,
+  KeyboardToolbar,
+} from "react-native-keyboard-controller";
+import DatePicker from "react-native-date-picker";
 
 const taskSchemaForm = z.object({
   title: z.string().min(1, "Title is required"),
@@ -224,19 +227,9 @@ const AddTask = () => {
     return undefined;
   };
 
-  const getMinimumEndTime = (startDate: Date, startTime: Date) => {
-    if (isToday(startDate) && startTime) {
-      return startTime;
-    }
-    if (startTime) {
-      return startTime;
-    }
-    return undefined;
-  };
-
   return (
     <>
-      {/* Date/Time Pickers */}
+      {/*Date/Time Pickers */}
       <DatePicker
         modal
         open={showStartDatePicker}
@@ -339,7 +332,14 @@ const AddTask = () => {
           />
         </View>
 
-        <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+        <KeyboardAwareScrollView
+          className="flex-1"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 20 }}
+          keyboardShouldPersistTaps="handled"
+          scrollEnabled={true}
+          nestedScrollEnabled={true}
+        >
           <View className="px-8 pt-4 pb-12 gap-6">
             {/* Title */}
             <View className="gap-3">
@@ -620,7 +620,7 @@ const AddTask = () => {
               />
             </View>
           </View>
-        </ScrollView>
+        </KeyboardAwareScrollView>
 
         {/* Create Button */}
         <View className="px-6 pb-12">
@@ -632,6 +632,8 @@ const AddTask = () => {
             isLoading={isCreating}
           />
         </View>
+
+        <KeyboardToolbar />
       </View>
     </>
   );

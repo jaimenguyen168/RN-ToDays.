@@ -123,7 +123,7 @@ const ProfileView = () => {
           </View>
 
           {/* Profile Section */}
-          <View className="items-center">
+          <View className="items-center mt-4">
             {/* Avatar */}
             <View className="mb-6">
               <ProfileImageUpload currentImageUrl={user?.imageUrl} />
