@@ -20,6 +20,16 @@ import { Ionicons } from "@expo/vector-icons";
 import { TaskTypes } from "~/convex/schemas/tasks";
 import { Id } from "~/convex/_generated/dataModel";
 
+// Filter types for secondary filtering
+type SecondaryFilter =
+  | "all"
+  | "completed"
+  | "pending"
+  | "today"
+  | "work"
+  | "personal"
+  | "emergency";
+
 const TaskListView = () => {
   const router = useRouter();
   const { category, recurringId, recurringTitle } = useLocalSearchParams<{
@@ -28,30 +38,89 @@ const TaskListView = () => {
     recurringTitle: string;
   }>();
   const [searchQuery, setSearchQuery] = useState("");
+  const [secondaryFilter, setSecondaryFilter] =
+    useState<SecondaryFilter>("all");
   const { headerOpacity, handleScroll } = useScrollHeader(15);
+
+  // Check if current category is a task type that should show secondary filters
+  const isTaskTypeCategory = () => {
+    return ["work", "personal", "emergency"].includes(category?.toLowerCase());
+  };
+
+  // Check if current category is a status/time filter that should show type filters
+  const isStatusCategory = () => {
+    return ["completed", "pending", "today"].includes(category?.toLowerCase());
+  };
 
   const getQueryArgs = () => {
     if (recurringId) {
       return { recurringId: recurringId as Id<"recurrings"> };
     }
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let baseArgs: any = {};
+
+    // Set base filter based on category
     switch (category?.toLowerCase()) {
       case "completed":
-        return { isCompleted: true };
+        baseArgs.isCompleted = true;
+        break;
       case "pending":
-        return { isPending: true };
+        baseArgs.isPending = true;
+        break;
       case "emergency":
-        return { type: TaskTypes.EMERGENCY };
+        baseArgs.type = TaskTypes.EMERGENCY;
+        break;
       case "work":
-        return { type: TaskTypes.WORK };
+        baseArgs.type = TaskTypes.WORK;
+        break;
       case "personal":
-        return { type: TaskTypes.PERSONAL };
+        baseArgs.type = TaskTypes.PERSONAL;
+        break;
       case "today":
-        return { isToday: true };
-      case "search":
+        baseArgs.todayDate = today.getTime();
+        break;
       default:
-        return {}; // Return all tasks for search
+        break;
     }
+
+    // Apply secondary filter if we're in a task type category
+    if (isTaskTypeCategory()) {
+      switch (secondaryFilter) {
+        case "completed":
+          baseArgs.isCompleted = true;
+          break;
+        case "pending":
+          baseArgs.isPending = true;
+          break;
+        case "today":
+          baseArgs.todayDate = today.getTime();
+          break;
+        default:
+          break;
+      }
+    }
+
+    // Apply type filter if we're in a status category
+    if (isStatusCategory()) {
+      switch (secondaryFilter) {
+        case "work":
+          baseArgs.type = TaskTypes.WORK;
+          break;
+        case "personal":
+          baseArgs.type = TaskTypes.PERSONAL;
+          break;
+        case "emergency":
+          baseArgs.type = TaskTypes.EMERGENCY;
+          break;
+        default:
+          break;
+      }
+    }
+
+    return baseArgs;
   };
 
   const allTasks = useQuery(
@@ -64,7 +133,7 @@ const TaskListView = () => {
       return recurringTitle;
     }
 
-    switch (category.toLowerCase()) {
+    switch (category?.toLowerCase()) {
       case "completed":
         return "Completed Tasks";
       case "pending":
@@ -80,6 +149,29 @@ const TaskListView = () => {
       default:
         return "All Tasks";
     }
+  };
+
+  // Get filter buttons based on category
+  const getFilterButtons = () => {
+    if (isTaskTypeCategory()) {
+      return [
+        { key: "all", label: "All", icon: "list" },
+        { key: "completed", label: "Completed", icon: "check-circle" },
+        { key: "pending", label: "Pending", icon: "clock" },
+        { key: "today", label: "Today", icon: "calendar" },
+      ];
+    }
+
+    if (isStatusCategory()) {
+      return [
+        { key: "all", label: "All", icon: "list" },
+        { key: "work", label: "Work", icon: "briefcase" },
+        { key: "personal", label: "Personal", icon: "user" },
+        { key: "emergency", label: "Emergency", icon: "alert-triangle" },
+      ];
+    }
+
+    return [];
   };
 
   const formatDate = (timestamp: number) => {
@@ -178,6 +270,46 @@ const TaskListView = () => {
 
     return grouped;
   }, [allTasks, searchQuery]);
+
+  const renderFilterButtons = () => {
+    const buttons = getFilterButtons();
+    if (buttons.length === 0) return null;
+
+    return (
+      <View className="flex-row gap-3 mb-4">
+        {buttons.map((button) => (
+          <TouchableOpacity
+            key={button.key}
+            onPress={() => setSecondaryFilter(button.key as SecondaryFilter)}
+            className={`flex-row items-center px-4 py-2 rounded-full border ${
+              secondaryFilter === button.key
+                ? "bg-app-primary border-app-primary"
+                : "bg-background border-border"
+            }`}
+          >
+            <ThemedIcon
+              name={button.icon as any}
+              size={14}
+              library="feather"
+              lightColor={
+                secondaryFilter === button.key ? "#ffffff" : "#1a1a1a"
+              }
+              darkColor="#ffffff"
+            />
+            <Text
+              className={`ml-2 text-sm font-medium ${
+                secondaryFilter === button.key
+                  ? "text-white"
+                  : "text-foreground"
+              }`}
+            >
+              {button.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    );
+  };
 
   const renderTaskItem = ({ item }: { item: any }) => {
     if (item.type === "month") {
@@ -317,6 +449,9 @@ const TaskListView = () => {
 
         {/* Search Bar */}
         <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
+
+        {/* Filter Buttons */}
+        {renderFilterButtons()}
 
         {/* Results count */}
         {searchQuery.trim() && (

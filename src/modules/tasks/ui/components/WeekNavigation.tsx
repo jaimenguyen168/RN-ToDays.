@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import { View, Text, FlatList, TouchableOpacity } from "react-native";
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity } from "react-native";
 import { ThemedIcon } from "@/components/ThemedIcon";
 import { screenWidth } from "react-native-gifted-charts/dist/utils";
 
@@ -11,20 +11,13 @@ interface DayItem {
   dateString: string;
 }
 
-interface WeekData {
-  weekOffset: number;
-  days: DayItem[];
-}
-
 interface WeekNavigationProps {
   selectedDate: Date;
   onDateChange: (date: Date) => void;
-  onWeekChange?: (weekOffset: number) => void;
 }
 
 interface WeekNavigationReturn {
-  weeks: WeekData[];
-  currentWeekOffset: number;
+  days: DayItem[];
   handlePrevWeek: () => void;
   handleNextWeek: () => void;
   handleDateSelect: (date: Date) => void;
@@ -34,44 +27,24 @@ export const useWeekNavigation = (
   selectedDate: Date,
   onDateChange: (date: Date) => void,
 ): WeekNavigationReturn => {
-  const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
-  const flatListRef = useRef<FlatList>(null);
+  const [currentWeekStart, setCurrentWeekStart] = useState(() => {
+    // Get the Monday of the week containing selectedDate
+    const date = new Date(selectedDate);
+    const day = date.getDay();
+    const mondayOffset = day === 0 ? -6 : 1 - day;
+    const monday = new Date(date);
+    monday.setDate(date.getDate() + mondayOffset);
+    monday.setHours(0, 0, 0, 0);
+    return monday;
+  });
 
-  // Helper function to calculate which week a date belongs to
-  const calculateWeekOffset = (date: Date): number => {
-    const today = new Date();
-    const currentDay = today.getDay();
-    const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay;
-
-    const thisWeekMonday = new Date(today);
-    thisWeekMonday.setDate(today.getDate() + mondayOffset);
-    thisWeekMonday.setHours(0, 0, 0, 0);
-
-    const selectedDay = date.getDay();
-    const selectedMondayOffset = selectedDay === 0 ? -6 : 1 - selectedDay;
-
-    const selectedWeekMonday = new Date(date);
-    selectedWeekMonday.setDate(date.getDate() + selectedMondayOffset);
-    selectedWeekMonday.setHours(0, 0, 0, 0);
-
-    const diffTime = selectedWeekMonday.getTime() - thisWeekMonday.getTime();
-    return Math.round(diffTime / (1000 * 60 * 60 * 24 * 7));
-  };
-
-  const generateWeekDays = (weekOffset: number): DayItem[] => {
-    const today = new Date();
-    const currentDay = today.getDay();
-    const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay;
-
-    const monday = new Date(today);
-    monday.setDate(today.getDate() + mondayOffset + weekOffset * 7);
-
+  const generateWeekDays = (weekStart: Date): DayItem[] => {
     const days = [];
     const dayNames = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"];
 
     for (let i = 0; i < 7; i++) {
-      const date = new Date(monday);
-      date.setDate(monday.getDate() + i);
+      const date = new Date(weekStart);
+      date.setDate(weekStart.getDate() + i);
 
       const dateString = date.toISOString().split("T")[0];
       const isSelected =
@@ -89,74 +62,28 @@ export const useWeekNavigation = (
     return days;
   };
 
-  // Generate 3 weeks: previous, current, and next
-  const generateThreeWeeks = (centerWeekOffset: number): WeekData[] => {
-    return [
-      {
-        weekOffset: centerWeekOffset - 1,
-        days: generateWeekDays(centerWeekOffset - 1),
-      },
-      {
-        weekOffset: centerWeekOffset,
-        days: generateWeekDays(centerWeekOffset),
-      },
-      {
-        weekOffset: centerWeekOffset + 1,
-        days: generateWeekDays(centerWeekOffset + 1),
-      },
-    ];
-  };
-
-  const [weeks, setWeeks] = useState(generateThreeWeeks(0));
-
-  // Update week offset when selectedDate changes from outside
-  useEffect(() => {
-    const correctWeekOffset = calculateWeekOffset(selectedDate);
-    if (correctWeekOffset !== currentWeekOffset) {
-      setCurrentWeekOffset(correctWeekOffset);
-    }
-  }, [selectedDate]);
-
-  useEffect(() => {
-    const newWeeks = generateThreeWeeks(currentWeekOffset);
-    setWeeks(newWeeks);
-
-    // Ensure we're scrolled to the middle week (index 1)
-    setTimeout(() => {
-      flatListRef.current?.scrollToIndex({ index: 1, animated: false });
-    }, 50);
-  }, [currentWeekOffset, selectedDate]);
+  const days = generateWeekDays(currentWeekStart);
 
   const handlePrevWeek = () => {
-    const newOffset = currentWeekOffset - 1;
-    setCurrentWeekOffset(newOffset);
+    const newWeekStart = new Date(currentWeekStart);
+    newWeekStart.setDate(currentWeekStart.getDate() - 7);
+    setCurrentWeekStart(newWeekStart);
 
-    // Find a date from the previous week and select it
-    const prevWeekDays = generateWeekDays(newOffset);
-    const newDate =
-      prevWeekDays.find(
-        (day) => day.dateString === selectedDate.toISOString().split("T")[0],
-      )?.date ||
-      prevWeekDays[selectedDate.getDay() === 0 ? 6 : selectedDate.getDay() - 1]
-        .date;
-
-    onDateChange(newDate);
+    // Keep the same day of week selected
+    const newSelectedDate = new Date(selectedDate);
+    newSelectedDate.setDate(selectedDate.getDate() - 7);
+    onDateChange(newSelectedDate);
   };
 
   const handleNextWeek = () => {
-    const newOffset = currentWeekOffset + 1;
-    setCurrentWeekOffset(newOffset);
+    const newWeekStart = new Date(currentWeekStart);
+    newWeekStart.setDate(currentWeekStart.getDate() + 7);
+    setCurrentWeekStart(newWeekStart);
 
-    // Find a date from the next week and select it
-    const nextWeekDays = generateWeekDays(newOffset);
-    const newDate =
-      nextWeekDays.find(
-        (day) => day.dateString === selectedDate.toISOString().split("T")[0],
-      )?.date ||
-      nextWeekDays[selectedDate.getDay() === 0 ? 6 : selectedDate.getDay() - 1]
-        .date;
-
-    onDateChange(newDate);
+    // Keep the same day of week selected
+    const newSelectedDate = new Date(selectedDate);
+    newSelectedDate.setDate(selectedDate.getDate() + 7);
+    onDateChange(newSelectedDate);
   };
 
   const handleDateSelect = (date: Date) => {
@@ -164,8 +91,7 @@ export const useWeekNavigation = (
   };
 
   return {
-    weeks,
-    currentWeekOffset,
+    days,
     handlePrevWeek,
     handleNextWeek,
     handleDateSelect,
@@ -176,10 +102,8 @@ const WeekNavigation = ({
   selectedDate,
   onDateChange,
 }: WeekNavigationProps) => {
-  const { weeks, handlePrevWeek, handleNextWeek, handleDateSelect } =
+  const { days, handlePrevWeek, handleNextWeek, handleDateSelect } =
     useWeekNavigation(selectedDate, onDateChange);
-
-  const flatListRef = useRef<FlatList>(null);
 
   const renderDayItem = ({ item }: { item: DayItem }) => (
     <TouchableOpacity
@@ -205,35 +129,6 @@ const WeekNavigation = ({
     </TouchableOpacity>
   );
 
-  const renderWeekItem = ({ item }: { item: WeekData }) => (
-    <View style={{ width: screenWidth - 120 }}>
-      <View className="flex-row justify-between px-2">
-        {item.days.map((day) => (
-          <View key={day.dateString}>{renderDayItem({ item: day })}</View>
-        ))}
-      </View>
-    </View>
-  );
-
-  const handleScroll = (event: any) => {
-    const { contentOffset } = event.nativeEvent;
-    const weekWidth = screenWidth - 120;
-    const pageIndex = Math.round(contentOffset.x / weekWidth);
-
-    // If user scrolled to previous week (index 0)
-    if (pageIndex === 0) {
-      handlePrevWeek();
-    }
-    // If user scrolled to next week (index 2)
-    else if (pageIndex === 2) {
-      handleNextWeek();
-    }
-    // Always ensure we're back at the center (index 1) after the scroll
-    setTimeout(() => {
-      flatListRef.current?.scrollToIndex({ index: 1, animated: false });
-    }, 100);
-  };
-
   return (
     <View className="flex-row justify-between items-center gap-1">
       <TouchableOpacity onPress={handlePrevWeek} className="p-3">
@@ -246,23 +141,14 @@ const WeekNavigation = ({
         />
       </TouchableOpacity>
 
-      <FlatList
-        ref={flatListRef}
-        data={weeks}
-        renderItem={renderWeekItem}
-        keyExtractor={(item) => item.weekOffset.toString()}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        pagingEnabled
-        onMomentumScrollEnd={handleScroll}
-        initialScrollIndex={1}
-        getItemLayout={(data, index) => ({
-          length: screenWidth - 80,
-          offset: (screenWidth - 80) * index,
-          index,
-        })}
-        style={{ flex: 1 }}
-      />
+      <View
+        className="flex-row justify-between px-2"
+        style={{ width: screenWidth - 120 }}
+      >
+        {days.map((day) => (
+          <View key={day.dateString}>{renderDayItem({ item: day })}</View>
+        ))}
+      </View>
 
       <TouchableOpacity onPress={handleNextWeek} className="p-3">
         <ThemedIcon
