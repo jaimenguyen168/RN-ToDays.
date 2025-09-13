@@ -46,6 +46,7 @@ const AddTask = () => {
   const { scheduleTaskNotifications, permissionStatus } = useNotifications();
 
   const { selectedDate } = useLocalSearchParams<{ selectedDate?: string }>();
+  const [isDaily, setIsDaily] = useState(true);
 
   const getInitialDate = () => {
     if (selectedDate) {
@@ -115,22 +116,39 @@ const AddTask = () => {
   const toggleWeekDay = (date: Date) => {
     const dayName = format(date, "EEEE").toLowerCase();
 
-    if (formData.selectedWeekDays.includes(dayName)) {
-      updateFormData(
-        "selectedWeekDays",
-        formData.selectedWeekDays.filter((day) => day !== dayName),
-      );
+    if (isDaily) {
+      setIsDaily(false);
+      updateFormData("selectedWeekDays", [dayName]);
     } else {
-      updateFormData("selectedWeekDays", [
-        ...formData.selectedWeekDays,
-        dayName,
-      ]);
+      if (formData.selectedWeekDays.includes(dayName)) {
+        updateFormData(
+          "selectedWeekDays",
+          formData.selectedWeekDays.filter((day) => day !== dayName),
+        );
+      } else {
+        updateFormData("selectedWeekDays", [
+          ...formData.selectedWeekDays,
+          dayName,
+        ]);
+      }
     }
   };
 
   const isWeekDaySelected = (date: Date) => {
     const dayName = format(date, "EEEE").toLowerCase();
+
+    if (isDaily) {
+      return true;
+    }
+
     return formData.selectedWeekDays.includes(dayName);
+  };
+
+  const handleDailyToggle = (value: boolean) => {
+    setIsDaily(value);
+    if (value) {
+      updateFormData("selectedWeekDays", []);
+    }
   };
 
   const formatDate = (date: Date) => {
@@ -238,7 +256,17 @@ const AddTask = () => {
         mode="date"
         onConfirm={(date) => {
           setShowStartDatePicker(false);
-          updateFormData("startDate", date);
+          const localDate = new Date(
+            date.getFullYear(),
+            date.getMonth(),
+            date.getDate(),
+          );
+          localDate.setHours(1, 0, 0, 0);
+
+          updateFormData("startDate", localDate);
+          updateFormData("endDate", localDate);
+
+          console.log("startDate", localDate.toISOString());
 
           // Update times to match the selected date
           const newStartTime = new Date(date);
@@ -249,6 +277,8 @@ const AddTask = () => {
             0,
           );
 
+          console.log("newStartTime", newStartTime.toISOString());
+
           const newEndTime = new Date(date);
           newEndTime.setHours(
             formData.endTime.getHours(),
@@ -256,6 +286,8 @@ const AddTask = () => {
             0,
             0,
           );
+
+          console.log("newEndTime", newEndTime.toISOString());
 
           updateFormData("startTime", newStartTime);
           updateFormData("endTime", newEndTime);
@@ -274,6 +306,8 @@ const AddTask = () => {
         onConfirm={(date) => {
           setShowEndDatePicker(false);
           updateFormData("endDate", date);
+
+          console.log("endDate", new Date(date).toISOString());
         }}
         onCancel={() => {
           setShowEndDatePicker(false);
@@ -289,6 +323,8 @@ const AddTask = () => {
         onConfirm={(time) => {
           setShowStartTimePicker(false);
           updateFormData("startTime", time);
+
+          console.log("startTime", new Date(time).toISOString());
 
           if (formData.endTime && formData.endTime <= time) {
             const newEndTime = new Date(time.getTime() + 30 * 60 * 1000);
@@ -309,6 +345,8 @@ const AddTask = () => {
         onConfirm={(time) => {
           setShowEndTimePicker(false);
           updateFormData("endTime", time);
+
+          console.log("endTime", new Date(time).toISOString());
         }}
         onCancel={() => {
           setShowEndTimePicker(false);
@@ -401,6 +439,26 @@ const AddTask = () => {
                       darkColor="#94A3B8"
                     />
                   </TouchableOpacity>
+
+                  {/* Daily/Custom Toggle Switches */}
+                  <View className="gap-4 mt-6">
+                    <Text className="text-sm text-muted-foreground">
+                      Recurrence Pattern
+                    </Text>
+
+                    {/* Daily Switch */}
+                    <View className="flex-row items-center justify-between">
+                      <Text className="text-muted-foreground text-sm">
+                        Daily
+                      </Text>
+                      <Switch
+                        value={isDaily}
+                        onValueChange={handleDailyToggle}
+                        trackColor={{ false: "#e5e7eb", true: "#6366f1" }}
+                        thumbColor={isDaily ? "#f9fafb" : "#f9fafb"}
+                      />
+                    </View>
+                  </View>
 
                   {/* Week Days Selection */}
                   <View className="gap-4 mt-6">
@@ -573,7 +631,9 @@ const AddTask = () => {
 
             {/* Tags */}
             <View className="gap-4 mt-1">
-              <Text className="text-sm text-muted-foreground">Tags</Text>
+              <Text className="text-sm text-muted-foreground">
+                Tags (optional)
+              </Text>
               <View className="flex-row flex-wrap gap-2 items-center">
                 {availableTags.map((tag) => (
                   <View

@@ -38,6 +38,20 @@ export const useWeekNavigation = (
     return monday;
   });
 
+  React.useEffect(() => {
+    const date = new Date(selectedDate);
+    const day = date.getDay();
+    const mondayOffset = day === 0 ? -6 : 1 - day;
+    const monday = new Date(date);
+    monday.setDate(date.getDate() + mondayOffset);
+    monday.setHours(0, 0, 0, 0);
+
+    // Only update if it's a different week
+    if (monday.getTime() !== currentWeekStart.getTime()) {
+      setCurrentWeekStart(monday);
+    }
+  }, [selectedDate]);
+
   const generateWeekDays = (weekStart: Date): DayItem[] => {
     const days = [];
     const dayNames = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"];

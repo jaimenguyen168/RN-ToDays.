@@ -9,7 +9,6 @@ import {
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { format } from "date-fns";
 import { ThemedIcon } from "@/components/ThemedIcon";
 import DatePicker from "react-native-date-picker";
 import { z } from "zod";
@@ -309,7 +308,7 @@ const EditTask = () => {
         </View>
 
         <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-          <View className="px-8 pt-4 pb-8 gap-6">
+          <View className="px-8 pt-4 pb-12 gap-6">
             {/* Recurring Info Display */}
             {task?.recurringId && (
               <View className="flex-row justify-end">
@@ -437,24 +436,14 @@ const EditTask = () => {
 
             {/* Description */}
             <View className="gap-3">
-              <Text className="text-sm text-muted-foreground">Description</Text>
+              <Text className="text-sm text-muted-foreground">
+                Description (optional)
+              </Text>
               <TextInput
                 value={formData.description}
                 onChangeText={(value) => updateFormData("description", value)}
                 className="text-foreground border-b border-border pb-3"
                 placeholder="Enter task description"
-                multiline
-              />
-            </View>
-
-            {/* Note */}
-            <View className="gap-3">
-              <Text className="text-sm text-muted-foreground">Note</Text>
-              <TextInput
-                value={formData.note}
-                onChangeText={(value) => updateFormData("note", value)}
-                className="text-foreground border-b border-border pb-3"
-                placeholder="Add a personal note"
                 multiline
               />
             </View>
@@ -493,7 +482,9 @@ const EditTask = () => {
 
             {/* Tags */}
             <View className="gap-4 mt-1">
-              <Text className="text-sm text-muted-foreground">Tags</Text>
+              <Text className="text-sm text-muted-foreground">
+                Tags (optional)
+              </Text>
               <View className="flex-row flex-wrap gap-2 items-center">
                 {availableTags.map((tag) => (
                   <View
@@ -522,6 +513,20 @@ const EditTask = () => {
                 className="text-foreground border-b border-border pb-3 shrink-0 flex-1"
                 onSubmitEditing={handleAddTag}
                 returnKeyType="done"
+              />
+            </View>
+
+            {/* Note */}
+            <View className="gap-3">
+              <Text className="text-sm text-muted-foreground">
+                Note (optional)
+              </Text>
+              <TextInput
+                value={formData.note}
+                onChangeText={(value) => updateFormData("note", value)}
+                className="text-foreground border-b border-border pb-3"
+                placeholder="Add a personal note"
+                multiline
               />
             </View>
           </View>

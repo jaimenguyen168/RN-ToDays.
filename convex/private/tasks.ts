@@ -225,13 +225,19 @@ export const getTasksForDate = query({
     const currentUser = await ctx.runQuery(api.private.users.getUser);
     const userId = currentUser._id as Id<"users">;
 
-    const startOfDay = new Date(args.date);
-    startOfDay.setUTCHours(0, 0, 0, 0);
+    const referenceDate = new Date(args.date);
+
+    const startOfDay = new Date(referenceDate);
+    startOfDay.setHours(0, 0, 0, 0);
     const startTimestamp = startOfDay.getTime();
 
-    const endOfDay = new Date(args.date);
-    endOfDay.setUTCHours(23, 59, 59, 999);
+    console.log("startTimestamp", new Date(startTimestamp).toISOString());
+
+    const endOfDay = new Date(referenceDate);
+    endOfDay.setHours(23, 59, 59, 999);
     const endTimestamp = endOfDay.getTime();
+
+    console.log("endTimestamp", new Date(endTimestamp).toISOString());
 
     const tasks = await ctx.db
       .query("tasks")
@@ -243,6 +249,11 @@ export const getTasksForDate = query({
         ),
       )
       .collect();
+
+    console.log(
+      "tasks",
+      tasks.map((task) => new Date(task.date).toISOString()),
+    );
 
     return tasks.sort((a, b) => a.startTime - b.startTime);
   },
