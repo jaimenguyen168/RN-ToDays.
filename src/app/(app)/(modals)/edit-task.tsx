@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -235,7 +237,11 @@ const EditTask = () => {
   }
 
   return (
-    <>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+    >
       <DatePicker
         modal
         open={showStartTimePicker}
@@ -307,7 +313,12 @@ const EditTask = () => {
           </TouchableOpacity>
         </View>
 
-        <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+        <ScrollView
+          className="flex-1"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 20 }}
+          keyboardShouldPersistTaps="handled"
+        >
           <View className="px-8 pt-4 pb-12 gap-6">
             {/* Recurring Info Display */}
             {task?.recurringId && (
@@ -543,7 +554,7 @@ const EditTask = () => {
           />
         </View>
       </View>
-    </>
+    </KeyboardAvoidingView>
   );
 };
 

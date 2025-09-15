@@ -6,6 +6,9 @@ import {
   TouchableOpacity,
   Switch,
   Alert,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -18,10 +21,6 @@ import { NotificationTypes, TaskTypes } from "~/convex/schemas/tasks";
 import { useNotifications } from "@/hooks/useNotifications";
 import AppButton from "@/components/AppButton";
 import ActionButton from "@/components/ActionButton";
-import {
-  KeyboardAwareScrollView,
-  KeyboardToolbar,
-} from "react-native-keyboard-controller";
 import DatePicker from "react-native-date-picker";
 
 const taskSchemaForm = z.object({
@@ -246,7 +245,11 @@ const AddTask = () => {
   };
 
   return (
-    <>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+    >
       {/*Date/Time Pickers */}
       <DatePicker
         modal
@@ -370,13 +373,11 @@ const AddTask = () => {
           />
         </View>
 
-        <KeyboardAwareScrollView
+        <ScrollView
           className="flex-1"
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 20 }}
           keyboardShouldPersistTaps="handled"
-          scrollEnabled={true}
-          nestedScrollEnabled={true}
         >
           <View className="px-8 pt-4 pb-12 gap-6">
             {/* Title */}
@@ -680,7 +681,7 @@ const AddTask = () => {
               />
             </View>
           </View>
-        </KeyboardAwareScrollView>
+        </ScrollView>
 
         {/* Create Button */}
         <View className="px-6 pb-12">
@@ -692,10 +693,8 @@ const AddTask = () => {
             isLoading={isCreating}
           />
         </View>
-
-        <KeyboardToolbar />
       </View>
-    </>
+    </KeyboardAvoidingView>
   );
 };
 

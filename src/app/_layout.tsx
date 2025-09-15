@@ -24,7 +24,6 @@ import {
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { tokenCache } from "@clerk/clerk-expo/token-cache";
 import { MenuProvider } from "react-native-popup-menu";
-import { KeyboardProvider } from "react-native-keyboard-controller";
 
 SplashScreen.setOptions({
   duration: 1000,
@@ -67,17 +66,15 @@ export default function RootLayout() {
     <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
       <ClerkLoaded>
         <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
-          <KeyboardProvider>
-            <GestureHandlerRootView style={{ flex: 1 }}>
-              <ThemeProvider
-                value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-              >
-                <MenuProvider>
-                  <InitialLayout />
-                </MenuProvider>
-              </ThemeProvider>
-            </GestureHandlerRootView>
-          </KeyboardProvider>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <ThemeProvider
+              value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+            >
+              <MenuProvider>
+                <InitialLayout />
+              </MenuProvider>
+            </ThemeProvider>
+          </GestureHandlerRootView>
         </ConvexProviderWithClerk>
       </ClerkLoaded>
     </ClerkProvider>
