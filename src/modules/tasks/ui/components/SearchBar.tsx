@@ -20,9 +20,17 @@ const SearchBar = ({
       <ThemedIcon name="search" size={20} />
       <TextInput
         placeholder={placeholder}
-        className={`flex-1 ${
+        className={`flex-1 flex-shrink-0  ${
           disabled ? "text-muted-foreground" : "text-foreground"
         }`}
+        style={{
+          textAlignVertical: "center",
+          paddingTop: 0,
+          paddingBottom: 0,
+          height: "100%",
+          fontSize: 14,
+          lineHeight: 20,
+        }}
         placeholderTextColor={disabled ? "#6B7280" : "#9CA3AF"}
         onChangeText={disabled ? undefined : onChangeText}
         value={value}

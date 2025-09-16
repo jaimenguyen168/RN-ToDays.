@@ -5,15 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="848daa69-0b20-4967-b608-52402236c448" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/modules/tasks/hooks/useDebounce.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/modules/tasks/ui/views/search-tasks-view.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.env.production" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/convex/private/tasks.ts" beforeDir="false" afterPath="$PROJECT_DIR$/convex/private/tasks.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(app)/(nav)/task-list.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(app)/(nav)/task-list.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/home/ui/views/home-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/home/ui/views/home-view.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/tasks/ui/components/SearchBar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/tasks/ui/components/SearchBar.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/tasks/ui/views/task-list-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/tasks/ui/views/task-list-view.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/tasks/ui/views/tasks-view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/tasks/ui/views/tasks-view.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.json" beforeDir="false" afterPath="$PROJECT_DIR$/app.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eas.json" beforeDir="false" afterPath="$PROJECT_DIR$/eas.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/Podfile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Podfile.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/ToDays.xcodeproj/project.pbxproj" beforeDir="false" afterPath="$PROJECT_DIR$/ios/ToDays.xcodeproj/project.pbxproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/ToDays/Info.plist" beforeDir="false" afterPath="$PROJECT_DIR$/ios/ToDays/Info.plist" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,6 +40,9 @@
   <component name="KubernetesApiProvider">{
   &quot;isMigrated&quot;: true
 }</component>
+  <component name="PackageJsonUpdateNotifier">
+    <dismissed value="$PROJECT_DIR$/package.json" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 7
 }</component>
@@ -56,7 +60,7 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;10-search&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;11-adjustment&quot;,
     &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
@@ -111,6 +115,10 @@
       <workItem from="1757215680395" duration="32838000" />
       <workItem from="1757348895202" duration="12642000" />
       <workItem from="1757448560841" duration="3271000" />
+      <workItem from="1757563129334" duration="3902000" />
+      <workItem from="1757604826824" duration="7000" />
+      <workItem from="1758005893215" duration="6911000" />
+
     </task>
     <servers />
   </component>
@@ -122,7 +130,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/src/app/(app)/(modals)/edit-task.tsx</url>
-          <line>39</line>
+          <line>40</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
       </breakpoints>

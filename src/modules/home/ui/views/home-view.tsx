@@ -89,15 +89,15 @@ const HomeView = () => {
   };
 
   const renderHeader = () => (
-    <View className="bg-background pt-4 gap-6">
+    <View className="tab-container gap-6">
       {/* Header */}
       <View className="mr-2">
         <View className="flex-row items-center justify-between">
           <View>
-            <Text className="text-foreground text-2xl font-semibold">
+            <Text className="text-foreground text-3xl font-semibold">
               Hi, {user?.username}
             </Text>
-            <Text className="text-muted-foreground text-sm">
+            <Text className="text-muted-foreground font-medium">
               Let&apos;s make this day productive
             </Text>
           </View>
@@ -105,7 +105,7 @@ const HomeView = () => {
           <TouchableOpacity onPress={() => router.push("/profile")}>
             <Image
               source={{ uri: user?.imageUrl }}
-              className="w-12 h-12 rounded-full"
+              className="size-16 rounded-full"
               resizeMode="cover"
             />
           </TouchableOpacity>
@@ -201,20 +201,21 @@ const HomeView = () => {
 
       <Animated.FlatList
         data={todayTasks}
-        className="flex-1 px-6"
         renderItem={({ item }) => (
-          <View className="mb-3">
+          <View className="mb-3 px-6">
             <TaskItem task={item} />
           </View>
         )}
         keyExtractor={(item) => item._id}
         ListHeaderComponent={renderHeader}
         ListEmptyComponent={
-          <EmptyState
-            icon="calendar"
-            title="No tasks scheduled for today"
-            description="Enjoy your free day!"
-          />
+          <View className="px-6">
+            <EmptyState
+              icon="calendar"
+              title="No tasks scheduled for today"
+              description="Enjoy your free day!"
+            />
+          </View>
         }
         ListFooterComponent={renderFooter}
         showsVerticalScrollIndicator={false}

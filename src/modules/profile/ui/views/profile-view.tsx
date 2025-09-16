@@ -123,7 +123,7 @@ const ProfileView = () => {
           </View>
 
           {/* Profile Section */}
-          <View className="items-center">
+          <View className="items-center mt-4">
             {/* Avatar */}
             <View className="mb-6">
               <ProfileImageUpload currentImageUrl={user?.imageUrl} />
@@ -152,12 +152,12 @@ const ProfileView = () => {
               onPress={() => navigateToTaskList("personal")}
             />
             <TaskProfileCard
-              title="Work"
-              count={taskCounts.work}
-              icon="briefcase"
-              iconColor="#16A34A"
-              colors={["#BBF7D0", "#22C55E"]}
-              onPress={() => navigateToTaskList("work")}
+              title="Today"
+              count={taskCounts.today}
+              icon="today-outline"
+              iconColor="#0891B2"
+              colors={["#A5F3FC", "#06B6D4"]}
+              onPress={() => navigateToTaskList("today")}
             />
           </View>
 
@@ -172,17 +172,6 @@ const ProfileView = () => {
               onPress={() => navigateToTaskList("emergency")}
             />
             <TaskProfileCard
-              title="Today"
-              count={taskCounts.today}
-              icon="today-outline"
-              iconColor="#0891B2"
-              colors={["#A5F3FC", "#06B6D4"]}
-              onPress={() => navigateToTaskList("today")}
-            />
-          </View>
-
-          <View className="flex-row">
-            <TaskProfileCard
               title="Completed"
               count={taskCounts.completed}
               iconLibrary="ionicons"
@@ -191,6 +180,18 @@ const ProfileView = () => {
               colors={["#FED7AA", "#F97316"]}
               onPress={() => navigateToTaskList("completed")}
             />
+          </View>
+
+          <View className="flex-row">
+            <TaskProfileCard
+              title="Work"
+              count={taskCounts.work}
+              icon="briefcase"
+              iconColor="#16A34A"
+              colors={["#BBF7D0", "#22C55E"]}
+              onPress={() => navigateToTaskList("work")}
+            />
+
             <TaskProfileCard
               title="Pending"
               count={taskCounts.pending}

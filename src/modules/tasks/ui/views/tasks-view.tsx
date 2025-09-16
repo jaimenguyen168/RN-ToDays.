@@ -237,10 +237,10 @@ const TasksView = () => {
   const renderMainContent = () => (
     <View className="flex-1">
       {/* Header Content */}
-      <View className="px-6 pt-4 gap-6">
+      <View className="tab-container gap-6">
         {/* Task Title and Date */}
         <View className="flex-row justify-between items-center">
-          <Text className="text-2xl font-semibold text-foreground justify-center -mb-2">
+          <Text className="text-3xl font-semibold text-foreground justify-center -mb-2">
             Task
           </Text>
           <TouchableOpacity
@@ -249,11 +249,11 @@ const TasksView = () => {
           >
             <ThemedIcon
               name="calendar-outline"
-              size={16}
+              size={20}
               lightColor="#64748B"
               darkColor="#94A3B8"
             />
-            <Text className="text-muted-foreground text-sm">
+            <Text className="text-muted-foreground font-medium text-lg pt-0.5">
               {formatDate(selectedDate)}
             </Text>
           </TouchableOpacity>

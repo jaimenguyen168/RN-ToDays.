@@ -44,3 +44,7 @@
     .bg-warning { @apply bg-warning-500 dark:bg-warning-400; }
     .bg-error { @apply bg-error-500 dark:bg-error-400; }
 }
+
+@layer utilities {
+    .tab-container { @apply px-6 pt-8 }
+}

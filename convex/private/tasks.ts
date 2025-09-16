@@ -4,7 +4,7 @@ import { TaskTypes } from "../schemas/tasks";
 import { calculateNotifications } from "../../src/utils/noti";
 import { api } from "../_generated/api";
 import { Id } from "../_generated/dataModel";
-import { isPast, isToday } from "date-fns";
+import { endOfDay, isPast, isToday, startOfDay } from "date-fns";
 
 export const create = mutation({
   args: {
@@ -143,7 +143,7 @@ export const getTasksWithFilters = query({
     ),
     isCompleted: v.optional(v.boolean()),
     isPending: v.optional(v.boolean()),
-    isToday: v.optional(v.boolean()),
+    todayDate: v.optional(v.number()),
     tags: v.optional(v.array(v.string())),
     recurringId: v.optional(v.id("recurrings")),
   },
@@ -179,8 +179,20 @@ export const getTasksWithFilters = query({
     }
 
     // Filter by today's date
-    if (args.isToday !== undefined && args.isToday) {
-      filteredTasks = filteredTasks.filter((task) => isToday(task.date));
+    if (args.todayDate !== undefined && args.todayDate) {
+      const referenceDate = new Date(args.todayDate);
+
+      const startOfDay = new Date(referenceDate);
+      startOfDay.setHours(0, 0, 0, 0);
+      const startTimestamp = startOfDay.getTime();
+
+      const endOfDay = new Date(referenceDate);
+      endOfDay.setHours(23, 59, 59, 999);
+      const endTimestamp = endOfDay.getTime();
+
+      filteredTasks = filteredTasks.filter(
+        (task) => task.date >= startTimestamp && task.date <= endTimestamp,
+      );
     }
 
     // Filter by tags
@@ -213,13 +225,19 @@ export const getTasksForDate = query({
     const currentUser = await ctx.runQuery(api.private.users.getUser);
     const userId = currentUser._id as Id<"users">;
 
-    const startOfDay = new Date(args.date);
-    startOfDay.setUTCHours(0, 0, 0, 0);
+    const referenceDate = new Date(args.date);
+
+    const startOfDay = new Date(referenceDate);
+    startOfDay.setHours(0, 0, 0, 0);
     const startTimestamp = startOfDay.getTime();
 
-    const endOfDay = new Date(args.date);
-    endOfDay.setUTCHours(23, 59, 59, 999);
+    console.log("startTimestamp", new Date(startTimestamp).toISOString());
+
+    const endOfDay = new Date(referenceDate);
+    endOfDay.setHours(23, 59, 59, 999);
     const endTimestamp = endOfDay.getTime();
+
+    console.log("endTimestamp", new Date(endTimestamp).toISOString());
 
     const tasks = await ctx.db
       .query("tasks")
@@ -231,6 +249,11 @@ export const getTasksForDate = query({
         ),
       )
       .collect();
+
+    console.log(
+      "tasks",
+      tasks.map((task) => new Date(task.date).toISOString()),
+    );
 
     return tasks.sort((a, b) => a.startTime - b.startTime);
   },
