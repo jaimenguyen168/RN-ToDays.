@@ -11,14 +11,20 @@
     "preview": {
       "distribution": "internal",
       "env": {
-        "APP_VARIANT": "preview"
+        "APP_VARIANT": "preview",
+        "EXPO_PUBLIC_CONVEX_URL": "https://brainy-goldfish-115.convex.cloud",
+        "CONVEX_DEPLOYMENT": "prod:brainy-goldfish-115"
       },
       "autoIncrement": true,
       "channel": "preview"
     },
     "production": {
       "autoIncrement": true,
-      "channel": "production"
+      "channel": "production",
+      "env": {
+        "EXPO_PUBLIC_CONVEX_URL": "https://brainy-goldfish-115.convex.cloud",
+        "CONVEX_DEPLOYMENT": "prod:brainy-goldfish-115"
+      }
     }
   },
   "submit": {
