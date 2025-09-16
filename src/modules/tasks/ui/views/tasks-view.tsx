@@ -40,8 +40,6 @@ const TasksView = () => {
     date: selectedDate.getTime(),
   });
 
-  // console.log("tasksForDate", tasksForDate);
-
   const handleDateChange = (date: Date) => {
     setSelectedDate(date);
   };

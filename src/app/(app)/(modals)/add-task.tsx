@@ -21,7 +21,6 @@ import { NotificationTypes, TaskTypes } from "~/convex/schemas/tasks";
 import { useNotifications } from "@/hooks/useNotifications";
 import AppButton from "@/components/AppButton";
 import ActionButton from "@/components/ActionButton";
-import DatePicker from "react-native-date-picker";
 
 const taskSchemaForm = z.object({
   title: z.string().min(1, "Title is required"),
@@ -281,7 +280,6 @@ const AddTask = () => {
           );
 
           console.log("newStartTime", newStartTime.toISOString());
-
           const newEndTime = new Date(date);
           newEndTime.setHours(
             formData.endTime.getHours(),
@@ -291,7 +289,6 @@ const AddTask = () => {
           );
 
           console.log("newEndTime", newEndTime.toISOString());
-
           updateFormData("startTime", newStartTime);
           updateFormData("endTime", newEndTime);
         }}
