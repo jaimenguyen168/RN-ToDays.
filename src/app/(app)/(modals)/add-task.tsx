@@ -6,9 +6,6 @@ import {
   TouchableOpacity,
   Switch,
   Alert,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -21,6 +18,8 @@ import { NotificationTypes, TaskTypes } from "~/convex/schemas/tasks";
 import { useNotifications } from "@/hooks/useNotifications";
 import AppButton from "@/components/AppButton";
 import ActionButton from "@/components/ActionButton";
+import DatePicker from "react-native-date-picker";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 const taskSchemaForm = z.object({
   title: z.string().min(1, "Title is required"),
@@ -244,11 +243,7 @@ const AddTask = () => {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
-    >
+    <View style={{ flex: 1 }}>
       {/*Date/Time Pickers */}
       <DatePicker
         modal
@@ -370,13 +365,20 @@ const AddTask = () => {
           />
         </View>
 
-        <ScrollView
-          className="flex-1"
+        {/* Scrollable Content with KeyboardAwareScrollView */}
+        <KeyboardAwareScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{
+            paddingBottom: 120,
+          }}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 20 }}
           keyboardShouldPersistTaps="handled"
+          enableOnAndroid={true}
+          extraHeight={120}
+          extraScrollHeight={80}
+          enableAutomaticScroll={true}
         >
-          <View className="px-8 pt-4 pb-12 gap-6">
+          <View className="px-8 pt-4 gap-6">
             {/* Title */}
             <View className="gap-3">
               <Text className="text-sm text-muted-foreground">Title</Text>
@@ -678,10 +680,10 @@ const AddTask = () => {
               />
             </View>
           </View>
-        </ScrollView>
+        </KeyboardAwareScrollView>
 
-        {/* Create Button */}
-        <View className="px-6 pb-12">
+        {/* Create Button - Fixed at bottom, stays in place when keyboard appears */}
+        <View className="absolute bottom-0 left-0 right-0 px-6 pb-12 bg-background">
           <AppButton
             title="Create"
             loadingTitle="Creating..."
@@ -691,7 +693,7 @@ const AddTask = () => {
           />
         </View>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 

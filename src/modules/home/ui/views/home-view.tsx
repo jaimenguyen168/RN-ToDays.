@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   Animated,
   SafeAreaView,
+  ActivityIndicator,
 } from "react-native";
 import React from "react";
 import { useRouter } from "expo-router";
@@ -87,6 +88,14 @@ const HomeView = () => {
       pathname: "/recurring-task-list",
     });
   };
+
+  if (user === undefined) {
+    return (
+      <View className="flex-1 items-center justify-center">
+        <ActivityIndicator />
+      </View>
+    );
+  }
 
   const renderHeader = () => (
     <View className="tab-container gap-6">

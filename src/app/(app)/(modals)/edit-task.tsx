@@ -1,14 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { ThemedIcon } from "@/components/ThemedIcon";
@@ -22,6 +13,7 @@ import ScopeSelectionModal from "@/components/ScopeSelectionModal";
 import { useNotifications } from "@/hooks/useNotifications";
 import { formatDateTime } from "@/utils/time";
 import AppButton from "@/components/AppButton";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 const taskSchemaForm = z.object({
   title: z.string().min(1, "Title is required"),
@@ -237,11 +229,7 @@ const EditTask = () => {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
-    >
+    <View style={{ flex: 1 }}>
       <DatePicker
         modal
         open={showStartTimePicker}
@@ -313,13 +301,20 @@ const EditTask = () => {
           </TouchableOpacity>
         </View>
 
-        <ScrollView
-          className="flex-1"
+        {/* Scrollable Content with KeyboardAwareScrollView */}
+        <KeyboardAwareScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{
+            paddingBottom: 120, // Space for fixed button
+          }}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 20 }}
           keyboardShouldPersistTaps="handled"
+          enableOnAndroid={true}
+          extraHeight={120}
+          extraScrollHeight={120}
+          enableAutomaticScroll={true}
         >
-          <View className="px-8 pt-4 pb-12 gap-6">
+          <View className="px-8 pt-4 gap-6">
             {/* Recurring Info Display */}
             {task?.recurringId && (
               <View className="flex-row justify-end">
@@ -541,10 +536,10 @@ const EditTask = () => {
               />
             </View>
           </View>
-        </ScrollView>
+        </KeyboardAwareScrollView>
 
-        {/* Update Button */}
-        <View className="px-6 pb-12">
+        {/* Update Button - Fixed at bottom, stays in place when keyboard appears */}
+        <View className="absolute bottom-0 left-0 right-0 px-6 pb-12 bg-background">
           <AppButton
             title="Update"
             loadingTitle="Updating..."
@@ -554,7 +549,7 @@ const EditTask = () => {
           />
         </View>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 
